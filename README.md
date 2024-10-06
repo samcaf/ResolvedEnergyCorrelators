@@ -1,6 +1,6 @@
 # DelphiScribe
 
-DelphiScribe is code for obtaining energy-weighted correlations in Pythia and on CMS Open Data.
+DelphiScribe a project for obtaining energy-weighted correlations in Pythia and on CMS Open Data.
 
 ## Table of Contents
 
@@ -17,7 +17,6 @@ DelphiScribe is code for obtaining energy-weighted correlations in Pythia and on
 
 DelphiScribe is a project dedicated to computing energy-weighted correlation in particle physics datasets.
 It facilitates analysis on both simulated data from Pythia and real data from the CMS Open Data.
-The codebase is designed to explore new parameterizations of N-point ENCs, providing tools for advanced data analysis and visualization.
 
 
 ## Features
