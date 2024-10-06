@@ -113,29 +113,39 @@ Each of these commands will produce associated files in output/new_encs. You can
 The project is organized into several directories, each serving a specific purpose:
 
 write/: Contains the main C++ source code for computing Energy Correlators.
-    - src/: Core C++ source files.
-    - utils/: Utility functions and classes for data processing.
-    - include/: Header files defining interfaces and data structures.
-    - new_enc/: Executables for computing Projected ENCs, Resolved 3-Point ENCs, and Resolved 4-Point ENCs.
+
+* new_enc/: Executables for computing Projected ENCs, Resolved 3-Point ENCs, and Resolved 4-Point ENCs.
+
+* src/: Core C++ source files.
+
+* utils/: Utility functions and classes for data processing.
+
+* include/: Header files defining interfaces and data structures.
+
 
 plot/: Houses Python scripts for data visualization.
-    - histogram.py: Script for generating histograms.
-    - plotter.py: General plotting utilities.
-    - utils/: Python utility modules.
-    - encs/: Project-specific plotting code for ENCs.
+
+* histogram.py: Contains a histogram class which is useful for plotting ENCs, testing their normalization, integrating over variables, finding sub-histograms, etc..
+
+* plotter.py: Plotter class inspired by the MIT Open Data plot format.
+
+* utils/: Python utility modules.
+
+* encs/: Project-specific plotting code for ENCs.
+
 
 bin/: Compiled binaries and executable files.
 
+
 output/: Directory for storing output data and generated figures.
-    - new_encs/: Output data files from ENC computations.
-    - new_enc_figures/: Figures and plots generated from the data.
+
+* new_encs/: Output data files from ENC computations.
+
+* new_enc_figures/: Figures and plots generated from the data.
 
 Makefile.inc: Configuration file for compilation settings.
 
 README.md: Project documentation.
-
-This structure allows for a clear separation of code, data, and results, facilitating easier navigation and collaboration.
-
 
 ## Contributing
 
@@ -173,5 +183,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Contact
 For any questions or suggestions:
-    * **Email**: samuelaf@mit.edu
-    * **GitHub Issues**: Issue Tracker
+
+* **Email**: samuelaf@mit.edu
+
+* **GitHub Issues**: Issue Tracker
