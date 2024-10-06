@@ -46,9 +46,12 @@ To install DelphiScribe, follow these steps:
     Before compiling the code, you'll need to edit `Makefile.inc` to set up the necessary directories:
     * Open `Makefile.inc` in your preferred text editor.
     * Modify the following variables to match the installation paths and versions on your system:
-          + `SOFTWARE_DIR`
-          + `PYTHIA_DIR`
-          + `FASTJET_DIR`
+
+    + `SOFTWARE_DIR`
+
+    + `PYTHIA_DIR`
+
+    + `FASTJET_DIR`
 
 4. **Configure Open Data File Path**
 
