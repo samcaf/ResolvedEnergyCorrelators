@@ -80,6 +80,9 @@ After installation, you can start computing Energy Correlators using the followi
 
 ### New Angles on Energy Correlators
 
+To generate files containing N-Point Energy Correlators (ENCs) with the keyword `opendata_test` in the directory `./output/new_encs/`, try running the following commands.
+Additional examples, including examples for computing ENCs in Pythia, can be found in `./bin/`.
+
 * Projected ENCs (PENCs)
 
 Generate PENCs by running:
