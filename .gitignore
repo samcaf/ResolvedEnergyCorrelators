@@ -160,6 +160,7 @@ cython_debug/
 # Pythia executables
 write/ewocs
 write/new_enc/*
+write/jet_properties
 
 # Too big
 write/data/cms_jet_run2011A.opendata.txt
@@ -179,6 +180,7 @@ write/src/utils/pileup_utils.cc
 plot/ewocs
 plot/qcd/dglap_moments.py
 plot/qcd/observable_utils.py
+write/src/ewocs.cc
 
 # Event Generation data
 output/*

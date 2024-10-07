@@ -174,7 +174,6 @@ fastjet::RecombinationScheme subrecomb_cmdln(int argc, char* argv[],
          fastjet::RecombinationScheme recomb_default=_SUB_RECOMB_DEFAULT);
 
 
-
 // =====================================
 // Ghost Particle Utilities
 // =====================================

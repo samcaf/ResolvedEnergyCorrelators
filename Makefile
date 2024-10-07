@@ -23,13 +23,14 @@
 # Lines are:
 #   * Tools for setup
 #   * Main functionality (compiling C++ writing tools)
+#   	- Basic jet physics
 #       - New Angles on Energy Correlators
 #   * Scripts for installing dependencies
 #       - Pythia and Fastjet
-.PHONY : setup plot_venv remove_venv update_local \
-	ewocs new_encs \
-		new_enc_2particle new_enc_3particle new_enc_4particle \
-		new_enc_2special old_enc_3particle \
+.PHONY : setup plot_venv get_cms_od remove_venv update_local \
+	ewocs new_encs new_encs_force \
+		jet_properties \
+		new_enc_2particle new_enc_3particle new_enc_4particle new_enc_2special old_enc_3particle \
 	install_dependencies \
 		download_pythia install_pythia \
 		download_fastjet install_fastjet
@@ -46,11 +47,22 @@ setup:
 	# =======================================
 	# Setting up the local environment
 	# =======================================
+	@mkdir -p output/jet_properties
+	@mkdir -p output/jet_property_figures
+	@mkdir -p output/new_encs
+	@mkdir -p output/new_enc_figures
 	@if [ -d "./plot/venv/" ];\
 		then printf "\nplot/venv exists";\
 		printf "\n";\
 	else\
 		$(MAKE) plot_venv;\
+	fi
+	@printf "\n\n"
+	@if [ -d "./write/data/cms_jet_run2011A.opendata.txt" ];\
+		then printf "CMS 2011A Jet Primary Dataset found";\
+		printf "\n";\
+	else\
+		$(MAKE) get_cms_od;\
 	fi
 	@printf "\n\n"
 	# =======================================
@@ -85,6 +97,14 @@ plot_venv:
 	. ./plot/venv/bin/activate; pip install $(LFM_DIR);
 	@printf "\n";
 
+
+get_cms_od:
+	# =======================================
+	# Getting CMS 2011A Jet Primary Dataset
+	# =======================================
+	wget -O ./write/data/cms_jet_run2011A.opendata.txt "https://github.com/abudhraj/FastEEC/releases/download/0.1/data.txt"
+
+
 remove_venv:
 	@printf "Removing virtual environment containing libraries for plotting"
 	@rm -rf ./lfm_tools/venv
@@ -102,9 +122,24 @@ write_tools:
 	# #=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#
 	@printf "\n";
 	# =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
+	# Basic Jet Properties
+	# =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
+	@$(MAKE) jet_properties;
+	# =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
 	# New Angles on Energy Correlators
 	# =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
 	@$(MAKE) new_encs;
+
+jet_properties: $(FASTJET) $(PYTHIA) write/src/jet_properties.cc
+	# =======================================================
+	# Compiling c++ code for writing histograms of basic jet properties:
+	# =======================================================
+	# Compiling `write/src/jet_properties.cc` to the executable `write/jet_properties`
+	$(CXX) write/src/jet_properties.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia_cmdln.cc write/src/utils/opendata_utils.cc\
+		-o write/jet_properties \
+		$(CXX_COMMON);
+	@printf "\n"
 
 new_encs:
 	# =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=

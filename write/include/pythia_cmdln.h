@@ -45,14 +45,7 @@ int checkPythiaInputs(int argc, char* argv[]);
 // Setting up pythia
 void setup_pythia_cmdln(Pythia8::Pythia &pythia, int argc, char* argv[]);
 
-// Setting up file
-void write_jetfile_header(std::string filename,
-                          int argc, char* argv[],
-                          double jet_rad, double sub_rad,
-                          bool python_format);
-
-// File Labelling Utilities
-std::string jet_alg_int_to_str(int alg_int);
-int jet_alg_str_to_int(std::string alg_str);
-
+void write_jetproperty_header(std::string filename,
+                              int argc, char* argv[],
+                              bool python_format);
 #endif
