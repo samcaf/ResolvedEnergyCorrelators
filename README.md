@@ -26,7 +26,7 @@ It facilitates analysis on both simulated data from Pythia and real data from th
 
 - **Jet Properties**:
 
-  Basic properties of jets -- useful for testing the structure of the C++ code and for seeing how python histograms can be plotted
+  Basic properties of jets -- useful for testing the structure of the C++ code and for seeing how python histograms can be plotted.
 
 - **New Angles on Energy Correlators**:
 
@@ -66,16 +66,13 @@ To install ECScribe, follow these steps:
     Before compiling the code, you'll need to edit `Makefile.inc` to set up the necessary directories:
     * Open `Makefile.inc` in your preferred text editor.
     * Modify the following variables to match the installation paths and versions on your system:
-
-    - `SOFTWARE_DIR`
-
-    - `PYTHIA_DIR`
-
-    - `FASTJET_DIR`
+      - `SOFTWARE_DIR`
+      - `PYTHIA_DIR`
+      - `FASTJET_DIR`
 
 4. **Compile the Code**
 
-    Run `make` to compile all relevant C++ code, prepare output directories, download a text file containing the CMS 2011A Jet Primary Dataset to `write/data`, and set up a Python virtual environment
+    Run `make` to compile all relevant C++ code, prepare output directories, download a text file containing the CMS 2011A Jet Primary Dataset (from [here](https://github.com/abudhraj/FastEEC/releases/tag/0.1) to `write/data`, and set up a Python virtual environment
     ```
     make
     ```
@@ -90,21 +87,25 @@ To install ECScribe, follow these steps:
 
 ## Usage
 
-After installation, you can start computing Energy Correlators using the following commands.
+After installation, you are ready to start computing Energy-Weighted Correlations!
 
 
 ### Jet Properties
 
-To generate histogram files with the keyword `opendata_test` in the directory `./output/jet_properties/`, try running the following command; you can look at/use/modify the plotting tools in `./plot/jet_properties` for some example plots of jet masses.
-Additional examples, including examples for computing ENCs in Pythia, can be found in `./bin/`.
+To generate histogram files containing jet properties (mass, transverse momentum, pseudorapidity, etc.) with the keyword `opendata_test` in the directory `./output/jet_properties/`, try running the following command:
 ```
 ./write/jet_properties --use_opendata true --n_events 100000 --nbins 100 --file_prefix opendata_test
 ```
+You can look at/use/modify the plotting tools in `./plot/jet_properties` for some example plots of jet masses.
+Additional examples, including examples for computing ENCs in Pythia, can be found in `./bin/`.
+
 
 ### New Angles on Energy Correlators
 
-To generate files containing N-Point Energy Correlators (ENCs) with the keyword `opendata_test` in the directory `./output/new_encs/`, try running the following commands; you can use the plotting tools in `./plot/encs`, which can be modified to produce your own versions of the plots from [2410.xxxx].
-Additional examples, including examples for computing ENCs in Pythia, can be found in `./bin/`.
+To generate files containing N-Point Energy Correlators (ENCs) with the keyword `opendata_test` in the directory `./output/new_encs/`, try running one of the commands below.
+
+You can use the plotting tools in `./plot/encs`, which can be modified to produce your own versions of the plots from [2410.xxxx].
+Additional examples for computing ENCs, including examples for computing ENCs in Pythia, can be found in `./bin/`.
 
 #### Projected ENCs (PENCs)
 
@@ -179,26 +180,23 @@ The project is organized into several directories, each serving a specific purpo
 
 ## Contributing
 
-We welcome contributions from the community! To contribute:
+We welcome contributions from the community! To [contribute](https://github.com/actions/checkout/blob/main/CONTRIBUTING.md):
 
 1. Fork the Repository
 
     Click on the 'Fork' button at the top right corner of the repository page.
 
 2. Create a New Branch
-
     ```
     git checkout -b feature/YourFeature
     ```
 
 3. Commit Your Changes
-
     ```
     git commit -m "Add your feature"
     ```
 
 4. Push to Your Branch
-
     ```
     git push origin feature/YourFeature
     ```
