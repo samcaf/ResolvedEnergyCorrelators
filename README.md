@@ -2,7 +2,7 @@
 
 A project for obtaining energy-weighted correlations in Pythia and on CMS Open Data.
 
-<img src="output/display/w_combined_1d.png" width="200"> <img src="output/display/qcd_3particle_bullseye.png" width="200"> <img src="output/display/od_4particle_bullseye.png" width="200"> <img src="output/display/od_newdef_density.png" width="200">
+<img src="output/display/w_combined_1d.png" width="200"> <img src="output/display/qcd_3particle_bullseye.png" width="200"> <img src="output/display/od_4particle_bullseye.png" width="200"> <img src="output/display/od_nonpert_density.png" width="200">
 
 ## Table of Contents
 
@@ -110,6 +110,8 @@ Additional examples for computing ENCs, including examples for computing ENCs in
 
 #### Projected ENCs (PENCs)
 
+<img src="output/display/od_highN_1d.png" width="200"> <img src="output/display/w_combined_1d.png" width="200">
+
 Generate PENCs by running:
 
 ```
@@ -119,6 +121,8 @@ The weight 1.0 indicates the energy weight associated with a particle in the jet
 
 #### Resolved 3-Point ENCs (RE3Cs)
 
+<img src="output/display/qcd_3particle_bullseye.png" width="200"> <img src="output/display/od_newdef_density.png" width="200">
+
 Generate RE3Cs with:
 
 ```
@@ -127,6 +131,8 @@ Generate RE3Cs with:
 The weights (1.0, 1.0) indicate the energy weights associated with a pair of resolved particles, and can be changed to any pair or list of pairs;
 
 #### Resolved 4-Point ENCs (RE4Cs)
+
+<img src="output/display/od_4particle_bullseye.png" width="200"> <img src="output/display/od_4particle_bullseye-1.png" width="200">
 
 Generate RE4Cs using:
 ```
