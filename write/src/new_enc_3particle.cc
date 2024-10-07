@@ -565,15 +565,18 @@ int main (int argc, char* argv[]) {
 
             // Storing jet constituents
             const std::vector<PseudoJet>& constituents = jet.constituents();
-
+            double weight_tot = 0;
+            for (const auto& particle : constituents) {
+                weight_tot += use_pt ? particle.pt() : particle.e();
+            }
 
             // ---------------------------------
             // Loop on "special" particle
             for (const auto& part_sp : constituents) {
                 // Energy-weighting factor for "special" particle
                 double weight_sp = use_pt ?
-                        part_sp.pt() / jet.pt() :
-                        part_sp.e() / jet.e();
+                        part_sp.pt() / weight_tot :
+                        part_sp.e() / weight_tot;
                 // Initializing sum of weights
                 // within an angle of 1st particle
                 double sum_weight1 = weight_sp;
@@ -627,8 +630,8 @@ int main (int argc, char* argv[]) {
                     double theta1    = sorted_angs_parts[jpart].first;
                     PseudoJet& part1 = sorted_angs_parts[jpart].second;
                     double weight1 = use_pt ?
-                            part1.pt() / jet.pt() :
-                            part1.e() / jet.e();
+                            part1.pt() / weight_tot :
+                            part1.e() / weight_tot;
 
                     // Calculating the theta1 bin in the histogram
                     int bin1 = bin_position(theta1, minbin, maxbin,
@@ -671,8 +674,8 @@ int main (int argc, char* argv[]) {
                         double theta2    = sorted_angs_parts[kpart].first;
                         PseudoJet& part2 = sorted_angs_parts[kpart].second;
                         double weight2 = use_pt ?
-                                part2.pt() / jet.pt() :
-                                part2.e() / jet.e();
+                                part2.pt() / weight_tot :
+                                part2.e() / weight_tot;
                         double theta2_over_theta1 =
                             theta1 == 0 ? 0 : theta2/theta1;
 

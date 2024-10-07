@@ -18,11 +18,14 @@ from warnings import warn
 # =#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#= #
 output_dir = Path(dirname(dirname(abspath(__file__)))) / "output"
 
-ewoc_data_dir = output_dir / "ewocs"
-ewoc_figure_dir = output_dir / "ewoc_figures"
+property_data_dir = output_dir / "jet_properties"
+property_figure_dir = output_dir / "jet_property_figures"
 
 enc_data_dir = output_dir / "new_encs"
 enc_figure_dir = output_dir / "new_enc_figures"
+
+ewoc_data_dir = output_dir / "ewocs"
+ewoc_figure_dir = output_dir / "ewoc_figures"
 
 
 # =#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#= #

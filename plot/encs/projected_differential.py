@@ -24,10 +24,11 @@ npyth  = '1M_500bins'
 plot_1d_params = {
     key: {
         'axes.labelsize': 20,
-        'ylim': (1e-5, 1e1),
-        'xlim': (5e-4, 2e0),
-        'xlabel': r'$\theta_1$',
-        'ylabel': r'$\frac{\text{d}\Sigma}{\text{d}\log_{10}\theta_1}$',
+        'ylim': (1e-4, 1e1),
+        'xlim': (5e-4, 3e0),
+        'xlabel': r'$R_1$',
+        'ylabel':
+        r'$\frac{\text{d}\Sigma}{\text{d}\log_{10}R_1}$',
         'y_scale': 'log',
         'x_scale': 'log',
     }
@@ -115,7 +116,7 @@ if __name__ == "__main__":
                         '2particle_od_100k_200bins_nu3-00.py',
                 plot_kwargs=plot_1d_params,
                 variable_order=['theta1'],
-                color='sandybrown',
+                color='lightcoral',
                 label=r'$N=4$',
                 save=None,
                 **plot_1d_params['opendata'],
@@ -125,7 +126,7 @@ if __name__ == "__main__":
                         '2particle_od_100k_200bins_nu4-00.py',
                 plot_kwargs=plot_1d_params,
                 variable_order=['theta1'],
-                color='lightcoral',
+                color='sandybrown',
                 label=r'$N=5$',
                 save=None,
                 **plot_1d_params['opendata'],
@@ -187,7 +188,7 @@ if __name__ == "__main__":
                         f'2particle_{process}_{npyth}_nu3-00.py',
                 plot_kwargs=plot_1d_params,
                 variable_order=['theta1'],
-                color='sandybrown',
+                color='lightcoral',
                 label=r'$N=4$',
                 save=None,
                 **plot_1d_params[process],
@@ -197,8 +198,8 @@ if __name__ == "__main__":
                         f'2particle_{process}_{npyth}_nu4-00.py',
                 plot_kwargs=plot_1d_params,
                 variable_order=['theta1'],
+                color='sandybrown',
                 save=None,
-                color='lightcoral',
                 label=r'$N=5$',
                 **plot_1d_params[process],
         )

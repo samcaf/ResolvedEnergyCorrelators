@@ -511,6 +511,11 @@ int main (int argc, char* argv[]) {
             // Storing jet constituents
             const std::vector<PseudoJet>& constituents =
                                             jet.constituents();
+            double weight_tot = 0;
+            for (const auto& particle : constituents) {
+                weight_tot += use_pt ? particle.pt() : particle.e();
+            }
+
 
             all_angweight_pairs.clear();
 
@@ -522,8 +527,8 @@ int main (int argc, char* argv[]) {
 
                 // Energy-weighting factor for "special" particle
                 double weight_sp1 = use_pt ?
-                        part_sp_1.pt() / jet.pt() :
-                        part_sp_1.e() / jet.e();
+                        part_sp_1.pt() / weight_tot :
+                        part_sp_1.e() / weight_tot;
                 // Initializing sum of weights within an
                 // angle of the first special particle
                 double sum_weight1  = weight_sp1;
@@ -557,8 +562,8 @@ int main (int argc, char* argv[]) {
                                    : fastjet::theta(part_sp_1,
                                                     part1),
                         // weight_1
-                        use_pt ? part1.pt() / jet.pt()
-                               : part1.e() / jet.e()
+                        use_pt ? part1.pt() / weight_tot
+                               : part1.e() / weight_tot
                        );
                 } // end particle sorting loop
                 // Sorting angles/weights by angle as promised :)
@@ -625,8 +630,8 @@ int main (int argc, char* argv[]) {
                                     : fastjet::theta(part_sp_2,
                                                      part_sp_1);
                     double weight_sp2 = use_pt
-                                    ? part_sp_2.pt() / jet.pt()
-                                    : part_sp_2.e() / jet.e();
+                                    ? part_sp_2.pt() / weight_tot
+                                    : part_sp_2.e() / weight_tot;
                     // Initializing sum of weights within an
                     // angle of the second special particle
                     double sum_weight2 = weight_sp2;

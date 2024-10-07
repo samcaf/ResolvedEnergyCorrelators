@@ -16,11 +16,10 @@ from qcd.qcd_basics import alpha_s
 # =====================================
 # Whether to plot OD
 opendata = True
-draw_np = True
+draw_np = False
 
 # Which pythia data to plot
 pythia = ['qcd', 'w', 'top']
-pythia = [None]
 npyth  = '1M_150bins'
 
 
@@ -31,7 +30,8 @@ npyth  = '1M_150bins'
 new_density = {
     'axes.labelsize': 20,
     'ylim': (0, 1.0),
-    'xlim': (5e-3, 8e-1),
+    'xlim': (5e-3, 5e-1),
+    # 'xlim': (5e-3, 12e-1),
     'xlabel': r'$R_1$',
     'ylabel': r'$R_2/R_1$',
     'x_scale': 'log',
@@ -40,7 +40,8 @@ new_density = {
 old_density = {
     'axes.labelsize': 20,
     'ylim': (0, 1.0),
-    'xlim': (5e-3, 8e-1),
+    'xlim': (5e-3, 5e-1),
+    # 'xlim': (5e-3, 12e-1),
     'xlabel': r'$R_L$',
     'ylabel': r'$R_S/R_L$',
     'x_scale': 'log',
@@ -120,7 +121,7 @@ if __name__ == "__main__":
         # theta1s = np.logspace(np.log10(Lambda_mid), np.log10(1/2),
         #                       100000)  # many points to shade fully
         Lambda_mid  = 5/pt
-        theta1s = np.logspace(-3, np.log10(1),
+        theta1s = np.logspace(-3, np.log10(1/2),
                               100)
 
         # Fudged version of naive physics because of some phase
@@ -251,27 +252,27 @@ if __name__ == "__main__":
         new_hist2d.density.savefig(
             str(enc_figure_dir/f'supplementary/density/{process}_newdef_density.pdf'))
 
-        # # =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
-        # # Plots with old variables
-        # # =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
-        # # Basic
-        # old_pythiahist3d = HistogramData(
-        #     file_name=enc_data_dir/
-        #           f'old_3particle_{process}_{npyth}.py'
-        # )
+        # =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
+        # Plots with old variables
+        # =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
+        # Basic
+        old_pythiahist3d = HistogramData(
+            file_name=enc_data_dir/
+                  f'old_3particle_{process}_{npyth}.py'
+        )
 
-        # old_pythiahist2d = plot_2d_density(
-        #     hist_data=old_pythiahist3d,
-        #     vmax=2, log_colorbar=False,
-        #     save=None,
-        #     **pythia_old_density)
-        # ax = old_pythiahist2d.density.axes[0]
-        # stamp_density(ax, **old_pythiahist2d.metadata)
-        # old_pythiahist2d.density.fig.tight_layout()
-        # old_pythiahist2d.density.savefig(
-        #     str(enc_figure_dir/f'supplementary/{process}_olddef_density.pdf'))
+        old_pythiahist2d = plot_2d_density(
+            hist_data=old_pythiahist3d,
+            vmax=2, log_colorbar=False,
+            save=None,
+            **pythia_old_density)
+        ax = old_pythiahist2d.density.axes[0]
+        stamp_density(ax, **old_pythiahist2d.metadata)
+        old_pythiahist2d.density.fig.tight_layout()
+        old_pythiahist2d.density.savefig(
+            str(enc_figure_dir/f'supplementary/density/{process}_olddef_density.pdf'))
 
-        # Symmetrized
+        # # Symmetrized
         # symm_old_hist3d = HistogramData(hist_data=old_hist3d)
         # symm_old_hist3d.hist = (old_hist3d.hist[:,:,:] +
         #                         old_hist3d.hist[:,::-1,:])/2
@@ -290,7 +291,3 @@ if __name__ == "__main__":
         #     log_colorbar=False,
         #     save=str(enc_figure_dir/'supplementary/new_minus_oldsymm'),
         #     **old_density_color)
-
-
-# TODO:
-# Indicate np region
