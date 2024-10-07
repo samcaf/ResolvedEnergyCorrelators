@@ -142,7 +142,7 @@ The weights (1.0, 1.0) indicate the energy weights associated with a pair of res
 
 Generate RE4Cs using:
 ```
-./write/new_enc/4particle --use_opendata true --use_deltaR --use_pt --weights 1.0 1.0 1.0 [or any set of triples] --n_events 100000 --nbins 150 --file_prefix opendata_test
+./write/new_enc/4particle --use_opendata true --use_deltaR --use_pt --weights 1.0 1.0 1.0 --n_events 100000 --nbins 150 --file_prefix opendata_test
 ```
 The weights (1.0, 1.0, 1.0) can be changed to any list of triples.
 
@@ -228,4 +228,4 @@ For any questions or suggestions:
 
 * **Email**: samuelaf@mit.edu
 
-* **GitHub Issues**: Issue Tracker
+* **GitHub Issues**: [Issue Tracker](https://github.com/samcaf/ECScribe/issues)
