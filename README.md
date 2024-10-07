@@ -32,11 +32,11 @@ It facilitates analysis on both simulated data from Pythia and real data from th
 - **New Angles on Energy Correlators**:
 
   Introduces a new parameterization for N-point Energy Correlators (ENCs) as detailed in [2410.xxxx].
+    <details>
+    <summary>Pseudocode</summary>
+    <img src="output/display/enc_pseudocode.png" width="600">
+    </details>
 
-<details>
-<summary>Pseudocode</summary>
-<img src="output/display/enc_pseudocode.png" width="600">
-</details>
 
 
 - **Energy Weighted Observable Correlations (EWOCs)**:
