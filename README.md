@@ -2,10 +2,10 @@
 
 A project for obtaining energy-weighted correlations in Pythia and on CMS Open Data.
 
-<img src="output/display/w_combined_1d.pdf" width="20">
-<img src="output/display/qcd_3particle_bullseye.pdf" width="20">
-<img src="output/display/od_4particle_bullseye.pdf" width="20">
-<img src="output/display/od_newdef_density.pdf" width="20">
+<img src="output/display/w_combined_1d.pdf" width="200">
+<img src="output/display/qcd_3particle_bullseye.pdf" width="200">
+<img src="output/display/od_4particle_bullseye.pdf" width="200">
+<img src="output/display/od_newdef_density.pdf" width="200">
 
 ## Table of Contents
 
