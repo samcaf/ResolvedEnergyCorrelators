@@ -184,6 +184,7 @@ write/src/ewocs.cc
 
 # Event Generation data
 output/*
+!output/display
 
 # Additional auxiliary code
 plot/mathematica
