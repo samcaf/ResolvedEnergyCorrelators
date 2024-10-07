@@ -1,6 +1,6 @@
-# DelphiScribe
+# ECScribe
 
-DelphiScribe a project for obtaining energy-weighted correlations in Pythia and on CMS Open Data.
+A project for obtaining energy-weighted correlations in Pythia and on CMS Open Data.
 
 
 ## Table of Contents
@@ -18,7 +18,7 @@ DelphiScribe a project for obtaining energy-weighted correlations in Pythia and 
 
 ## Introduction
 
-DelphiScribe is a project dedicated to computing energy-weighted correlation in particle physics datasets.
+ECScribe is a project dedicated to computing energy-weighted correlation in particle physics datasets.
 It facilitates analysis on both simulated data from Pythia and real data from the CMS Open Data.
 
 
@@ -34,7 +34,7 @@ It facilitates analysis on both simulated data from Pythia and real data from th
 
 - **Energy Weighted Observable Correlations (EWOCs)**:
 
-  Not yet included: will introduces a new parameterization for N-point Energy Correlators (ENCs) as detailed in [2410.xxxx].
+  Not yet included: will introduce a new type of energy correlator on non-angular observables as detailed in [24yy.xxxx].
 
 - **Python Classes**:
 
@@ -48,17 +48,17 @@ It facilitates analysis on both simulated data from Pythia and real data from th
 
 ## Installation
 
-To install DelphiScribe, follow these steps:
+To install ECScribe, follow these steps:
 
 1. **Clone the Repository**
    ```
-   git clone https://github.com/samcaf/DelphiScribe.git
+   git clone https://github.com/samcaf/ECScribe.git
    ```
 
 2. **Navigate to the Directory**
 
     ```
-    cd DelphiScribe
+    cd ECScribe
     ```
 
 3. **Configure the Makefile**
@@ -67,11 +67,11 @@ To install DelphiScribe, follow these steps:
     * Open `Makefile.inc` in your preferred text editor.
     * Modify the following variables to match the installation paths and versions on your system:
 
-    + `SOFTWARE_DIR`
+    - `SOFTWARE_DIR`
 
-    + `PYTHIA_DIR`
+    - `PYTHIA_DIR`
 
-    + `FASTJET_DIR`
+    - `FASTJET_DIR`
 
 4. **Compile the Code**
 
@@ -106,7 +106,7 @@ Additional examples, including examples for computing ENCs in Pythia, can be fou
 To generate files containing N-Point Energy Correlators (ENCs) with the keyword `opendata_test` in the directory `./output/new_encs/`, try running the following commands; you can use the plotting tools in `./plot/encs`, which can be modified to produce your own versions of the plots from [2410.xxxx].
 Additional examples, including examples for computing ENCs in Pythia, can be found in `./bin/`.
 
-* Projected ENCs (PENCs)
+#### Projected ENCs (PENCs)
 
 Generate PENCs by running:
 
@@ -115,7 +115,7 @@ Generate PENCs by running:
 ```
 The weight 1.0 indicates the energy weight associated with a particle in the jet -- or the value of N-1 for the ENC. It can be replaced by any list of weights (any list of the desired values for N-1);
 
-* Resolved 3-Point ENCs (RE3Cs)
+#### Resolved 3-Point ENCs (RE3Cs)
 
 Generate RE3Cs with:
 
@@ -124,7 +124,7 @@ Generate RE3Cs with:
 ```
 The weights (1.0, 1.0) indicate the energy weights associated with a pair of resolved particles, and can be changed to any pair or list of pairs;
 
-* Resolved 4-Point ENCs (RE4Cs)
+#### Resolved 4-Point ENCs (RE4Cs)
 
 Generate RE4Cs using:
 ```
@@ -137,40 +137,45 @@ The weights (1.0, 1.0, 1.0) can be changed to any list of triples.
 
 The project is organized into several directories, each serving a specific purpose:
 
-write/: Contains the main C++ source code for computing Energy Correlators.
+`write/`: Contains the main C++ source code for computing Energy Correlators:
 
-* new_enc/: Executables for computing Projected ENCs, Resolved 3-Point ENCs, and Resolved 4-Point ENCs.
+* `new_enc/`: Executables for computing Projected ENCs, Resolved 3-Point ENCs, and Resolved 4-Point ENCs;
 
-* src/: Core C++ source files.
+* `src/`: Core C++ source files;
 
-* utils/: Utility functions and classes for data processing.
+* `utils/`: Utility functions and classes for data processing;
 
-* include/: Header files defining interfaces and data structures.
+* `include/`: Header files defining interfaces and data structures;
 
-
-plot/: Houses Python scripts for data visualization.
-
-* histogram.py: Contains a histogram class which is useful for plotting ENCs, testing their normalization, integrating over variables, finding sub-histograms, etc..
-
-* plotter.py: Plotter class inspired by the MIT Open Data plot format.
-
-* utils/: Python utility modules.
-
-* encs/: Project-specific plotting code for ENCs.
+* `data/`: Houses datasets, including the CMS 2011A Jet Primary Dataset.
 
 
-bin/: Compiled binaries and executable files.
+`plot/`: Houses python tools for data visualization:
+
+* `plotter.py`: Plotter class inspired by the MIT Open Data plot format.
+
+* `histogram.py`: Contains a histogram class which is useful for plotting ENCs, testing their normalization, integrating over variables, finding sub-histograms, etc..
+
+* `utils/`: Python utility modules.
+
+* `jet_properties/`: Example plotting code for plotting properties of jets from different samples.
+
+* `encs/`: Project-specific plotting code for ENCs.
 
 
-output/: Directory for storing output data and generated figures.
+`bin/`: Compiled binaries and executable files.
 
-* new_encs/: Output data files from ENC computations.
 
-* new_enc_figures/: Figures and plots generated from the data.
+`output/`: Directory for storing output data and generated figures.
 
-Makefile.inc: Configuration file for compilation settings.
+* `new_encs/`: Output data files from ENC computations.
 
-README.md: Project documentation.
+* `new_enc_figures/`: Figures and plots generated from the data.
+
+`Makefile.inc`: Configuration file for compilation settings.
+
+`README.md`: Project documentation.
+
 
 ## Contributing
 
@@ -205,6 +210,7 @@ We welcome contributions from the community! To contribute:
 
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.
+
 
 ## Contact
 For any questions or suggestions:
