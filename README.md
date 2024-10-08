@@ -32,10 +32,10 @@ It facilitates analysis on both simulated data from Pythia and real data from th
 - **New Angles on Energy Correlators**:
 
   Introduces a new parameterization for N-point Energy Correlators (ENCs) as detailed in [2410.xxxx].
-    <details>
-    <summary>Pseudocode</summary>
-    <img src="output/display/enc_pseudocode.png" width="600">
-    </details>
+            <details>
+                <summary>Pseudocode</summary>
+                <img src="output/display/enc_pseudocode.png" width="600">
+            </details>
 
 
 
@@ -74,12 +74,23 @@ To install ECScribe, follow these steps:
     * Open `Makefile.inc` in your preferred text editor.
     * Modify the following variables to match the installation paths and versions on your system:
       - `SOFTWARE_DIR`
-      - `PYTHIA_DIR`
-      - `FASTJET_DIR`
+      - `PYTHIA_VERSION`
+      - `FASTJET_VERSION`
+      - **Note:** If you don't have Pythia or FastJet installed, you can try running the following after setting up the directories/version numbers above:
+         ```
+         make download pythia
+         make install pythia
+         ```
+         and
+         ```
+         make download fastjet
+         make install fastjet
+         ```
+         respectively.
 
 4. **Compile the Code**
 
-    Run `make` to compile all relevant C++ code, prepare output directories, download a text file containing the CMS 2011A Jet Primary Dataset (from [here](https://github.com/abudhraj/FastEEC/releases/tag/0.1) to `write/data`, and set up a Python virtual environment
+    Run `make` to compile all relevant C++ code, prepare output directories, download a text file containing the CMS 2011A Jet Primary Dataset (from [FastEEC](https://github.com/abudhraj/FastEEC/releases/tag/0.1)) to `write/data`, and set up a Python virtual environment
     ```
     make
     ```
