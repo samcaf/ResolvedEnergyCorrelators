@@ -177,6 +177,12 @@ To install ECScribe, follow these steps:
 
 After installation, you are ready to start computing Energy-Weighted Correlations!
 
+Note that to use the plotting tools provided in `./plot`, you will need to have access to the relevant python libraries; these are provided in the virtual environment after running `make`, and can be accessed in bash, via
+```
+cd ./plot
+source venv/bin/activate
+```
+
 
 ## Jet Properties
 
