@@ -90,14 +90,14 @@ The project is organized into several directories, each serving a specific purpo
 <ul>
 <li>
   <code>plotter.py</code>: Plotter class inspired by the MIT Open Data plot format.
-<li>
 </li>
+<li>
   <code>histogram.py</code>: Contains a histogram class which is useful for plotting ENCs, testing their normalization, integrating over variables, finding sub-histograms, etc..
-<li>
 </li>
+<li>
   <code>utils/</code>: Python utility modules.
-<li>
 </li>
+<li>
   <code>jet_properties/</code>: Example plotting code for plotting properties of jets from different samples.
 </li>
 <li>
@@ -108,7 +108,7 @@ The project is organized into several directories, each serving a specific purpo
 
 <details>
 <summary>
-<code>output/</code>: Directory for storing output data and generated figures.
+<code>output/</code>: Contains directories for storing output data and generated figures:
 </summary>
 <ul>
 <li>
