@@ -1,4 +1,4 @@
-# ECScribe
+# EnergyCorrelationScribe
 
 A project for obtaining energy-weighted correlations in Pythia and on CMS Open Data.
 
@@ -19,8 +19,12 @@ A project for obtaining energy-weighted correlations in Pythia and on CMS Open D
 
 # Introduction
 
-ECScribe is a project dedicated to computing energy-weighted correlations in particle physics datasets.
-It facilitates analysis on both simulated data from Pythia and real data from the CMS Open Data.
+EnergyCorrelationScribe (ECScribe, read "ek-scribe") is a project dedicated to computing energy-weighted correlations in particle physics datasets.
+It facilitates the analysis of both simulated data from Pythia and real data provided publicly by CERN (and CMS).
+
+**Warning**
+
+Using CMS Open Data without performing the correct experimental data analysis procedures, including unfolding, event selection, and many more, does not and cannot provide results that can be called "true experimental analyses". CERN has graciously provided public access to a tremendous amount of open particle physics datasets, including both simulated and real data, and this has facilitated a wonderful bridge between the theoretical and experimental particle physics communities; any theoretical computations involving or compared to open data must be followed by the appropriate experimental procedures before they constitute any true experimental discovery.
 
 
 # Features
@@ -179,8 +183,7 @@ After installation, you are ready to start computing Energy-Weighted Correlation
 
 Note that to use the plotting tools provided in `./plot`, you will need to have access to the relevant python libraries; these are provided in the virtual environment after running `make`, and can be accessed in bash, via
 ```
-cd ./plot
-source venv/bin/activate
+source ./plot/venv/bin/activate
 ```
 
 
