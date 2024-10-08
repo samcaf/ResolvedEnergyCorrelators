@@ -62,32 +62,62 @@ The project is organized into several directories, each serving a specific purpo
 
 <details>
 <summary>
-`write/`: Contains the main C++ source code for computing Energy Correlators:
+<code>write/</code>: Contains the main C++ source code for computing Energy Correlators:
 </summary>
-* `new_enc/`: Executables for computing Projected ENCs, Resolved 3-Point ENCs, and Resolved 4-Point ENCs;
-* `src/`: Core C++ source files;
-* `utils/`: Utility functions and classes for data processing;
-* `include/`: Header files defining interfaces and data structures;
-* `data/`: Houses datasets, including the CMS 2011A Jet Primary Dataset.
+<ul>
+<li>
+  <code>new_enc/</code>: Executables for computing Projected ENCs, Resolved 3-Point ENCs, and Resolved 4-Point ENCs;
+</li>
+<li>
+  <code>src/</code>: Core C++ source files;
+</li>
+<li>
+  <code>utils/</code>: Utility functions and classes for data processing;
+</li>
+<li>
+  <code>include/</code>: Header files defining interfaces and data structures;
+</li>
+<li>
+  <code>data/</code>: Houses datasets, including the CMS 2011A Jet Primary Dataset.
+</li>
+</ul>
 </details>
 
 <details>
 <summary>
-`plot/`: Houses python tools for data visualization:
+<code>plot/</code>: Houses python tools for data visualization:
 </summary>
-* `plotter.py`: Plotter class inspired by the MIT Open Data plot format.
-* `histogram.py`: Contains a histogram class which is useful for plotting ENCs, testing their normalization, integrating over variables, finding sub-histograms, etc..
-* `utils/`: Python utility modules.
-* `jet_properties/`: Example plotting code for plotting properties of jets from different samples.
-* `encs/`: Project-specific plotting code for ENCs.
+<ul>
+<li>
+  <code>plotter.py</code>: Plotter class inspired by the MIT Open Data plot format.
+<li>
+</li>
+  <code>histogram.py</code>: Contains a histogram class which is useful for plotting ENCs, testing their normalization, integrating over variables, finding sub-histograms, etc..
+<li>
+</li>
+  <code>utils/</code>: Python utility modules.
+<li>
+</li>
+  <code>jet_properties/</code>: Example plotting code for plotting properties of jets from different samples.
+</li>
+<li>
+  <code>encs/</code>: Project-specific plotting code for ENCs.
+</li>
+</ul>
 </details>
 
 <details>
 <summary>
-`output/`: Directory for storing output data and generated figures.
+<code>output/</code>: Directory for storing output data and generated figures.
 </summary>
-* `new_encs/`: Output data files from ENC computations.
-* `new_enc_figures/`: Figures and plots generated from the data.
+<ul>
+<li>
+  <code>new_encs/</code>: Output data files from C++ ENC computations.
+</li>
+<li>
+  <code>new_enc_figures/</code>: Figures and plots generated using the tools in <code>./plot/encs</code>.
+</li>
+</ul>
 </details>
 
 `bin/`: Example command-line code for generating events and output.
