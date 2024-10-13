@@ -1,4 +1,4 @@
-# EnergyCorrelationScribe
+# ResolvedEnergyCorrelations
 
 A project for obtaining energy-weighted correlations in Pythia and on CMS Open Data.
 
@@ -19,7 +19,7 @@ A project for obtaining energy-weighted correlations in Pythia and on CMS Open D
 
 # Introduction
 
-EnergyCorrelationScribe (ECScribe, read "ek-scribe") is a project dedicated to computing energy-weighted correlations in particle physics datasets.
+ResolvedEnergyCorrelations (RENCs, read "ren-sees") is a project dedicated to computing energy-weighted correlations in particle physics datasets.
 It facilitates the analysis of both simulated data from Pythia and real data provided publicly by CERN (and CMS).
 
 **Warning**
@@ -129,17 +129,17 @@ The project is organized into several directories, each serving a specific purpo
 
 # Installation
 
-To install ECScribe, follow these steps:
+To install RENCs, follow these steps:
 
 1. **Clone the Repository**
    ```
-   git clone https://github.com/samcaf/ECScribe.git
+   git clone https://github.com/samcaf/ResolvedEnergyCorrelations.git
    ```
 
 2. **Navigate to the Directory**
 
     ```
-    cd ECScribe
+    cd ResolvedEnergyCorrelations
     ```
 
 3. **Configure the Makefile**
@@ -275,4 +275,4 @@ For any questions or suggestions:
 
 * **Email**: samuelaf@mit.edu
 
-* **GitHub Issues**: [Issue Tracker](https://github.com/samcaf/ECScribe/issues)
+* **GitHub Issues**: [Issue Tracker](https://github.com/samcaf/ResolvedEnergyCorrelations/issues)
