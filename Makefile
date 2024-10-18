@@ -102,7 +102,7 @@ get_cms_od:
 
 remove_venv:
 	@printf "Removing virtual environment containing libraries for plotting"
-	@rm -rf ./lfm_tools/venv
+	@rm -rf ./plot/venv
 	@printf "\n"
 
 
