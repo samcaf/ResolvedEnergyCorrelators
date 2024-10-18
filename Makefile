@@ -1,5 +1,5 @@
 #
-#Makefile for DelphiScribe
+#Makefile for ResolvedEnergyCorrelators
 
 #===========================================
 # Include the configuration.
@@ -41,7 +41,7 @@
 # =======================================
 setup:
 	# #######################################
-	# Setting up DelphiScribe
+	# Setting up ResolvedEnergyCorrelators
 	# #######################################
 	@printf "\n"
 	# =======================================
@@ -90,11 +90,6 @@ plot_venv:
 	. ./plot/venv/bin/activate; pip install sympy;
 	. ./plot/venv/bin/activate; pip install importlib_resources;
 	. ./plot/venv/bin/activate; pip install seaborn;
-	# Intalling fire for CLI
-	. ./plot/venv/bin/activate; pip install fire;
-	# Installing local LFM
-	. ./plot/venv/bin/activate; pip install tk;
-	. ./plot/venv/bin/activate; pip install $(LFM_DIR);
 	@printf "\n";
 
 
@@ -250,6 +245,27 @@ old_enc_3particle: $(FASTJET) $(PYTHIA) write/src/old_enc_3particle.cc
 		-o write/new_enc/old_3particle \
 		$(CXX_COMMON);
 	@printf "\n"
+
+new_enc_benchmarks: $(FASTJET) $(PYTHIA) write/src/benchmark/new_enc_2particle.cc write/src/benchmark/new_enc_3particle.cc write/src/benchmark/new_enc_4particle.cc
+	# =======================================================
+	# Compiling c++ code for benchmarking ENC histograms:
+	# =======================================================
+	$(CXX) write/src/benchmark/new_enc_2particle.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc\
+		-o write/benchmark/new_enc_2particle \
+		$(CXX_COMMON);
+	@printf "\n"
+	$(CXX) write/src/benchmark/new_enc_3particle.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc\
+		-o write/benchmark/new_enc_3particle \
+		$(CXX_COMMON);
+	@printf "\n"
+	$(CXX) write/src/benchmark/new_enc_4particle.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc\
+		-o write/benchmark/new_enc_4particle \
+		$(CXX_COMMON);
+	@printf "\n"
+
 
 
 ewocs: $(FASTJET) $(PYTHIA) write/src/ewocs.cc
