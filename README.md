@@ -1,4 +1,4 @@
-# ResolvedEnergyCorrelations
+# ResolvedEnergyCorrelators
 
 A project for obtaining energy-weighted correlations in Pythia and on CMS Open Data.
 
@@ -19,7 +19,7 @@ A project for obtaining energy-weighted correlations in Pythia and on CMS Open D
 
 # Introduction
 
-ResolvedEnergyCorrelations (RENCs, read "ren-sees") is a project dedicated to computing energy-weighted correlations in particle physics datasets.
+ResolvedEnergyCorrelators (RENCs, read "ren-sees") is a project dedicated to computing energy-weighted correlations in particle physics datasets.
 It facilitates the analysis of both simulated data from Pythia and real data provided publicly by CERN (and CMS).
 
 **Warning**
@@ -43,7 +43,7 @@ Using CMS Open Data without performing the correct experimental data analysis pr
 
 
 
-- **Energy Weighted Observable Correlations (EWOCs)**:
+- **Energy Weighted Observable Correlators (EWOCs)**:
 
   Not yet included: will introduce a new type of energy correlator on non-angular observables as detailed in [24yy.xxxx].
 
@@ -133,13 +133,13 @@ To install RENCs, follow these steps:
 
 1. **Clone the Repository**
    ```
-   git clone https://github.com/samcaf/ResolvedEnergyCorrelations.git
+   git clone https://github.com/samcaf/ResolvedEnergyCorrelators.git
    ```
 
 2. **Navigate to the Directory**
 
     ```
-    cd ResolvedEnergyCorrelations
+    cd ResolvedEnergyCorrelators
     ```
 
 3. **Configure the Makefile**
@@ -152,13 +152,13 @@ To install RENCs, follow these steps:
       - `FASTJET_VERSION`
       - **Note:** If you don't have Pythia or FastJet installed, you can try running the following after setting up the directories/version numbers above:
          ```
-         make download pythia
-         make install pythia
+         make download_pythia
+         make install_pythia
          ```
          and
          ```
-         make download fastjet
-         make install fastjet
+         make download_fastjet
+         make install_fastjet
          ```
          respectively.
 
@@ -168,13 +168,11 @@ To install RENCs, follow these steps:
     ```
     make
     ```
-
-5. **Configure Open Data File Path**
-
-    If you intend to use information from  the CMS Open Data 2011A Jet Primary Dataset:
-    * Open `write/include/opendata_utils.h`.
-    * Change the `cms_jets_file` variable to point to the location of the CMS Open Data file on your machine.
-
+    If you run into problems with the Open Data event reader, such as
+    ```
+    od::EventReader: Error: Input file not found.
+    ```
+    please check that `write/data/` contains a file called `cms_jet_run2011A.opendata.txt`, and that the address to this file on your machine is the same as the variable `cms_jets_file` in the header file `write/include/opendata_utils.h`.
 
 
 # Usage
@@ -275,4 +273,4 @@ For any questions or suggestions:
 
 * **Email**: samuelaf@mit.edu
 
-* **GitHub Issues**: [Issue Tracker](https://github.com/samcaf/ResolvedEnergyCorrelations/issues)
+* **GitHub Issues**: [Issue Tracker](https://github.com/samcaf/ResolvedEnergyCorrelators/issues)

@@ -97,7 +97,14 @@ get_cms_od:
 	# =======================================
 	# Getting CMS 2011A Jet Primary Dataset
 	# =======================================
-	wget -O ./write/data/cms_jet_run2011A.opendata.txt "https://github.com/abudhraj/FastEEC/releases/download/0.1/data.txt"
+	wget -O ./write/data/cms_jet_run2011A.opendata.txt "https://github.com/abudhraj/FastEEC/releases/download/0.1/data.txt";
+	@if [ "$$(uname)" = "Darwin" ]; then \
+		sed -i '' 's|const std::string cms_jets_file = .*|const std::string cms_jets_file = "$(PWD)/write/data/cms_jet_run2011A.opendata.txt";|' write/include/opendata_utils.h; \
+	elif [ "$$(uname)" = "Linux" ]; then \
+		sed -i 's|const std::string cms_jets_file = .*|const std::string cms_jets_file = "$(PWD)/write/data/cms_jet_run2011A.opendata.txt";|' write/include/opendata_utils.h; \
+	else \
+		echo "Unsupported OS: $$(uname). Please see `get_cms_od` in the Makefile"; exit 1; \
+    fi
 
 
 remove_venv:
