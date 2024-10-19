@@ -123,6 +123,7 @@ write_tools:
 	# =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
 	# New Angles on Energy Correlators
 	# =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
+	mkdir write/new_enc;
 	@$(MAKE) new_encs;
 
 jet_properties: $(FASTJET) $(PYTHIA) write/src/jet_properties.cc
