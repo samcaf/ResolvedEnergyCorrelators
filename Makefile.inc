@@ -11,7 +11,6 @@ SOFTWARE_DIR=/home/samaf/Software
 # Subdirectories
 PYTHIA_DIR=$(SOFTWARE_DIR)/pythia$(PYTHIA_VERSION)
 FASTJET_DIR=$(SOFTWARE_DIR)/fastjet-$(FASTJET_VERSION)
-CONTRIB_DIR=$(SOFTWARE_DIR)/fastjet-install
 
 # LIB_SUFFIX=.dylib
 LIB_SUFFIX=.so
@@ -30,10 +29,6 @@ FASTJET_LIB=$(FASTJET_DIR)/src/.libs
 FASTJET_INCLUDE=$(FASTJET_DIR)/include
 FASTJET=$(FASTJET_LIB)/libfastjet$(LIB_SUFFIX)
 
-# fastjet-contrib
-CONTRIB_LIB=$(CONTRIB_DIR)/lib
-CONTRIB_INCLUDE=$(CONTRIB_DIR)/include
-
 
 #===========================================
 # Compilation flags
@@ -41,10 +36,6 @@ CONTRIB_INCLUDE=$(CONTRIB_DIR)/include
 # Basic compilation
 CXX=g++ -g
 
-# CXX_COMMON=-O2 -pedantic -W -Wall -Wshadow -fPIC -pthread
-CXX_COMMON=-O2 -pedantic -W -Wall -Wshadow -fPIC -pthread
+CXX_COMMON=-O2 -std=c++17 -pedantic -W -Wall -Wshadow -fPIC -pthread
 CXX_COMMON:=-I$(PYTHIA_INCLUDE) -I$(FASTJET_INCLUDE) $(CXX_COMMON) $(GZIP_LIB)
 CXX_COMMON+= -L$(PYTHIA_LIB) -L$(FASTJET_LIB) -Wl,-rpath,$(PYTHIA_LIB) -Wl,-rpath,$(FASTJET_LIB) -lpythia8 -lfastjet -ldl
-
-CXX_SHARED=-dynamiclib
-CXX_SONAME=-Wl,-dylib_install_name,@rpath/
