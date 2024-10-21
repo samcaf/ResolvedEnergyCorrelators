@@ -5,8 +5,10 @@ A project for obtaining energy-weighted correlations in Pythia and on CMS Open D
 <img src="assets/w_combined_1d.png" width="200"> <img src="assets/qcd_3particle_bullseye.png" width="200"> <img src="assets/od_4particle_bullseye.png" width="200"> <img src="assets/od_nonpert_density.png" width="200">
 
 
-![](https://github.com/samcaf/ResolvedEnergyCorrelators/tree/master/assets/RENC_Intro.gif)
-
+![]()
+![RENC Intro](https://github.com/samcaf/ResolvedEnergyCorrelators/tree/master/assets/RENC_Intro.gif)
+<br>
+<img src="https://github.com/samcaf/ResolvedEnergyCorrelators/tree/master/assets/RENC_Intro.gif" width="40" height="40" />
 
 ## Table of Contents
 
