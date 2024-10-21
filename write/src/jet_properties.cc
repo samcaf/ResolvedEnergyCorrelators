@@ -62,17 +62,17 @@ float CMS_PT_MIN        = 500;
 float CMS_PT_MAX        = 550;
 
 // List of jet properties we want to store
-int MAX_N_CONSTITUENTS = 200;
+int MAX_N_CONSTITUENTS = 250;
 std::vector<std::string> property_names = {"mass", "pT", "energy",
                                         "eta", "n_constituents"};
 bool is_logarithmic(std::string prop) {
-    if (str_eq(prop, "mass") or str_eq(prop, "pT")
-            or str_eq(prop, "energy"))
-        return true;
-    if (str_eq(prop, "eta") or str_eq(prop, "n_constituents"))
-        return false;
-
-    throw std::runtime_error("Invalid property name " + prop);
+    return false;
+    /* if (str_eq(prop, "mass") or str_eq(prop, "pT") */
+    /*         or str_eq(prop, "energy")) */
+    /*     return true; */
+    /* if (str_eq(prop, "eta") or str_eq(prop, "n_constituents")) */
+    /*     return false; */
+    /* throw std::runtime_error("Invalid property name " + prop); */
 }
 
 
@@ -124,6 +124,23 @@ int main (int argc, char* argv[]) {
     const bool is_proton_collision = (pid_1 == 2212 and
                                       pid_2 == 2212);
 
+    // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-
+    // Output Settings
+    // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-
+    // Whether to output hist in a mathematica friendly format
+    const bool mathematica_format = cmdln_bool("mathematica",
+                                               argc, argv, false);
+    const std::string HIST_DELIM = mathematica_format ?  " " : ", ";
+    const std::string file_ext   = mathematica_format ?  ".txt"
+                                                      : ".py";
+
+    // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-
+    // Input Settings
+    // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-
+    const bool use_opendata = cmdln_bool("use_opendata", argc, argv,
+                                         true);
+
+
 
     // =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
     // Jet Settings
@@ -150,11 +167,11 @@ int main (int argc, char* argv[]) {
 
     const double pt_min  = cmdln_double("pt_min", argc, argv,
                                  // default depends on collision
-                                 is_proton_collision ? CMS_PT_MIN
+                                 is_proton_collision ? CMS_PT_MIN/1.5
                                  : _PTMIN_DEFAULT);
     const double pt_max  = cmdln_double("pt_max", argc, argv,
                                  // default depends on collision
-                                 is_proton_collision ? CMS_PT_MAX
+                                 is_proton_collision ? CMS_PT_MAX*1.5
                                  : _PTMAX_DEFAULT);
 
     // Require |eta| < eta_cut, but only for proton-proton collisions
@@ -169,11 +186,15 @@ int main (int argc, char* argv[]) {
     // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-
     const int   nbins  = cmdln_int("nbins", argc, argv, 500, false);
 
-    const double minbin  = cmdln_double("minbin", argc, argv,
-                                  -2, false);
-    const double maxbin  = cmdln_double("maxbin", argc, argv,
-                                  log10(2*pt_max), false);
-    const bool uflow = true, oflow = true;
+    const double E_min = cmdln_double("E_min", argc, argv,
+                                       0, false);
+    const double m_min = cmdln_double("m_min", argc, argv,
+                                       0, false);
+    const double E_max = cmdln_double("E_max", argc, argv,
+                                        2*pt_max, false);
+    const double m_max = cmdln_double("m_max", argc, argv,
+                                        2*pt_max, false);
+    const bool uflow = false, oflow = true;
 
 
     // Initializing bin edges and centers
@@ -186,11 +207,11 @@ int main (int argc, char* argv[]) {
     std::map<std::string, std::vector<double>> bin_edges;
 
     bin_centers.insert(std::pair("mass",
-            get_bin_centers(minbin, maxbin, nbins, uflow, oflow)));
+            get_bin_centers(m_min, m_max, nbins, uflow, oflow)));
     bin_centers.insert(std::pair("pT",
-            get_bin_centers(minbin, maxbin, nbins, uflow, oflow)));
+            get_bin_centers(pt_min, pt_max, nbins, uflow, oflow)));
     bin_centers.insert(std::pair("energy",
-            get_bin_centers(minbin, maxbin, nbins, uflow, oflow)));
+            get_bin_centers(E_min, E_max, nbins, uflow, oflow)));
     bin_centers.insert(std::pair("eta",
             get_bin_centers(-eta_cut, eta_cut, nbins,
                             false, false)));
@@ -200,11 +221,11 @@ int main (int argc, char* argv[]) {
                             false, false)));
 
     bin_edges.insert(std::pair("mass",
-            get_bin_edges(minbin, maxbin, nbins, uflow, oflow)));
+            get_bin_edges(m_min, m_max, nbins, uflow, oflow)));
     bin_edges.insert(std::pair("pT",
-            get_bin_edges(minbin, maxbin, nbins, uflow, oflow)));
+            get_bin_edges(pt_min, pt_max, nbins, uflow, oflow)));
     bin_edges.insert(std::pair("energy",
-            get_bin_edges(minbin, maxbin, nbins, uflow, oflow)));
+            get_bin_edges(E_min, E_max, nbins, uflow, oflow)));
     bin_edges.insert(std::pair("eta",
             get_bin_edges(-eta_cut, eta_cut, nbins,
                             false, false)));
@@ -212,23 +233,6 @@ int main (int argc, char* argv[]) {
             get_bin_edges(-0.5, MAX_N_CONSTITUENTS+0.5,
                           MAX_N_CONSTITUENTS+1,
                           false, false)));
-
-    // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-
-    // Output Settings
-    // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-
-    // Whether to output hist in a mathematica friendly format
-    const bool mathematica_format = cmdln_bool("mathematica",
-                                               argc, argv, false);
-    const std::string HIST_DELIM = mathematica_format ?  " " : ", ";
-    const std::string file_ext   = mathematica_format ?  ".txt"
-                                                      : ".py";
-
-    // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-
-    // Input Settings
-    // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-
-    const bool use_opendata = cmdln_bool("use_opendata", argc, argv,
-                                         true);
-
 
     // =====================================
     // Output Setup
@@ -413,27 +417,32 @@ int main (int argc, char* argv[]) {
         // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
         for (const auto& jet : good_jets) {
         try {
+            const double num  = jet.constituents().size();
+            const double mass = jet.m() > 0 ? jet.m() : 0;
+            const double pT   = jet.pt();
+            const double E    = jet.e();
+            const double eta  = jet.eta();
+
             // Histogramming properties of this jet
-            jet_properties["n_constituents"][bin_position(
-                                   jet.constituents().size(),
+            jet_properties["n_constituents"][bin_position(num,
                                    -0.5, MAX_N_CONSTITUENTS+0.5,
                                    MAX_N_CONSTITUENTS+1, "lin",
                                    false, false)]
                 += 1;
-            jet_properties["mass"][bin_position(
-                                   jet.m(), minbin, maxbin,
-                                   nbins, "log", uflow, oflow)]
+            jet_properties["mass"][bin_position(mass,
+                                   m_min, m_max,
+                                   nbins, "lin", uflow, oflow)]
                 += 1;
-            jet_properties["pT"][bin_position(
-                                   jet.pt(), minbin, maxbin,
-                                   nbins, "log", uflow, oflow)]
+            jet_properties["pT"][bin_position(pT,
+                                   pt_min, pt_max,
+                                   nbins, "lin", uflow, oflow)]
                 += 1;
-            jet_properties["energy"][bin_position(
-                                   jet.e(), minbin, maxbin,
-                                   nbins, "log", uflow, oflow)]
+            jet_properties["energy"][bin_position(E,
+                                   E_min, E_max,
+                                   nbins, "lin", uflow, oflow)]
                 += 1;
-            jet_properties["eta"][bin_position(
-                                   jet.eta(), -eta_cut, eta_cut,
+            jet_properties["eta"][bin_position(eta,
+                                   -eta_cut, eta_cut,
                                    nbins, "lin", false, false)]
                 += 1;
 
@@ -556,7 +565,7 @@ int main (int argc, char* argv[]) {
             // Printing histogram
             outfile << std::setprecision(10)
                     << jet_properties[prop][bin];
-            if (int(bin) != nbins-1)
+            if (bin != jet_properties[prop].size() - 1)
                 outfile << HIST_DELIM;
             else
                 outfile << "\n";

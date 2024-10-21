@@ -141,13 +141,13 @@ int main (int argc, char* argv[]) {
                                  // default depends on collision
                                  is_proton_collision ? CMS_PT_MIN
                                  : _PTMIN_DEFAULT);
-    const double       pt_max  = cmdln_double("pt_max", argc, argv,
+    const double pt_max  = cmdln_double("pt_max", argc, argv,
                                  // default depends on collision
                                  is_proton_collision ? CMS_PT_MAX
                                  : _PTMAX_DEFAULT);
 
     // Require |eta| < eta_cut, but only for proton-proton collisions
-    const double       eta_cut  = cmdln_double("eta_cut",
+    const double eta_cut = cmdln_double("eta_cut",
                                  argc, argv,
                                  // default depends on collision
                                  is_proton_collision ? CMS_ETA_CUT
@@ -193,7 +193,7 @@ int main (int argc, char* argv[]) {
     // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-
     // Histogram Settings
     // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-
-    const int   nbins  = cmdln_int("nbins", argc, argv, 100, false);
+    const int    nbins   = cmdln_int("nbins", argc, argv, 100, false);
     // NOTE: using logarithmically spaced bins,
     // NOTE:   with minbin and maxbin in base 10
 
@@ -201,7 +201,7 @@ int main (int argc, char* argv[]) {
                                   -8, false);
     const double maxbin  = cmdln_double("maxbin", argc, argv,
                                   1, false);
-    const bool uflow = true, oflow = true;
+    const bool   uflow = true, oflow = true;
 
 
     // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-

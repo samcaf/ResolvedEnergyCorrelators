@@ -218,7 +218,7 @@ int main (int argc, char* argv[]) {
     // =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
     // Histogram Settings
     // =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
-    const int   nbins     = cmdln_int("nbins", argc, argv,
+    const int    nbins    = cmdln_int("nbins", argc, argv,
                                       100, false);
     // NOTE: using logarithmically spaced bins,
     // NOTE:   with minbin and maxbin in base 10
@@ -278,8 +278,8 @@ int main (int argc, char* argv[]) {
     // Whether to output hist in a mathematica friendly format
     const bool mathematica_format = cmdln_bool("mathematica",
                                                argc, argv, false);
-    const std::string HIST_DELIM = mathematica_format ?  " " : ", ";
-    const std::string file_ext   = mathematica_format ?  ".txt"
+    const std::string HIST_DELIM  = mathematica_format ?  " " : ", ";
+    const std::string file_ext    = mathematica_format ?  ".txt"
                                                       : ".py";
 
 

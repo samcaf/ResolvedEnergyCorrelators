@@ -205,13 +205,13 @@ int main (int argc, char* argv[]) {
                                  // default depends on collision
                                  is_proton_collision ? CMS_PT_MIN
                                  : _PTMIN_DEFAULT);
-    const double       pt_max  = cmdln_double("pt_max", argc, argv,
+    const double pt_max  = cmdln_double("pt_max", argc, argv,
                                  // default depends on collision
                                  is_proton_collision ? CMS_PT_MAX
                                  : _PTMAX_DEFAULT);
 
     // Require |eta| < eta_cut, but only for proton-proton collisions
-    const double       eta_cut  = cmdln_double("eta_cut",
+    const double eta_cut = cmdln_double("eta_cut",
                                  argc, argv,
                                  // default depends on collision
                                  is_proton_collision ? CMS_ETA_CUT
@@ -351,8 +351,8 @@ int main (int argc, char* argv[]) {
     // Whether to output hist in a mathematica friendly format
     const bool mathematica_format = cmdln_bool("mathematica",
                                                argc, argv, false);
-    const std::string HIST_DELIM = mathematica_format ?  " " : ", ";
-    const std::string file_ext   = mathematica_format ?  ".txt"
+    const std::string HIST_DELIM  = mathematica_format ?  " " : ", ";
+    const std::string file_ext    = mathematica_format ?  ".txt"
                                                       : ".py";
 
     // =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=

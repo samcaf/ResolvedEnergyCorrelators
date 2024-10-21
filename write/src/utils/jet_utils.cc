@@ -489,13 +489,13 @@ const double      _PTMAX_DEFAULT     = pow(10.,9.);
 
 // radius and recombination scheme:
 const std::vector<double> _JETRAD_DEFAULT = {1.0};
-const fastjet::RecombinationScheme _JET_RECOMB_DEFAULT = fastjet::WTA_pt_scheme;
+const fastjet::RecombinationScheme _JET_RECOMB_DEFAULT = fastjet::E_scheme;
 
 // Subjet options
 const std::string _SUBALG_DEFAULT    = "cambridge-aachen";
 // radius and recombination scheme:
 const std::vector<double> _SUBRAD_DEFAULT = {0.1};
-const fastjet::RecombinationScheme _SUB_RECOMB_DEFAULT = fastjet::WTA_pt_scheme;
+const fastjet::RecombinationScheme _SUB_RECOMB_DEFAULT = fastjet::WTA_modp_scheme;
 
 // Accepted recombination schemes for jet finding
 std::map<fastjet::RecombinationScheme, std::string> scheme_string = {
