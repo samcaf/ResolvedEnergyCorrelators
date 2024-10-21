@@ -5,8 +5,9 @@ A project for obtaining energy-weighted correlations in Pythia and on CMS Open D
 <img src="output/display/w_combined_1d.png" width="200"> <img src="output/display/qcd_3particle_bullseye.png" width="200"> <img src="output/display/od_4particle_bullseye.png" width="200"> <img src="output/display/od_nonpert_density.png" width="200">
 
 
-![](https://samcaf.github.io/assets/RENC_Intro.mp4)
-
+<video width="320" height="240" controls>
+  <source src="https://samcaf.github.io/assets/RENC_Intro.mp4" type="video/mp4">
+</video>
 
 ## Table of Contents
 
