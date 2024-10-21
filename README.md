@@ -6,8 +6,7 @@ A project for obtaining energy-weighted correlations in Pythia and on CMS Open D
 
 
 
-https://github.com/user-attachments/assets/ca5f2d5c-f783-4065-8edd-627b041575d4
-
+<video src="https://github.com/samcaf/output/display/RENC_Intro.mp4" width="300" />
 
 
 ## Table of Contents
