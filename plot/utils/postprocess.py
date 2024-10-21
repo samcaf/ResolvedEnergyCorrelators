@@ -20,6 +20,39 @@ def partonic_energy(fixed_param_values):
     return energy
 
 
+# ====================================
+# Code for processing text files
+# ====================================
+def read_xy_columns(file_path):
+    """
+    Reads a file with two columns of data and returns two NumPy arrays:
+    x and y.
+
+    Parameters:
+    file_path (str): The path to the file containing the data.
+
+    Returns:
+    x_array (numpy.ndarray): NumPy array of x values.
+    y_array (numpy.ndarray): NumPy array of y values.
+    """
+    x_values = []
+    y_values = []
+
+    # Open the file and read each line
+    with open(file_path, 'r') as file:
+        for line in file:
+            # Split each line into x and y
+            x, y = line.split()
+            # Convert strings to floats and append to lists
+            x_values.append(float(x))
+            y_values.append(float(y))
+
+    # Convert lists to NumPy arrays
+    x_array = np.array(x_values)
+    y_array = np.array(y_values)
+
+    return x_array, y_array
+
 # =====================================
 # Code for processing figures
 # =====================================

@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 from re import search
 
@@ -10,6 +11,8 @@ from encs.plots import density_colormap
 
 from qcd.qcd_basics import alpha_s
 
+from encs.plots import bl_prop
+
 
 # =====================================
 # Flags
@@ -19,7 +22,10 @@ opendata = True
 draw_np = False
 
 # Which pythia data to plot
-pythia = ['qcd', 'w', 'top']
+pythia = []
+pythia.append('qcd')
+pythia.append('w')
+pythia.append('top')
 npyth  = '1M_150bins'
 
 
@@ -28,28 +34,37 @@ npyth  = '1M_150bins'
 # ====================================
 # 2D density plots
 new_density = {
-    'axes.labelsize': 20,
-    'ylim': (0, 1.0),
-    'xlim': (5e-3, 5e-1),
-    # 'xlim': (5e-3, 12e-1),
-    'xlabel': r'$R_1$',
-    'ylabel': r'$R_2/R_1$',
-    'x_scale': 'log',
-    'cbar_cmap': density_colormap['opendata']
+    key: {
+        'axes.labelsize': 20,
+        'ylim': (0, 1.0),
+        # 'xlim': (5e-3, 5e-1),
+        'xlim': (5e-3, 12e-1),
+        'xlabel': r'$R_1$',
+        'ylabel': r'$R_2/R_1$',
+        'x_scale': 'log',
+        'cbar_cmap': density_colormap[key]
+    }
+    for key in ['opendata', 'qcd', 'w', 'top']
 }
 old_density = {
-    'axes.labelsize': 20,
-    'ylim': (0, 1.0),
-    'xlim': (5e-3, 5e-1),
-    # 'xlim': (5e-3, 12e-1),
-    'xlabel': r'$R_L$',
-    'ylabel': r'$R_S/R_L$',
-    'x_scale': 'log',
-    'cbar_cmap': density_colormap['opendata']
+    key: {
+        'axes.labelsize': 20,
+        'ylim': (0, 1.0),
+        # 'xlim': (5e-3, 5e-1),
+        'xlim': (5e-3, 12e-1),
+        'xlabel': r'$R_L$',
+        'ylabel': r'$R_S/R_L$',
+        'x_scale': 'log',
+        'cbar_cmap': density_colormap[key]
+    }
+    for key in ['opendata', 'qcd', 'w', 'top']
 }
 
+new_density['opendata']['xlim'] = (5e-3, 5e-1)
+old_density['opendata']['xlim'] = (5e-3, 5e-1)
 
-def stamp_density(ax, **metadata):
+
+def stamp_density(ax, olddef, **metadata):
     # Dataset information
     if metadata['level'] == 'data':
         ax.text(-0.00, 1.10,
@@ -86,10 +101,20 @@ def stamp_density(ax, **metadata):
             fontsize=11, transform=ax.transAxes)
 
     # Axes labels
-    ax.text(1.02, 1.105, r'$\phi_2$-integrated', fontsize=14,
-            transform=ax.transAxes)
-    ax.text(1.08, 1.025, r'$\textbf{RE3C}$', fontsize=20,
-            transform=ax.transAxes)
+    if olddef:
+        ax.text(1.00, 1.130, r'$R_M$-integrated', fontsize=14,
+                transform=ax.transAxes)
+        rcParams = plt.rcParams.copy()
+        plt.rcParams.update(plt.rcParamsDefault)
+        ax.text(1.09, 1.020, 'E3C',
+                font_properties=bl_prop,
+                fontsize=28, transform=ax.transAxes)
+        plt.rcParams.update(rcParams)
+    else:
+        ax.text(1.02, 1.105, r'$\phi_2$-integrated', fontsize=14,
+                transform=ax.transAxes)
+        ax.text(1.08, 1.025, r'$\textbf{RE3C}$', fontsize=20,
+                transform=ax.transAxes)
 
 
 
@@ -108,25 +133,22 @@ if __name__ == "__main__":
         new_hist2d = plot_2d_density(
             hist_data=new_hist3d,
             vmax=1, log_colorbar=False,
-            save=None, **new_density)
+            save=None, **new_density['opendata'])
         ax = new_hist2d.density.axes[0]
         # Stamp
-        stamp_density(ax, **new_hist2d.metadata)
-        # Non-perturbative portion:
-        pt = 500
-        # Lambda_high = 10/pt
-        # Lambda_low  = 5/pt
-        # Lambda_mid  = 10**(.7*np.log10(Lambda_high)+
-        #                    .3*np.log10(Lambda_low))
-        # theta1s = np.logspace(np.log10(Lambda_mid), np.log10(1/2),
-        #                       100000)  # many points to shade fully
-        Lambda_mid  = 5/pt
-        theta1s = np.logspace(-3, np.log10(1/2),
-                              100)
+        stamp_density(ax, olddef=False, **new_hist2d.metadata)
+
+        new_hist2d.density.fig.tight_layout()
+        new_hist2d.density.savefig(
+            'od_newdef_density.pdf', enc_figure_dir)
 
         # Fudged version of naive physics because of some phase
         # space constraints that I coded up in Mathematica after
-        # pulling them out of my booty
+        # pulling them out of my booty.
+        # Full solution I derived is the solution to a cubic which
+        # is complicated and not obviously real, but is well
+        # approximated by the simpler functional form
+        # below.
         # Basically, the place where i2 approaches within LambdaQCD of
         # i1 is not exactly where the NP effects kick in -- you
         # need to take into account when they become comparable
@@ -134,72 +156,21 @@ if __name__ == "__main__":
         # the NP physics starts but the associated region of phase
         # space is measure zero. As R_2 increases even further,
         # _then_ the NP effects begin to become more important)
-        if draw_np:
-            ax.plot(theta1s, Lambda_mid/theta1s,
-                    lw=5, ls='dashed',
-                    color='darkgoldenrod')
-            ax.plot(theta1s, 1-Lambda_mid/2/theta1s,
-                    lw=5, ls='dashed',
-                    color='mediumseagreen')
-            # ax.fill_between(theta1s,
-            #             Lambda_low/theta1s,
-            #             [Lambda_high/t1 if Lambda_high/t1 < 1-Lambda_high/2/t1
-            #              else 1-Lambda_low/2/t1 for t1 in theta1s],
-            #             alpha=0.25, color='firebrick',
-            #             lw=0)
-            # np_high_inds = [i for i, t1 in enumerate(theta1s) if
-            #             Lambda_high/t1 < 1-Lambda_high/2/t1]
-            # ax.fill_between(theta1s[np_high_inds],
-            #             1-Lambda_high/2/theta1s[np_high_inds],
-            #             1-Lambda_low/2/theta1s[np_high_inds],
-            #             alpha=0.25, color='firebrick',
-            #             lw=0)
+        pt = 500
+        Lambda_mid  = 5/pt
+        theta1s = np.logspace(np.log10(1.5e-2), np.log10(2/5),
+                              100)
+
+        ax.plot(theta1s, Lambda_mid/theta1s,
+                lw=5, ls='dashed',
+                color='darkgoldenrod')
+        ax.plot(theta1s, 1-Lambda_mid/2/theta1s,
+                lw=5, ls='dashed',
+                color='mediumseagreen')
 
         new_hist2d.density.fig.tight_layout()
         new_hist2d.density.savefig(
-            str(enc_figure_dir/'od_newdef_density.pdf'))
-
-        # Trying something analytic
-        """
-        new_hist3d = HistogramData(
-            file_name=enc_data_dir/
-                  '3particle_od_100k_150bins_nus_1-00_1-00.py'
-        )
-        Rs, Ts, Phis = np.meshgrid(new_hist3d.centers['theta1'],
-                            new_hist3d.centers['theta2_over_theta1'],
-                            new_hist3d.centers['phi'])
-
-        def law_of_cosines(adj1, adj2, angle):
-            c2 = adj1**2. + adj2**2. - 2.*adj1*adj2*np.cos(angle)
-            return np.sqrt(c2)
-
-        minR = np.minimum(Rs*Ts, law_of_cosines(Rs, Rs*Ts, Phis))
-
-        pertdensity = 1 \
-            * alpha_s(Rs*500, freeze_at=.12) \
-            * alpha_s(minR*500, freeze_at=.12) \
-            * 1/(minR) \
-            * (4/3)**2. / (4*np.pi)**2. / 10000
-        # pertdensity = minR
-
-        new_hist3d.hist = pertdensity
-        new_hist3d.variable_order = ['theta1', 'theta2_over_theta1',
-                                     'phi']
-        new_hist2d = HistogramData2D(
-                    hist_data=new_hist3d.get_sub_histogram('phi', 0))
-        new_hist2d.make_plot('density')
-        # new_hist2d = plot_2d_density(
-        #     hist_data=new_hist3d,
-        #     vmin=0, vmax=1, log_colorbar=False,
-        #     save=None, **new_density)
-        ax = new_hist2d.density.axes[0]
-        # Stamp
-        stamp_density(ax, **new_hist2d.metadata)
-
-        new_hist2d.density.fig.tight_layout()
-        new_hist2d.density.savefig(
-            str(enc_figure_dir/'od_newdef_density.pdf'))
-        """
+            'od_nonpert_density.pdf', str(enc_figure_dir))
 
 
         # =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
@@ -213,9 +184,9 @@ if __name__ == "__main__":
         old_hist2d = plot_2d_density(
             hist_data=old_hist3d,
             vmax=2, log_colorbar=False,
-            save=None, **old_density)
+            save=None, **old_density['opendata'])
         ax = old_hist2d.density.axes[0]
-        stamp_density(ax, **old_hist2d.metadata)
+        stamp_density(ax, olddef=True, **old_hist2d.metadata)
         old_hist2d.density.fig.tight_layout()
         old_hist2d.density.savefig(
             str(enc_figure_dir/'od_olddef_density.pdf'))
@@ -227,13 +198,6 @@ if __name__ == "__main__":
     for process in np.atleast_1d(pythia):
         if process is None:
             continue
-        pythia_new_density = new_density.copy()
-        pythia_new_density['cbar_cmap'] = density_colormap[process]
-        pythia_old_density = old_density.copy()
-        pythia_old_density['cbar_cmap'] = density_colormap[process]
-
-
-
         # =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
         # Plots with new variables
         # =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
@@ -245,9 +209,9 @@ if __name__ == "__main__":
             hist_data=new_hist3d,
             vmax=1, log_colorbar=False,
             save=None,
-            **pythia_new_density)
+            **new_density[process])
         ax = new_hist2d.density.axes[0]
-        stamp_density(ax, **new_hist2d.metadata)
+        stamp_density(ax, olddef=False, **new_hist2d.metadata)
         new_hist2d.density.fig.tight_layout()
         new_hist2d.density.savefig(
             str(enc_figure_dir/f'supplementary/density/{process}_newdef_density.pdf'))
@@ -265,29 +229,9 @@ if __name__ == "__main__":
             hist_data=old_pythiahist3d,
             vmax=2, log_colorbar=False,
             save=None,
-            **pythia_old_density)
+            **old_density[process])
         ax = old_pythiahist2d.density.axes[0]
-        stamp_density(ax, **old_pythiahist2d.metadata)
+        stamp_density(ax, olddef=True, **old_pythiahist2d.metadata)
         old_pythiahist2d.density.fig.tight_layout()
         old_pythiahist2d.density.savefig(
             str(enc_figure_dir/f'supplementary/density/{process}_olddef_density.pdf'))
-
-        # # Symmetrized
-        # symm_old_hist3d = HistogramData(hist_data=old_hist3d)
-        # symm_old_hist3d.hist = (old_hist3d.hist[:,:,:] +
-        #                         old_hist3d.hist[:,::-1,:])/2
-
-        # symm_old_hist2d = plot_2d_density(
-        #     hist_data=symm_old_hist3d,
-        #     vmax=1, log_colorbar=False,
-        #     save=str(enc_figure_dir/'supplementary/olddef_symm'),
-        #     **old_density_color)
-
-        # # Symmetrized - new
-        # symm_old_hist3d.hist = new_hist3d.hist - symm_old_hist3d.hist
-        # diff_hist2d = plot_2d_density(
-        #     hist_data=symm_old_hist3d,
-        #     vmin=-0.5, vmax=0.5,
-        #     log_colorbar=False,
-        #     save=str(enc_figure_dir/'supplementary/new_minus_oldsymm'),
-        #     **old_density_color)

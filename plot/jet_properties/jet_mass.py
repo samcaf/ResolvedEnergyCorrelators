@@ -13,31 +13,41 @@ opendata = True
 
 # Which pythia data to plot
 pythia = []
-# pythia.append('qcd')
+pythia.append('qcd')
 pythia.append('w')
 pythia.append('top')
-npyth  = '10k_200bins'
+npyth  = '100k_200bins'
+
+# Plot colors for different jet radii
+colors = {
+    'AKT4' : 'mediumseagreen',
+    'AKT6' : 'cornflowerblue',
+    'AKT8' : 'mediumorchid',
+    'AKT10': 'lightcoral',
+    'AKT12': 'sandybrown'
+}
 
 
 # =====================================
 # Plot parameters
 # =====================================
 # 1D plots
-plot_1d_params = {
+plot_kwargs = {
     key: {
         'axes.labelsize': 20,
-        'ylim': (1e-5, 8e0),
-        # 'ylim': (0, 7e-1),
-        'xlim': (1e-5, 1e3),
-        # 'xlim': (1e-4, 4e0),
-        # 'xlim': (0, 3e0),
-        'xlabel': r'$R_1$',
+        # 'ylim': (1e-6, 7e-1),
+        'ylim': (0, 8e-2),
+        # 'xlim': (1e-1, 1e3),
+        'xlim': (0, 2e2),
+        'xlabel': r'$m_{\text{jet}}$',
+        # 'ylabel':
+        # r'$\frac{\text{d}\Sigma}{\text{d}\log_{10}m}$',
         'ylabel':
-        r'$\frac{\text{d}\Sigma}{\text{d}\log_{10}m}$',
+        r'$\frac{\text{d}\Sigma}{\text{d}m}$',
         # 'y_scale': 'log',
         'y_scale': 'lin',
-        'x_scale': 'log',
-        # 'x_scale': 'lin',
+        # 'x_scale': 'log',
+        'x_scale': 'lin',
     }
     for key in ['opendata', 'qcd', 'w', 'top']
 }
@@ -109,58 +119,23 @@ if __name__ == "__main__":
     # Pythia Plots
     # =====================================
     for process in pythia:
-        if process is None:
-            continue
-
-        pythia_plotters = []
-
-        pythia_0 = plot_jet_mass(
-                file_name=property_data_dir/
-                        f'{process}_AKT6_{npyth}_mass.py',
-                plot_kwargs=plot_1d_params,
-                color='mediumseagreen',
-                label=r'AKT6',
-                save=None,
-                **plot_1d_params[process],
-        )
-        pythia_plotters.append(pythia_0.plot)
-
-        pythia_0 = plot_jet_mass(
-                file_name=property_data_dir/
-                        f'{process}_AKT8_{npyth}_mass.py',
-                plot_kwargs=plot_1d_params,
-                color='cornflowerblue',
-                label=r'AKT8',
-                save=None,
-                **plot_1d_params[process],
-        )
-        pythia_plotters.append(pythia_0.plot)
-
-        pythia_0 = plot_jet_mass(
-                file_name=property_data_dir/
-                        f'{process}_AKT10_{npyth}_mass.py',
-                plot_kwargs=plot_1d_params,
-                color='mediumorchid',
-                label=r'AKT10',
-                save=None,
-                **plot_1d_params[process],
-        )
-        pythia_plotters.append(pythia_0.plot)
-
-        pythia_0 = plot_jet_mass(
-                file_name=property_data_dir/
-                        f'{process}_AKT12_{npyth}_mass.py',
-                plot_kwargs=plot_1d_params,
-                color='lightcoral',
-                label=r'AKT12',
-                save=None,
-                **plot_1d_params[process],
-        )
-        pythia_plotters.append(pythia_0.plot)
+        plotters = []
+        metadata = []
+        for label, col in colors.items():
+            plotter = plot_jet_mass(
+                            file_name=property_data_dir/
+                                f'{process}_{label}_{npyth}_mass.py',
+                            color=col,
+                            label=label,
+                            save=None,
+                            **plot_kwargs[process],
+                        )
+            plotters.append(plotter.plot)
+            metadata.append(plotter.metadata)
 
         # Combining plots
-        cplotter = combine_plotters(pythia_plotters)
-        stamp_1d(cplotter.axes[0], **pythia_0.metadata)
+        cplotter = combine_plotters(plotters)
+        stamp_1d(cplotter.axes[0], **metadata[0])
         cplotter.axes[0].legend(loc=(0.03, 0.42))
         cplotter.fig.tight_layout()
         cplotter.savefig(f'{process}_jet_mass.pdf',

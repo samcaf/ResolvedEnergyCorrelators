@@ -4,6 +4,8 @@ import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 
+import matplotlib.font_manager as fm
+
 import matplotlib.ticker as mticker
 
 # Histogram imports
@@ -28,6 +30,12 @@ density_colormap = {
     'top': 'YlOrBr',
     None : None
 }
+
+oldenglish_path = "/usr/share/fonts/oldenglishtextmt.ttf"
+oeboots_path = "/usr/share/fonts/Old_Englished_Boots.ttf"
+
+# Add the font to matplotlib
+bl_prop = fm.FontProperties(fname=oeboots_path)
 
 
 # =====================================

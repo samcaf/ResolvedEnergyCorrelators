@@ -27,6 +27,9 @@ enc_figure_dir = output_dir / "new_enc_figures"
 ewoc_data_dir = output_dir / "ewocs"
 ewoc_figure_dir = output_dir / "ewoc_figures"
 
+manim_dir = output_dir / "manim"
+manim_enc_dir = manim_dir / "encs"
+
 
 # =#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#= #
 # Logging Flags

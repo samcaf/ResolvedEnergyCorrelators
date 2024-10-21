@@ -1,6 +1,8 @@
 import numpy as np
 from itertools import product
 
+import matplotlib.pyplot as plt
+
 from histogram import HistogramData
 from histogram import HistogramData2D
 
@@ -8,6 +10,7 @@ from plotter import enc_data_dir, enc_figure_dir
 from utils.plot_utils import adjust_lightness
 from utils.postprocess import collision_stamp
 
+from encs.plots import bl_prop
 from encs.plots import plot_2d_bullseye, bullseye_inset
 from encs.plots import density_colormap
 
@@ -23,55 +26,54 @@ opendata = False
 
 pythia = []
 # Which pythia data to plot
-# pythia.append('qcd')
-pythia.append('w')
-# pythia.append('top')
+pythia.append('qcd')
+# pythia.append('w')
+pythia.append('top')
 
-npyth3 = '1M_150bins'
-npyth4 = '1M_20bins'
+# npyth3 = '1M_150bins'
+npyth4 = '1M_25bins'
 
 
 # =====================================
 # Flags
 # =====================================
-# Choice of values
-recursive  = True
-theta1s_od = [0.04 , 0.1, 0.4]
-theta1s_py = [0.1, 0.3, 0.49]
-t2_t1_val  = 0.7
-phi2_val   = 0
-phi2_val   = -179*np.pi/180 # np.pi-0.001
+# Choice of value
+theta1s_od = [0.03, 0.1, 0.3]
+theta1s_py = [0.6]
+t2_t1_val  = 0.8
+phi2_vals  = [np.pi/4, np.pi/2, np.pi-0.001]
 
 
 # =====================================
 # Plot parameters
 # =====================================
-new_bullseye = {
-    'ylim': (0, 1.0),
-    'cbar_cmap': density_colormap['opendata'],
-    'vmin': 4e-1,
-    'vmax': 2e1,
+new_3part_params = {
+    key: {
+        'ylim': (0, 1.0),
+        'cbar_cmap': density_colormap[key],
+        # 'vmin': 1e0,
+        # 'vmax': 7e1,
+    } for key in ['opendata', 'qcd', 'w', 'top']
 }
 
-new_bullseye_4part = {
-    'ylim': (0, 1.0),
-    'cbar_cmap': density_colormap['opendata'],
-    'vmin': 4e-3,
-    'vmax': 5e0
+new_4part_params = {
+    key: {
+        'ylim': (0, 1.0),
+        'cbar_cmap': density_colormap[key],
+        # 'vmin': 1e0,
+        # 'vmax': 4e3
+    } for key in ['opendata', 'qcd', 'w', 'top']
 }
 
 
-old_bullseye = {
-    'ylim': (0, 1.0),
-    'cbar_cmap': density_colormap['opendata'],
-    # 'vmin': 1e0,
-    'vmax': 1e3,
+old_3part_params = {
+    key: {
+        'ylim': (0, 1.0),
+        'cbar_cmap': density_colormap[key],
+        # 'vmin': 1e0,
+        # 'vmax': 4e3,
+    } for key in ['opendata', 'qcd', 'w', 'top']
 }
-
-pythia_new_bullseye = new_bullseye.copy()
-pythia_new_bullseye_4part = new_bullseye_4part.copy()
-pythia_old_bullseye = old_bullseye.copy()
-
 
 
 def stamp_bullseye(ax, bins, Npoint=3, olddef=False, **metadata):
@@ -168,8 +170,20 @@ def stamp_bullseye(ax, bins, Npoint=3, olddef=False, **metadata):
     ax.text(0.92, 0.05, rf'$R_{label2}/R_{label1}$', fontsize=16,
             color=adjust_lightness('dimgrey', 0.4),
             transform=ax.transAxes)
-    ax.text(1.06, 1.035, rf'$\textbf{{RE{Npoint}C}}$', fontsize=24,
-            transform=ax.transAxes)
+
+    if olddef:
+        assert Npoint == 3, \
+            "{Npoint=} not supported, must be 3."
+        rcParams = plt.rcParams.copy()
+        plt.rcParams.update(plt.rcParamsDefault)
+        ax.text(1.11, 1.01, 'E3C',
+                font_properties=bl_prop,
+                fontsize=28, transform=ax.transAxes)
+        plt.rcParams.update(rcParams)
+    else:
+        ax.text(1.06, 1.035,
+                rf'$\textbf{{RE{Npoint}C}}$',
+                fontsize=24, transform=ax.transAxes)
 
 
 def bullseye_arrows(ax):
@@ -216,11 +230,8 @@ if __name__ == "__main__":
     if opendata:
         for t1_val in theta1s_od:
             # ==========================================
-            # Open Data: 3-Particle
+            # Open Data: 3-Particles, new variables
             # ==========================================
-            # =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
-            # 3-Particle Plots with new variables
-            # =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
             # Black-and-white (main text)
             new_hist3d = HistogramData(
                 file_name=enc_data_dir/
@@ -236,7 +247,8 @@ if __name__ == "__main__":
             new_hist3d = plot_2d_bullseye(
                 hist_data=new_hist3d,
                 save=None, theta1=t1_val,
-                **new_bullseye,
+                **new_3part_params['opendata'],
+                vmin=5e-4/t1**4.2, vmax=1.5e2/t1**1.8,
             )
             # Creating inset
             bullseye_inset(new_hist3d, inner_rad=t1,
@@ -249,47 +261,9 @@ if __name__ == "__main__":
 
             # Saving
             new_hist3d.bullseye.fig.tight_layout()
-            # new_hist3d.bullseye.savefig(
-            #     f'/od/od_3particle_bullseye_{t1}.pdf',
-            #     enc_figure_dir)
-            # new_hist3d.bullseye.fig.close()
+            new_hist3d.bullseye.savefig(
+                f'/od/od_3particle_bullseye_{t1}.pdf', enc_figure_dir)
 
-            """
-            # # =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
-            # # 3-Particle Plots with old variables
-            # # =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
-            # # Setup
-            # old_hist3d = HistogramData(
-            #     file_name=enc_data_dir/
-            #               'old_3particle_od_100k_150bins.py'
-            # )
-            # tL_ind = np.digitize([t1_val],
-            #                      old_hist3d.edges['thetaL'])[0] - 1
-            # tL = old_hist3d.centers['thetaL'][tL_ind]
-            # tL_bin = (old_hist3d.edges['thetaL'][tL_ind],
-            #           old_hist3d.edges['thetaL'][tL_ind+1])
-
-            # # Making bullseye
-            # old_hist3d = plot_2d_bullseye(
-            #     hist_data=old_hist3d,
-            #     save=None, theta1=tL,
-            #     **old_bullseye,
-            # )
-
-            # # Decorating plot
-            # ax = old_hist3d.bullseye.axes[0]
-            # bullseye_arrows(ax)
-            # stamp_bullseye(ax, {'theta_L': tL_bin},
-            #                olddef=True,
-            #                **old_hist3d.metadata)
-
-            # # Saving
-            # old_hist3d.bullseye.fig.tight_layout()
-            # old_hist3d.bullseye.savefig(
-            #     f'/od/od_3particle_old_bullseye.pdf',
-            #     enc_figure_dir)
-
-            """
 
             # ==========================================
             # Open Data: 4-Particle
@@ -301,8 +275,7 @@ if __name__ == "__main__":
             # Histogram processing
             new_hist5d = HistogramData(
                 file_name=enc_data_dir/
-                   f"4particle_od_{'rec' if recursive else 'nonrec'}"
-                   "_100k_20bins_nus_1-00_1-00_1-00.py",
+                   f"4particle_od_100k_25bins_nus_1-00_1-00_1-00.py",
                 variable_order=['theta1', t2_t1_key, 'phi2',
                                 t3_t2_key, 'phi3']
             )
@@ -312,118 +285,187 @@ if __name__ == "__main__":
             t1_ind = np.digitize([t1_val],
                          new_hist5d.edges['theta1'])[0]-1
             t1 = new_hist5d.centers['theta1'][t1_ind]
+            t1_bin = (new_hist5d.edges['theta1'][t1_ind],
+                      new_hist5d.edges['theta1'][t1_ind+1])
             # t2/t1
             t2_ind = np.digitize([t2_t1_val],
                          new_hist5d.edges['theta2_over_theta1'])[0]-1
             t2_t1 = new_hist5d.centers['theta2_over_theta1'][t2_ind]
-            # phi2
-            phi2_ind = np.digitize([phi2_val],
-                         new_hist5d.edges['phi2'])[0]-1
-            phi2 = new_hist5d.centers['phi2'][phi2_ind]
-
-            # Bins
             t2_bin = (new_hist5d.edges['theta2_over_theta1'][t2_ind],
                       new_hist5d.edges['theta2_over_theta1'][t2_ind+1])
-            phi2_bin = (new_hist5d.edges['phi2'][phi2_ind],
-                      new_hist5d.edges['phi2'][phi2_ind+1])
 
-            # Get data
-            bullseye_4part = HistogramData2D(
-                hist_data = new_hist5d.\
-                    get_sub_histogram('theta1', t1).\
-                    get_sub_histogram(t2_t1_key, t2_t1).\
-                    get_sub_histogram('phi2', phi2)
+            pre_bullseye_4part = new_hist5d.\
+                                    get_sub_histogram('theta1', t1).\
+                                    get_sub_histogram(t2_t1_key,
+                                                      t2_t1)
+
+            for phi2_val in phi2_vals:
+                # phi2
+                phi2_ind = np.digitize([phi2_val],
+                             new_hist5d.edges['phi2'])[0]-1
+                phi2 = new_hist5d.centers['phi2'][phi2_ind]
+                phi2_bin = (new_hist5d.edges['phi2'][phi2_ind],
+                            new_hist5d.edges['phi2'][phi2_ind+1])
+
+                # Get data
+                bullseye_4part = HistogramData2D(
+                    hist_data = pre_bullseye_4part.\
+                                    get_sub_histogram('phi2', phi2)
+                )
+
+                # bin edges and centers
+                bin3_edges = bullseye_4part.edges[t3_t2_key]
+                t3_edges   = t1*t2_t1*bin3_edges
+                bin3_centers = bullseye_4part.centers[t3_t2_key]
+                t3_centers   = t1*t2_t1*bin3_centers
+
+                bullseye_4part.hist = np.array([
+                    bullseye_4part.hist[i3] / t3
+                    for i3, t3 in enumerate(t3_centers)
+                ])
+
+                # Readjusting for correct defn of angles (not ratios)
+                bullseye_4part.edges[t3_t2_key] = t3_edges
+                bullseye_4part.centers[t3_t2_key] = t3_centers
+
+                # Making plot
+                bullseye_4part.make_plot('bullseye',
+                         log_norm=True, save=None,
+                         radial_coordinate='theta3_over_theta2',
+                         **new_4part_params)
+                ax = bullseye_4part.bullseye.axes[0]
+                ax.set_ylim(0, t1*t2_t1)
+
+                # Inset and stamping
+                bullseye_inset(bullseye_4part,
+                               inner_rad=t1*t2_t1,
+                               inset_pts=[(t1, -phi2)])
+                bullseye_arrows(ax)
+                stamp_bullseye(bullseye_4part.bullseye.axes[0],
+                               {'theta_1': t1_bin,
+                                'theta_2': t2_bin,
+                                'phi_2':   phi2_bin},
+                               Npoint=4, **new_hist5d.metadata)
+
+                # Saving
+                bullseye_4part.bullseye.fig.tight_layout()
+                bullseye_4part.bullseye.savefig(
+                    f'/od/od_4particle_bullseye_{t1}_{t2_t1}_{phi2}.pdf',
+                    enc_figure_dir)
+
+
+            # ==========================================
+            # Open Data: 3-Particle Plots, old variables
+            # ==========================================
+            # Setup
+            old_hist3d = HistogramData(
+                file_name=enc_data_dir/
+                          'old_3particle_od_100k_150bins.py'
+            )
+            tL_ind = np.digitize([t1_val],
+                                 old_hist3d.edges['thetaL'])[0] - 1
+            tL = old_hist3d.centers['thetaL'][tL_ind]
+            tL_bin = (old_hist3d.edges['thetaL'][tL_ind],
+                      old_hist3d.edges['thetaL'][tL_ind+1])
+
+            # Making bullseye
+            old_hist3d = plot_2d_bullseye(
+                hist_data=old_hist3d,
+                save=None, theta1=tL,
+                **old_3part_params['opendata'],
+                vmin=3e-3/tL**4.2, vmax=8e1/tL**2.2,
             )
 
-            # bin edges and centers
-            bin3_edges = bullseye_4part.edges[t3_t2_key]
-            t3_edges   = t1*t2_t1*bin3_edges
-            bin3_centers = bullseye_4part.centers[t3_t2_key]
-            t3_centers   = t1*t2_t1*bin3_centers
-
-            bullseye_4part.hist = np.array([
-                bullseye_4part.hist[i3] / t3
-                for i3, t3 in enumerate(t3_centers)
-            ])
-
-            # Readjusting for correct defn of angles (not ratios)
-            bullseye_4part.edges[t3_t2_key] = t3_edges
-            bullseye_4part.centers[t3_t2_key] = t3_centers
-
-            # Making plot
-            bullseye_4part.make_plot('bullseye',
-                     log_norm=True, save=None,
-                     radial_coordinate='theta3_over_theta2',
-                     **new_bullseye_4part)
-            ax = bullseye_4part.bullseye.axes[0]
-            ax.set_ylim(0, t1*t2_t1)
-
-            # Inset and stamping
-            bullseye_inset(bullseye_4part,
-                           inner_rad=t1*t2_t1,
-                           inset_pts=[(t1, -phi2)])
+            # Decorating plot
+            ax = old_hist3d.bullseye.axes[0]
             bullseye_arrows(ax)
-            stamp_bullseye(bullseye_4part.bullseye.axes[0],
-                           {'theta_1': t1_bin,
-                            'theta_2': t2_bin,
-                            'phi_2':   phi2_bin},
-                           Npoint=4, **new_hist5d.metadata)
+            stamp_bullseye(ax, {'theta_L': tL_bin},
+                           olddef=True,
+                           **old_hist3d.metadata)
 
             # Saving
-            bullseye_4part.bullseye.fig.tight_layout()
-            bullseye_4part.bullseye.savefig(
-                f'/od/od_4particle_bullseye_{t1}_{t2_t1}_{phi2}.pdf',
+            old_hist3d.bullseye.fig.tight_layout()
+            old_hist3d.bullseye.savefig(
+                f'/od/od_3particle_old_3part_params_{t1}.pdf',
                 enc_figure_dir)
 
 
+
     # =#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
-    # Pythia:  (Plots with new variables)
+    # Pythia:
     # =#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
     for process in np.atleast_1d(pythia):
-        if process is None:
-            continue
-
         # Getting style/colormap
-        pythia_new_bullseye['cbar_cmap'] = density_colormap[process]
-        pythia_new_bullseye_4part['cbar_cmap'] = density_colormap[process]
-        pythia_old_bullseye['cbar_cmap'] = density_colormap[process]
-
         for t1_val in theta1s_py:
-            """
-            # ==========================================
-            # Pythia: 3-Particle
-            # ==========================================
-            # new_pythiahist3d = HistogramData(
-            #     file_name=enc_data_dir/
-            #           f'3particle_{process}_{npyth3}_nus_1-00_1-00.py',
-            #     variable_order=['theta1', 'theta2_over_theta1', 'phi']
-            # )
-            # t1_ind = np.digitize([t1_val],
-            #          new_pythiahist3d.edges['theta1'])[0] - 1
-            # t1 = new_pythiahist3d.centers['theta1'][t1_ind]
-            # t1_bin = (new_pythiahist3d.edges['theta1'][t1_ind],
-            #           new_pythiahist3d.edges['theta1'][t1_ind + 1])
+            # =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
+            # 3-Particle Plots with new variables
+            # =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
+            new_hist3d = HistogramData(
+                file_name=enc_data_dir/
+                      f'3particle_{process}_{npyth3}_nus_1-00_1-00.py',
+                variable_order=['theta1', 'theta2_over_theta1', 'phi']
+            )
+            t1_ind = np.digitize([t1_val],
+                     new_hist3d.edges['theta1'])[0] - 1
+            t1 = new_hist3d.centers['theta1'][t1_ind]
+            t1_bin = (new_hist3d.edges['theta1'][t1_ind],
+                      new_hist3d.edges['theta1'][t1_ind + 1])
 
-            # new_pythiahist3d = plot_2d_bullseye(
-            #     hist_data=new_pythiahist3d,
-            #     save=None, theta1=t1_val,
-            #     **pythia_new_bullseye,
-            # )
-            # # Inset
-            # bullseye_inset(new_pythiahist3d, inner_rad=t1,
-            #                inner_var='theta1')
-            # # Stamping
-            # bullseye_arrows(new_pythiahist3d.bullseye.axes[0])
-            # stamp_bullseye(new_pythiahist3d.bullseye.axes[0],
-            #                {'theta_1': t1_bin},
-            #                opendata=False, process=pythia,
-            #                **new_pythiahist3d.metadata)
-            # # Saving
-            # new_pythiahist3d.bullseye.fig.tight_layout()
-            # new_pythiahist3d.bullseye.savefig(
-            #     f'/supplementary/3particle/{process}{t1}_3particle_bullseye.pdf',
-            #     enc_figure_dir)
-            """
+            new_hist3d = plot_2d_bullseye(
+                hist_data=new_hist3d,
+                save=None, theta1=t1_val,
+                **new_3part_params[process],
+                vmin=8e-3/t1**3.0, vmax=2.0e0/t1**2.6,
+            )
+            # Inset
+            bullseye_inset(new_hist3d, inner_rad=t1,
+                           inner_var='theta1')
+            # Stamping
+            bullseye_arrows(new_hist3d.bullseye.axes[0])
+            stamp_bullseye(new_hist3d.bullseye.axes[0],
+                           {'theta_1': t1_bin},
+                           opendata=False, process=pythia,
+                           **new_hist3d.metadata)
+            # Saving
+            new_hist3d.bullseye.fig.tight_layout()
+            new_hist3d.bullseye.savefig(
+                f'/supplementary/3particle/{process}{t1}_3particle_bullseye.pdf',
+                enc_figure_dir)
+
+            # =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
+            # 3-Particle Plots with old variables
+            # =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
+            # Setup
+            old_hist3d = HistogramData(
+                file_name=enc_data_dir/
+                          f'old_3particle_{process}_{npyth3}.py'
+            )
+            tL_ind = np.digitize([t1_val],
+                                 old_hist3d.edges['thetaL'])[0] - 1
+            tL = old_hist3d.centers['thetaL'][tL_ind]
+            tL_bin = (old_hist3d.edges['thetaL'][tL_ind],
+                      old_hist3d.edges['thetaL'][tL_ind+1])
+
+            # Making bullseye
+            old_hist3d = plot_2d_bullseye(
+                hist_data=old_hist3d,
+                save=None, theta1=tL,
+                **old_3part_params[process],
+                vmin=5e-2/tL**2.8, vmax=8.0e0/tL**2.7,
+            )
+
+            # Decorating plot
+            ax = old_hist3d.bullseye.axes[0]
+            bullseye_arrows(ax)
+            stamp_bullseye(ax, {'theta_L': tL_bin},
+                           olddef=True,
+                           **old_hist3d.metadata)
+
+            # Saving
+            old_hist3d.bullseye.fig.tight_layout()
+            old_hist3d.bullseye.savefig(
+                f'/supplementary/wedge/{process}{tL}_3particle_bullseye.pdf',
+                enc_figure_dir)
 
             # ==========================================
             # Pythia: 4-Particle
@@ -434,10 +476,9 @@ if __name__ == "__main__":
 
             # Histogram processing
             try:
-                new_pythiahist5d = HistogramData(
+                new_hist5d = HistogramData(
                     file_name=enc_data_dir/
                        f"4particle_{process}"
-                       f"_{'rec' if recursive else 'nonrec'}"
                        f"_{npyth4}_nus_1-00_1-00_1-00.py",
                     variable_order=['theta1', t2_t1_key, 'phi2',
                                     t3_t2_key, 'phi3']
@@ -446,92 +487,92 @@ if __name__ == "__main__":
                 print("Invalid variable order in: ",
                        enc_data_dir/
                        f"4particle_{process}"
-                       f"_{'rec' if recursive else 'nonrec'}"
                        f"_{npyth4}_nus_1-00_1-00_1-00.py")
                 continue
 
             # Getting actual histogram centers
             t1_ind = np.digitize([t1_val],
-                         new_pythiahist5d.edges['theta1'])[0]-1
-            t1 = new_pythiahist5d.centers['theta1'][t1_ind]
-            t1_bin = (new_pythiahist5d.edges['theta1'][t1_ind],
-                      new_pythiahist5d.edges['theta1'][t1_ind + 1])
+                         new_hist5d.edges['theta1'])[0]-1
+            t1 = new_hist5d.centers['theta1'][t1_ind]
+            t1_bin = (new_hist5d.edges['theta1'][t1_ind],
+                      new_hist5d.edges['theta1'][t1_ind + 1])
 
             t2_ind = np.digitize([t2_t1_val],
-                     new_pythiahist5d.edges['theta2_over_theta1'])[0]-1
-            t2_t1 = new_pythiahist5d.centers['theta2_over_theta1'][t2_ind]
+                     new_hist5d.edges['theta2_over_theta1'])[0]-1
+            t2_t1 = new_hist5d.centers['theta2_over_theta1'][t2_ind]
 
-            phi2_ind = np.digitize([phi2_val],
-                         new_pythiahist5d.edges['phi2'])[0]-1
-            phi2 = new_pythiahist5d.centers['phi2'][phi2_ind]
+            for phi2_val in phi2_vals:
+                phi2_ind = np.digitize([phi2_val],
+                             new_hist5d.edges['phi2'])[0]-1
+                phi2 = new_hist5d.centers['phi2'][phi2_ind]
 
-            t2_bin = (new_pythiahist5d.edges['theta2_over_theta1'][t2_ind],
-                      new_pythiahist5d.edges['theta2_over_theta1'][t2_ind+1])
-            phi2_bin = (new_pythiahist5d.edges['phi2'][phi2_ind],
-                      new_pythiahist5d.edges['phi2'][phi2_ind+1])
+                t2_bin = (new_hist5d.edges['theta2_over_theta1'][t2_ind],
+                          new_hist5d.edges['theta2_over_theta1'][t2_ind+1])
+                phi2_bin = (new_hist5d.edges['phi2'][phi2_ind],
+                          new_hist5d.edges['phi2'][phi2_ind+1])
 
-            bullseye_4part = HistogramData2D(
-                hist_data = new_pythiahist5d.\
-                    get_sub_histogram('theta1', t1).\
-                    get_sub_histogram(t2_t1_key, t2_t1).\
-                    get_sub_histogram('phi2', phi2)
-            )
+                bullseye_4part = HistogramData2D(
+                    hist_data = new_hist5d.\
+                        get_sub_histogram('theta1', t1).\
+                        get_sub_histogram(t2_t1_key, t2_t1).\
+                        get_sub_histogram('phi2', phi2)
+                )
 
-            bin3_edges = bullseye_4part.edges[t3_t2_key]
-            t3_edges   = t1*t2_t1*bin3_edges
-            bin3_centers = bullseye_4part.centers[t3_t2_key]
-            t3_centers   = t1*t2_t1*bin3_centers
-            bullseye_4part.hist = np.array([
-                bullseye_4part.hist[i3] / t3
-                for i3, t3 in enumerate(t3_centers)
-            ])
-            bullseye_4part.edges[t3_t2_key] = t3_edges
-            bullseye_4part.centers[t3_t2_key] = t3_centers
+                bin3_edges = bullseye_4part.edges[t3_t2_key]
+                t3_edges   = t1*t2_t1*bin3_edges
+                bin3_centers = bullseye_4part.centers[t3_t2_key]
+                t3_centers   = t1*t2_t1*bin3_centers
+                bullseye_4part.hist = np.array([
+                    bullseye_4part.hist[i3] / t3
+                    for i3, t3 in enumerate(t3_centers)
+                ])
+                bullseye_4part.edges[t3_t2_key] = t3_edges
+                bullseye_4part.centers[t3_t2_key] = t3_centers
 
-            # Making plot
-            bullseye_4part.make_plot('bullseye',
-                     log_norm=True, save=None,
-                     radial_coordinate='theta3_over_theta2',
-                     **pythia_new_bullseye_4part)
-            ax = bullseye_4part.bullseye.axes[0]
-            ax.set_ylim(0, t1*t2_t1)
-            # bullseye_4part.bullseye.savefig(
-            #     str(enc_figure_dir)+'/4particle_test.pdf')
-            bullseye_inset(bullseye_4part,
-                           inner_rad=t1*t2_t1,
-                           inset_pts=[(t1, -phi2)])
+                # Making plot
+                bullseye_4part.make_plot('bullseye',
+                         log_norm=True, save=None,
+                         radial_coordinate='theta3_over_theta2',
+                         **new_4part_params[process])
+                ax = bullseye_4part.bullseye.axes[0]
+                ax.set_ylim(0, t1*t2_t1)
+                # bullseye_4part.bullseye.savefig(
+                #     str(enc_figure_dir)+'/4particle_test.pdf')
+                bullseye_inset(bullseye_4part,
+                               inner_rad=t1*t2_t1,
+                               inset_pts=[(t1, -phi2)])
 
-            # Drawing curves and arrows
-            theta2 = t1*t2_t1
-            rad_end = 1.45
-            phi_end = 0.8
-            # Angular arrow
-            phis = np.arange(0, phi_end, .01)
-            rads = np.ones_like(phis)*theta2*1.1
-            ax.plot(phis, rads, lw=2, color='dimgrey', clip_on=False)
-            ax.arrow(phis[-1], theta2*1.1, 1e-10*theta2, 0,
-                     clip_on=False, width=0.0,
-                     facecolor='dimgrey', edgecolor='dimgrey',
-                     head_width=0.05*theta2,
-                     head_length=0.25*theta2)
-            # Radial arrow
-            ax.plot([-0.85, -0.85], [theta2*1.05, theta2*rad_end],
-                    lw=2, color='dimgrey', clip_on=False)
-            ax.arrow(-0.85, theta2*rad_end, 0, 1e-10*theta2,
-                     clip_on=False, width=0.0,
-                     facecolor='dimgrey', edgecolor='dimgrey',
-                     head_width=0.21*theta2,
-                     head_length=0.07*theta2)
+                # Drawing curves and arrows
+                theta2 = t1*t2_t1
+                rad_end = 1.45
+                phi_end = 0.8
+                # Angular arrow
+                phis = np.arange(0, phi_end, .01)
+                rads = np.ones_like(phis)*theta2*1.1
+                ax.plot(phis, rads, lw=2, color='dimgrey', clip_on=False)
+                ax.arrow(phis[-1], theta2*1.1, 1e-10*theta2, 0,
+                         clip_on=False, width=0.0,
+                         facecolor='dimgrey', edgecolor='dimgrey',
+                         head_width=0.05*theta2,
+                         head_length=0.25*theta2)
+                # Radial arrow
+                ax.plot([-0.85, -0.85], [theta2*1.05, theta2*rad_end],
+                        lw=2, color='dimgrey', clip_on=False)
+                ax.arrow(-0.85, theta2*rad_end, 0, 1e-10*theta2,
+                         clip_on=False, width=0.0,
+                         facecolor='dimgrey', edgecolor='dimgrey',
+                         head_width=0.21*theta2,
+                         head_length=0.07*theta2)
 
-            # Stamping
-            stamp_bullseye(bullseye_4part.bullseye.axes[0],
-                           {'theta_1': t1_bin,
-                            'theta_2': t2_bin,
-                            'phi_2':   phi2_bin},
-                           Npoint=4, **new_pythiahist5d.metadata)
+                # Stamping
+                stamp_bullseye(bullseye_4part.bullseye.axes[0],
+                               {'theta_1': t1_bin,
+                                'theta_2': t2_bin,
+                                'phi_2':   phi2_bin},
+                               Npoint=4, **new_hist5d.metadata)
 
-            bullseye_4part.bullseye.fig.tight_layout()
-            bullseye_4part.bullseye.savefig(
-                '/supplementary/4particle/'
-                f'{process}{t1}_{t2_t1}_{phi2}_4particle_bullseye.pdf',
-                enc_figure_dir)
+                bullseye_4part.bullseye.fig.tight_layout()
+                bullseye_4part.bullseye.savefig(
+                    '/supplementary/4particle/'
+                    f'{process}{t1}_{t2_t1}_{phi2}_4particle_bullseye.pdf',
+                    enc_figure_dir)
