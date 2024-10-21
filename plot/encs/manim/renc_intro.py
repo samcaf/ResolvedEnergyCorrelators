@@ -12,8 +12,6 @@ from plotter import manim_enc_dir
 from encs.manim.scenes.text_scenes import *
 
 
-config.disable_caching = True
-
 # Plot definitions
 s_color  = WHITE
 i1_color = XKCD.CORNFLOWERBLUE
@@ -550,15 +548,15 @@ class RENC_Intro(ThreeDScene):
         self.bullseye = None
 
         # Intro Slide
-        self.next_section("Intro", skip_animations=True)
+        self.next_section("Intro")
         self.introslide()
 
         # Jet cartoon
-        self.next_section("Jet Cartoon", skip_animations=True)
+        self.next_section("Jet Cartoon")
         self.jetcartoon()
 
         # Open Data visualization
-        self.next_section("OpenData RE3C")#, skip_animations=True)
+        self.next_section("OpenData RE3C")
         title = Text("CMS Open Data:",
                      font_size=72).move_to(RIGHT*6.5+UP*4.0)
         self.play(Write(title))
@@ -567,13 +565,13 @@ class RENC_Intro(ThreeDScene):
         self.opendata_re3c()
 
         # RE4C
-        self.next_section("OpenData RE4C", skip_animations=True)
+        self.next_section("OpenData RE4C")
         self.opendata_re4c()
 
         self.play(Unwrite(title))
 
         # End "slide"
-        self.next_section("Final", skip_animations=True)
+        self.next_section("Final")
         self.final()
         self.fade_all()
         self.wait()

@@ -54,7 +54,7 @@ def save_bullseye_3part(theta1, hist_data, params, metadata):
     # Generate and stamp the bullseye plot
     bullseye = plot_2d_bullseye(hist_data=hist_data,
                                 save=None, theta1=theta1,
-                                vmin=min(5e-4/theta1**4.2, 1e4),
+                                vmin=min(5e-4/theta1**4.2, 1e3),
                                 vmax=min(1.5e2/theta1**1.8, 1e8),
                                 **params)
     if not bullseye:
