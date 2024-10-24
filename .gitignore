@@ -177,6 +177,7 @@ write/src/PRECLAUDE
 write/TODO
 # TODO
 write/src/utils/pileup_utils.cc
+
 # EWOCs:
 plot/ewocs
 plot/qcd/dglap_moments.py
@@ -190,6 +191,10 @@ output/display/*.pdf
 
 # Additional auxiliary code
 plot/mathematica
+
+# Presentations
+assets/presentations/*.zip
+assets/presentations/MIT_LNS_2024/*
 
 
 # Log files
