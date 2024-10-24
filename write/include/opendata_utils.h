@@ -12,7 +12,7 @@
 namespace od
 {
     // Opendata Files
-    const std::string cms_jets_file = "/home/samaf/Documents/Research/DelphiScribe/write/data/cms_jet_run2011A.opendata.txt";
+    const std::string cms_jets_file = "/home/samaf/Documents/Research/ResolvedEnergyCorrelators/write/data/cms_jet_run2011A.opendata.txt";
 
     // Class for reading files
     class EventReader {

@@ -160,6 +160,7 @@ cython_debug/
 # Pythia executables
 write/ewocs
 write/new_enc/*
+# write/benchmark/*
 write/jet_properties
 
 # Too big

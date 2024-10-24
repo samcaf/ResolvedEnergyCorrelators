@@ -291,6 +291,15 @@ ewocs: $(FASTJET) $(PYTHIA) write/src/ewocs.cc
 # =======================================
 # Dependencies
 # =======================================
+clean:
+	rm write/ewocs
+	rm write/jet_properties
+	rm write/new_enc/*
+	rm write/benchmark/*
+
+# =======================================
+# Dependencies
+# =======================================
 install_dependencies:
 	# #=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#
 	# Installing dependencies
