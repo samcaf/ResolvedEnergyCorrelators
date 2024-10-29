@@ -128,7 +128,7 @@ int main (int argc, char* argv[]) {
     const RecombinationScheme jet_recomb = jetrecomb_cmdln(
                                               argc, argv);
 
-    // Number of inclusive jets
+    // Number of exclusive jets
     const int n_exclusive_jets           = cmdln_int(
                                               "n_exclusive_jets",
                                               argc, argv, -1);
@@ -193,7 +193,8 @@ int main (int argc, char* argv[]) {
     // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-
     // Histogram Settings
     // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-
-    const int    nbins   = cmdln_int("nbins", argc, argv, 100, false);
+    const int    nbins   = cmdln_int("nbins", argc, argv, 100,
+                                     false);
     // NOTE: using logarithmically spaced bins,
     // NOTE:   with minbin and maxbin in base 10
 
@@ -369,7 +370,6 @@ int main (int argc, char* argv[]) {
                 // Starting fastjet; redirect output
                 std::cout.rdbuf(fastjetstream.rdbuf());
             }
-
 
             cluster_seq_ptr = std::make_unique
                     <ClusterSequence>(particles, jet_def);
