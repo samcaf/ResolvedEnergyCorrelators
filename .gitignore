@@ -182,7 +182,6 @@ write/src/utils/pileup_utils.cc
 plot/ewocs
 plot/qcd/dglap_moments.py
 plot/qcd/observable_utils.py
-write/src/ewocs.cc
 
 # Event Generation data
 output/*
