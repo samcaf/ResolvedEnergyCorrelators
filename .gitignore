@@ -157,36 +157,14 @@ cython_debug/
 # =========================
 # Custom ignores
 # =========================
-# Pythia executables
-write/ewocs
-write/new_enc/*
-# write/benchmark/*
-write/jet_properties
-
-# Too big
+# Datasets
 write/data/cms_jet_run2011A.opendata.txt
 
-# Deprecated
-plot/encs/data
-plot/encs/plotDEPRECATED
-write/new_enc_PRECLAUDE
-write/DEPRECATED
-write/src/PRECLAUDE
-
-# TODO or incomplete
-write/TODO
-# TODO
-write/src/utils/pileup_utils.cc
-
-# EWOCs:
-plot/ewocs
-plot/qcd/dglap_moments.py
-plot/qcd/observable_utils.py
-
-# Event Generation data
+# Executables and output
+write/ewocs
+write/new_enc/*
+write/jet_properties
 output/*
-!output/display
-output/display/*.pdf
 
 # Additional auxiliary code
 plot/mathematica
@@ -195,6 +173,11 @@ plot/mathematica
 assets/presentations/*.zip
 assets/presentations/MIT_LNS_2024/*
 
+# TODO or incomplete
+write/TODO
+# TODO
+write/src/utils/pileup_utils.cc
+write/src/jet_shape.cc
 
 # Log files
 *.out
