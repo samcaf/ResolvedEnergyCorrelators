@@ -113,7 +113,9 @@ def plot_1d_enc(file_name=None, hist_data=None,
     return hist1d
 
 
-def plot_2d_density(file_name=None, hist_data=None,
+def plot_2d_density(file_name=None,
+                    hist_data=None,
+                    log_normalize=True,
                     **kwargs):
     try:
         hist3d = HistogramData(file_name, hist_data,
@@ -124,6 +126,7 @@ def plot_2d_density(file_name=None, hist_data=None,
                                  'theta2_over_theta1': 'linear',
                                  'phi': 'linear'}
         t1_key = 'theta1'
+        t2_t1_key = 'theta2_over_theta1'
     except:
         hist3d = HistogramData(file_name, hist_data,
                                variable_order=['thetaL',
@@ -133,6 +136,7 @@ def plot_2d_density(file_name=None, hist_data=None,
                                  'thetaS_over_thetaL': 'linear',
                                  'phi': 'linear'}
         t1_key = 'thetaL'
+        t2_t1_key = 'thetaS_over_thetaL'
 
     # Normalization test
     check_normalization(hist3d)
@@ -147,6 +151,17 @@ def plot_2d_density(file_name=None, hist_data=None,
 
     # Normalization test
     check_normalization(hist2d)
+
+
+    # Changing variables
+    if not log_normalize:
+        bin1_centers = hist2d.centers[t1_key]
+        hist2d.hist = np.array([
+            hist2d.hist[i1] / t1
+            for i1, t1 in
+                enumerate(bin1_centers)
+        ])
+
 
     # Testing plots:
     if kwargs:
@@ -173,7 +188,6 @@ def plot_2d_density(file_name=None, hist_data=None,
         if log_colorbar:
             hist2d.make_plot('density', log_norm=True,
                              **kwargs)
-            print(save_name)
             if save_name:
                 hist2d.density.savefig(
                     save_name+'_lognorm_density.pdf')

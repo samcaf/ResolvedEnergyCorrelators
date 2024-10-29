@@ -132,7 +132,9 @@ if __name__ == "__main__":
         )
         new_hist2d = plot_2d_density(
             hist_data=new_hist3d,
-            vmax=1, log_colorbar=False,
+            vmax=50, log_normalize=False,
+            # vmax=1, log_normalize=True,
+            log_colorbar=False,
             save=None, **new_density['opendata'])
         ax = new_hist2d.density.axes[0]
         # Stamp

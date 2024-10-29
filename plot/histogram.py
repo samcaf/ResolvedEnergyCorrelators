@@ -554,8 +554,9 @@ class HistogramData2D(HistogramData):
             vmax = kwargs.pop('vmax', np.nanmax(hist2d))
             norm = LogNorm(vmin=vmin, vmax=vmax)
         else:
-            norm = Normalize(vmin=kwargs.pop('vmin', hist2d.min()),
-                             vmax=kwargs.pop('vmax', hist2d.max()))
+            vmin = kwargs.pop('vmin', np.nanmin(hist2d))
+            vmax = kwargs.pop('vmax', np.nanmax(hist2d))
+            norm = Normalize(vmin=vmin, vmax=vmax)
 
         # Create plot using Plotter
         self.density = Plotter(**kwargs)
@@ -617,13 +618,12 @@ class HistogramData2D(HistogramData):
         # Apply normalization
         if log_norm:
             vmin = np.nanmin(hist2d[np.nonzero(hist2d)])
-            vmax = np.nanmax(hist2d)
             vmin = kwargs.pop('vmin', vmin)
-            vmax = kwargs.pop('vmax', vmax)
+            vmax = kwargs.pop('vmax', np.nanmax(hist2d))
             norm = LogNorm(vmin=vmin, vmax=vmax)
         else:
-            vmin = kwargs.pop('vmin', hist2d.min())
-            vmax = kwargs.pop('vmax', hist2d.max())
+            vmin = kwargs.pop('vmin', np.nanmin(hist2d))
+            vmax = kwargs.pop('vmax', np.nanmax(hist2d))
             norm = Normalize(vmin=hist2d.min(), vmax=hist2d.max())
 
         # Create plot using Plotter
@@ -636,6 +636,7 @@ class HistogramData2D(HistogramData):
         ax.grid(False)
         pc = ax.pcolormesh(phi, radius, hist2d,
                            cmap=cmap, norm=norm,
+                           vmin=vmin, vmax=vmax,
                            alpha=1.0,
                            rasterized=True,
                            antialiased=True)
