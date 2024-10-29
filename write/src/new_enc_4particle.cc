@@ -1313,6 +1313,9 @@ int main (int argc, char* argv[]) {
             else outfile << "\n";
         }
         if (not(mathematica_format)) outfile << "]";
+
+        // Closing the file
+        outfile.close()
     }
 
     // ---------------------------------
