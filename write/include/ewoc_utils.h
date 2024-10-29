@@ -9,6 +9,8 @@
 #include "pythia_cmdln.h"
 
 extern const std::string ewoc_banner;
+extern const double _DEFAULT_WEIGHT;
+
 
 void write_ewocfile_header(std::string filename,
                            int argc, char* argv[],

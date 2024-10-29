@@ -60,17 +60,6 @@ typedef std::vector<Hist2d> Hist3d;
 typedef std::pair<double, double> weight_t;
 
 
-// =====================================
-// Switches, flags, and options
-// =====================================
-// Cut on jets from the CMS Jet 2011A Dataset
-float CMS_ETA_CUT       = 1.9;
-float CMS_R_JET         = 0.5;
-std::string CMS_JET_ALG = "akt";
-float CMS_PT_MIN        = 500;
-float CMS_PT_MAX        = 550;
-
-
 // ####################################
 // Main
 // ####################################

@@ -8,6 +8,16 @@
 
 #include "fastjet/PseudoJet.hh"
 
+// =====================================
+// Switches, flags, and options
+// =====================================
+// Cut on jets from the CMS Jet 2011A Dataset
+extern const float CMS_ETA_CUT;
+extern const float CMS_R_JET;
+extern const std::string CMS_JET_ALG;
+extern const float CMS_PT_MIN;
+extern const float CMS_PT_MAX;
+
 
 namespace od
 {

@@ -51,16 +51,6 @@ using namespace std::chrono;
 typedef std::vector<double> Hist;
 // (we are only differential in a single angle)
 
-// =====================================
-// Switches, flags, and options
-// =====================================
-// Cut on jets from the CMS Jet 2011A Dataset
-float CMS_ETA_CUT       = 1.9;
-float CMS_R_JET         = 0.5;
-std::string CMS_JET_ALG = "akt";
-float CMS_PT_MIN        = 500;
-float CMS_PT_MAX        = 550;
-
 
 // ####################################
 // Main
@@ -254,7 +244,7 @@ int main (int argc, char* argv[]) {
         // Setting up histograms
         enc_hists.emplace_back(Hist (nbins));
 
-        // Setting up output files
+        // Setting up output files,
         std::string filename = "output/new_encs/2particle_" +
                 file_prefix +
                 "_nu" + str_round(nu, 2);
@@ -262,7 +252,7 @@ int main (int argc, char* argv[]) {
         filename = periods_to_hyphens(filename);
         filename += file_ext;
         // writing a header with relevant information
-        // for a E^nC projected to depend on only a single angle
+        // for a E^nC projected to depend on only a single angle,
         write_enc_header(filename, argc, argv,
                          std::vector<double> {nu},
                          not(mathematica_format));
@@ -646,9 +636,9 @@ int main (int argc, char* argv[]) {
         // Normalizing histogram
         // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-
         // Currently, hist contains
-        //   hist[ibin] = N_jets * d Sigma_asymm[theta1] (integrated over [theta2/theta1][phi])
+        //   hist[ibin] = N_jets * d Sigma[theta1]
         // Now, changing all finite bins:
-        //   hist[ibin] -> (dSigma_asymm/dtheta1)
+        //   hist[ibin] -> (dSigma/dtheta1)
         // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-
         double total_sum = 0.0;
 
@@ -780,7 +770,7 @@ int main (int argc, char* argv[]) {
         if (not(mathematica_format)) outfile << "]";
 
         // Closing the file
-        outfile.close()
+        outfile.close();
     }
 
 

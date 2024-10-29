@@ -13,8 +13,19 @@
 #include "../../include/opendata_utils.h"
 
 
+// =====================================
+// Switches, flags, and options
+// =====================================
+// Cut on jets from the CMS Jet 2011A Dataset
+const float CMS_ETA_CUT       = 1.9;
+const float CMS_R_JET         = 0.5;
+const std::string CMS_JET_ALG = "akt";
+const float CMS_PT_MIN        = 500;
+const float CMS_PT_MAX        = 550;
+
 namespace od
 {
+
     // =====================================
     // File Reading Utilities
     // =====================================

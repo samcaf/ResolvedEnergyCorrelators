@@ -33,6 +33,9 @@ const std::string ewoc_banner = R"(
 )";
 
 
+// Default EWOC options
+const double _DEFAULT_WEIGHT = 1;
+
 
 /**
 * @brief: Writes a header containing information used in event
@@ -69,13 +72,22 @@ void write_ewocfile_header(std::string filename,
     std::string outstate_str  = cmdln_string("outstate", argc, argv,
                                              _OUTSTATE_DEFAULT);
 
+    bool        use_opendata  = cmdln_bool("use_opendata",
+                                           argc, argv, false);
+    if (use_opendata) level = "data";
+
+
     // Jet settings
-    std::string jet_alg       = jetalgstr_cmdln(argc, argv);
-    std::string jet_scheme    = scheme_string[jetrecomb_cmdln(argc, argv)];
+    std::string jet_alg    = jetalgstr_cmdln(argc, argv);
+    std::string jet_scheme = scheme_string[jetrecomb_cmdln(argc, argv)];
 
     // Subjet settings
-    std::string sub_alg       = subalgstr_cmdln(argc, argv);
-    std::string sub_scheme    = scheme_string[subrecomb_cmdln(argc, argv)];
+    std::string sub_alg    = subalgstr_cmdln(argc, argv);
+    std::string sub_scheme = scheme_string[subrecomb_cmdln(argc, argv)];
+
+    // EWOC settings
+    const double e_weight = cmdln_double("weight", argc, argv,
+                                         _DEFAULT_WEIGHT);
 
     // ---------------------------------
     // Writing the header
@@ -83,6 +95,20 @@ void write_ewocfile_header(std::string filename,
     // Opening the file
     std::ofstream file;
     file.open(filename);
+
+    // Checking for existence
+    if (!file.is_open()) {
+        std::stringstream errMsg;
+        errMsg << "File for EWOC output was expected "
+               << "to be open, but was not open.\n\n"
+               << "It is possible the file was unable to "
+               << "be created at the desired location:\n\n\t"
+               << "filename = " << filename << "\n\n"
+               << "Is the filename an absolute path? If not, "
+               << "that might be the problem.";
+        throw std::runtime_error(errMsg.str().c_str());
+    }
+
 
     if (not(python_format)) {
         // Writing for loading into mathematica
@@ -106,7 +132,8 @@ void write_ewocfile_header(std::string filename,
     }
 
     // Add header with additional information
-    file << "# ==================================\n"
+    file << "import numpy as np\n\n"
+         << "# ==================================\n"
          << "# Information\n"
          << "# ==================================\n"
          << "# Function call ```";
@@ -121,12 +148,29 @@ void write_ewocfile_header(std::string filename,
          << "pid_1, pid_2 = " << pid_1 << ", " << pid_2 << "\n"
          << "outstate_str = " + outstate_str << "\n"
 
-         << "# Jet information:\n"
-         << "jet_alg = " + jet_alg << "\n"
-         << "jet_scheme = " + jet_scheme << "\n"
-         << "jet_rad = " + std::to_string(jet_rad) << "\n"
+         << "# Weight information:\n"
+         << "weight = " << e_weight << "\n";
 
-         << "# Subjet information:\n"
+    // Jet information
+    if (use_opendata) {
+        file <<"# CMS 2011A Jet Dataset:\n"
+             << "jet_alg = \"anti-kt\"\n"
+             << "jet_scheme = \"E?\"" << "\n"
+             << "jet_rad = 0.5\n\n";
+    } else if (jet_rad == 1000) {
+        file <<"# Jet information (FULL EVENT):\n"
+             << "jet_alg = None"<< "\n"
+             << "jet_scheme = None" << "\n"
+             << "jet_rad = None" << "\n\n";
+    } else {
+        file <<"# Jet information:\n"
+             << "jet_alg = \"" + jet_alg << "\"\n"
+             << "jet_scheme = \"" + jet_scheme << "\"\n"
+             << "jet_rad = \"" + std::to_string(jet_rad) << "\"\n\n";
+    }
+
+    // Subjet information
+    file << "# Subjet information:\n"
          << "sub_alg = " + sub_alg << "\n"
          << "sub_scheme = " + sub_scheme << "\n"
          << "sub_rad = " + std::to_string(sub_rad) << "\n\n"
