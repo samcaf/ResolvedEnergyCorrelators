@@ -27,7 +27,7 @@ const std::string enc_banner = "";
 *
 * @param: argc/argv          Command line input.
 *
-* @param: jet_rad/sub_rad    Jet and subjet radii used for this file.
+* @param: weights            Energy weights used for this file.
 *
 * @param: python_format         Whether to write in a python-friendly way.
 *

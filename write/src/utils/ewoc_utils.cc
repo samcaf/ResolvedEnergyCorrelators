@@ -48,7 +48,7 @@ const double _DEFAULT_WEIGHT = 1;
 *
 * @param: jet_rad/sub_rad    Jet and subjet radii used for this file.
 *
-* @param: python_format         Whether to write in a python-friendly way.
+* @param: python_format      Whether to write in a python-friendly way.
 *
 */
 void write_ewocfile_header(std::string filename,
