@@ -106,8 +106,8 @@ double formation_time(PseudoJet pj1, PseudoJet pj2){
 */
 int main (int argc, char* argv[]) {
     // Printing if told to be verbose
-    const int verbose = cmdln_int("verbose", argc, argv, 1);
-    if (verbose >= 0) std::cout << ewoc_banner << "\n\n";
+    const int verbose = cmdln_int("verbose", argc, argv, 0);
+    if (verbose >= 1) std::cout << ewoc_banner << "\n\n";
 
     const bool DEBUG = cmdln_bool("DEBUG", argc, argv, false);
 
@@ -325,7 +325,6 @@ int main (int argc, char* argv[]) {
 
     std::cout.rdbuf(old);    // Restore std::cout
     if (not use_opendata) {
-        std::cout << "Setting up pythia" << std::endl;
         // Setting up pythia based on command line arguments
         setup_pythia_cmdln(pythia, argc, argv);
     }
@@ -761,7 +760,7 @@ int main (int argc, char* argv[]) {
         }
 
         // Printing out weight information if verbose
-        if (verbose >= 0) {
+        if (verbose >= 1) {
             float total_integral = 0;
             // Looping over all bins
             for (int bin=0; bin < nbins; ++bin) {

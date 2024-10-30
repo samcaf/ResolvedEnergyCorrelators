@@ -151,7 +151,7 @@ int checkPythiaInputs(int argc, char* argv[]) {
     std::string sub_alg       = subalgstr_cmdln(argc, argv);
 
     // Misc. Settings
-    int verbose = cmdln_int("verbose", argc, argv, 1);
+    int verbose = cmdln_int("verbose", argc, argv, 0);
 
     // ---------------------------------
     // Help
