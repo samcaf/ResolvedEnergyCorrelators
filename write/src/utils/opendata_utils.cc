@@ -25,19 +25,18 @@ const float CMS_PT_MAX        = 550;
 
 namespace od
 {
-
     // =====================================
     // File Reading Utilities
     // =====================================
     /**
-    * @brief: Takes in a text file containing processed CMS Open Data.
+    * @brief: Takes in a text file containing processed data.
     *         Reads events into a given vector of PseudoJets when
-    *         read_event is called.
+    *         read_jet is called.
     *
     * @param: inputfile   The text file containing CMS Open Data
     */
     EventReader::EventReader(const std::string& inputfile)
-                : current_event(0) {
+                : current_event(-1) {
         source.open(inputfile);
         if (!source.good()) {
             throw std::runtime_error("od::EventReader: Error: "
@@ -45,96 +44,178 @@ namespace od
         }
     }
 
+    /**
+    * @brief: Destructor for EventReader
+    */
     EventReader::~EventReader() {
         if (source.is_open()) {
             source.close();
         }
     }
 
+    /**
+    * @brief: Read a line and return the linestream
+    */
+    const std::istringstream EventReader::read_line(
+                                        const std::string line) {
+        // If the string is not a particle, returning "empty"
+        if (line.substr(0, 1) == "#") {
+            std::istringstream linestream("-1 0 0 0");
+            return linestream;
+        }
+
+        // Preparing to read line
+        std::istringstream linestream(line);
+        return linestream;
+    }
+
+
+    /**
+    * @brief: Append a particle to a jet
+    */
+    void EventReader::append_to_jet(fastjet::PseudoJet& jet,
+             const double pt, const double eta, const double phi) {
+        // Not adding empty particles to jet
+        if (pt == 0)
+            return;
+
+        // Preparing kinematic variables
+        const double px = pt * cos(phi);
+        const double py = pt * sin(phi);
+        const double pz = pt * sinh(eta);
+        const double E = sqrt(px * px + py * py + pz * pz);
+
+        // Adding particle to jet
+        jet = join(jet, fastjet::PseudoJet(px, py, pz, E));
+    }
+
+
+    /**
+    * @brief: Read a jet within the source file into a PseudoJet
+    */
     bool EventReader::read_jet(
             fastjet::PseudoJet& jet) {
-        std::string line;
-        while (std::getline(source, line)) {
-            if (line.substr(0, 4) == "#END") {
-                return false;
-            }
-            if (line.substr(0, 1) == "#") {
-                continue;
-            }
+        if (prev_line.length() != 0) {
+            // Reading line
+            std::istringstream linestream = read_line(prev_line);
 
-            std::istringstream linestream(line);
+            // Storing particle data
             int event_number;
             double pt, eta, phi;
             linestream >> event_number >> pt >> eta >> phi;
 
+            // Throwing appropriate errors if incorrect format
+            if (linestream.fail()) {
+                throw std::runtime_error("od::EventReader: Error:"
+                   " Incorrect input format in line: " + prev_line);
+            }
+
+            // Adding particle to jet
+            append_to_jet(jet, pt, eta, phi);
+        }
+
+        std::string line;
+        while (std::getline(source, line)) {
+            // Reading line
+            std::istringstream linestream = read_line(line);
+
+            // Storing particle data
+            int event_number;
+            double pt, eta, phi;
+            linestream >> event_number >> pt >> eta >> phi;
+
+            // Throwing appropriate errors if incorrect format
             if (linestream.fail()) {
                 throw std::runtime_error("od::EventReader: Error:"
                    " Incorrect input format in line: " + line);
             }
 
-            if (event_number > current_event) {
+            // Setting up for first event
+            if (current_event == -1) {
                 current_event = event_number;
+            }
+            // Preparing to end reading if footer found
+            if (line.substr(0, 4) == "#END") {
+                return false;
+            }
+
+            // Checking if this particle belongs in a new event
+            if (event_number > current_event) {
+                // We've reached a new event; update current_event
+                current_event = event_number;
+
+                // Storing current particle (it's in the next jet)
+                prev_line = line;
+
+                // Return the jet we've built so far
                 return true;
             }
 
-            double px = pt * cos(phi);
-            double py = pt * sin(phi);
-            double pz = pt * sinh(eta);
-            double E = sqrt(px * px + py * py + pz * pz);
-            jet = join(jet, fastjet::PseudoJet(px, py, pz, E));
+            // Storing particle information in the current jet
+            append_to_jet(jet, pt, eta, phi);
+
         }
         return false;
     }
 
 
-    // DEBUG: Old OD method
-    void read_events(std::vector< std::vector<PseudoJet> >& events,
-                     int nevents, std::string inputfile) {
-        std::ifstream source(inputfile);
-
-        if (not source.good())
-            throw std::runtime_error("od::read_events:\n\tError: Input file not found.");
-
-        std::string line;
-        int event_count = 0;
-
-        while (std::getline(source, line) && event_count < nevents) {
-            // Reading the file line-by-line
-            std::istringstream linestream(line);
-
-            if (line.substr(0,4) == "#END") {return;}
-            if (line.substr(0,1) == "#") {continue;}
-
-            int event_number;
-            double pt, eta, phi;
-            linestream >> event_number >> pt >> eta >> phi;
-
-            // Check if all variables were successfully read
-            if (linestream.fail())
-                throw std::runtime_error("od::read_events:\n\tError: "
-                                         "Incorrect input format in line: "
-                                         + line);
-
-            double px = pt * cos(phi);
-            double py = pt * sin(phi);
-            double pz = pt * sinh(eta);
-            double E = sqrt(px * px + py * py + pz * pz);
-            fastjet::PseudoJet particle(px, py, pz, E);
-            if (event_number >= nevents) {
-                break;
-            } else {
-                events[event_number].push_back(particle);
-            }
+    // =====================================
+    // File Writing Utilities
+    // =====================================
+    /**
+    * @brief: Takes in a target text file for storing data.
+    *         Writes a vector of pseudojets (an event and/or jet)
+    *         when write_jet is called.
+    *
+    * @param: inputfile   The text file containing CMS Open Data
+    */
+    EventWriter::EventWriter(const std::string& targetfile)
+                : current_event(-1) {
+        target.open(targetfile);
+        if (!target.good()) {
+            throw std::runtime_error("od::EventWriter: Error: "
+                                     "Input file not found.");
         }
-
-        source.close();
-
-        //Check if enough events were provided
-        for (int i=0; i<nevents; ++i)
-            if (events[i].size()==0)
-                throw std::runtime_error("od::read_events:\n\tError: "
-                                         "Input file does not have enough events.");
     }
-    // END DEBUG
 
+    /**
+     * @brief: Destructor for EventWriter
+     */
+    EventWriter::~EventWriter() {
+        if (target.is_open()) {
+            target.close();
+        }
+    }
+
+
+    /**
+     * @brief: Writes a jet to the output file
+     *
+     * @param: event_number   The event number
+     * @param: jet            The jet to write
+     */
+    void EventWriter::write_jet(const fastjet::PseudoJet& jet) {
+        // Decompose the jet into constituent particles if necessary
+        std::vector<fastjet::PseudoJet> particles = jet.constituents();
+
+        // Update the current event number
+        current_event += 1;
+
+        // Loop over particles and write them
+        for (const auto& particle : particles) {
+            double pt  = particle.perp();
+            double eta = particle.eta();
+            double phi = particle.phi();
+
+            if (pt == 0)
+                continue;
+
+            // Write to the file
+            target << std::setprecision(12) << std::noshowpoint
+                   << current_event << " "
+                   << pt << " "
+                   << eta << " "
+                   << phi << "\n";
+        }
+    }
 }

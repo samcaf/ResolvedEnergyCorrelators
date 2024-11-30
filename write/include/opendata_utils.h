@@ -27,8 +27,14 @@ namespace od
     // Class for reading files
     class EventReader {
     private:
+        // Properties
         std::ifstream source;
+        std::string prev_line;
         int current_event;
+        // Methods
+        const std::istringstream read_line(const std::string line);
+        void append_to_jet(fastjet::PseudoJet& jet,
+             const double pt, const double eta, const double phi);
 
     public:
         EventReader(const std::string& inputfile);
@@ -37,11 +43,17 @@ namespace od
         bool read_jet(fastjet::PseudoJet& jet);
     };
 
-    // DEBUG: Old OD method
-    // Utilities for reading files
-    void read_events(
-            std::vector<std::vector<fastjet::PseudoJet>>& events,
-            int nevents, std::string inputfile=cms_jets_file);
-    // END DEBUG
+    // Class for writing files
+    class EventWriter {
+    private:
+        std::ofstream target;
+        int current_event;
+
+    public:
+        EventWriter(const std::string& targetfile);
+        ~EventWriter();
+
+        void write_jet(const fastjet::PseudoJet& jet);
+    };
 }
 #endif
