@@ -253,7 +253,6 @@ To generate files containing EWOCs `./output/ewocs/`, try running the following 
     --nbins 400 --minbin -2 --maxbin 4 \
     --pt_min 500 --pt_max 100000 \
     --file_prefix lhc_w_highres120bins_parton
-
 ```
 or change the subjet radius, jet radius, or EWOC observable to suit your needs.
 
