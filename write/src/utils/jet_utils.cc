@@ -19,6 +19,7 @@
 #include <vector>
 #include <stdexcept>
 #include <algorithm>  // std::max and std::min
+#include <random>
 
 #include <assert.h>
 
@@ -117,7 +118,12 @@ bool is_leptonic_pid(int pid) {
 
 // PseudoJet utilities
 PseudoJet pythia_particle_to_pseudojet(const Pythia8::Particle& p) {
-    return PseudoJet(p.px(), p.py(), p.pz(), p.e());
+    PseudoJet pj(p.px(), p.py(), p.pz(), p.e());
+
+    // Saving charge information for track-based substructure
+    pj.set_user_index(p.charge());
+
+    return pj;
 }
 
 
@@ -141,6 +147,36 @@ bool valid_status(int status,
     }
 }
 
+
+
+// Function to apply homogeneous multiplicative rescaling of 4-momentum
+PseudoJet rescale_momentum(const PseudoJet& particle,
+                           const double scaling_factor) {
+    PseudoJet pj(particle.px() * scaling_factor,
+                 particle.py() * scaling_factor,
+                 particle.pz() * scaling_factor,
+                 particle.e() * scaling_factor);
+    pj.set_user_index(particle.user_index());
+    return pj;
+}
+
+
+// Function to create a new jet with only charged particles
+PseudoJet create_charged_jet(const fastjet::PseudoJet& original_jet) {
+    // Filter charged particles into new jet
+    PseudoJet charged_jet;
+    for (const auto& particle : original_jet.constituents()) {
+        // user index stores charge information
+        if (particle.user_index() != 0) {
+            charged_jet = join(charged_jet, particle);
+        }
+    }
+
+    // Mark this as a charged-only jet
+    charged_jet.set_user_index(1);
+
+    return charged_jet;
+}
 
 // ---------------------------------
 // Jet-Pair utilities
@@ -215,6 +251,9 @@ double pj_cos(const PseudoJet pj1, const PseudoJet pj2) {
 // ---------------------------------
 // Event utilities
 // ---------------------------------
+// Setting up random number generation for smearing
+std::default_random_engine generator;
+
 /**
 * @brief: Takes in a Pythia Event and return a vector of PseudoJets
 *         containing all particles of a current event.
@@ -225,13 +264,38 @@ double pj_cos(const PseudoJet pj1, const PseudoJet pj2) {
 * @return: vector<PseudoJet>    A vector containing all particles in the event.
 */
 PseudoJets get_particles_pythia(const Pythia8::Event event,
-                                const std::vector<int> use_pids,
-                                const std::vector<int> exclude_pids,
-                                bool final_only) {
+                        const double photon_smear_factor,
+                        const double charged_smear_factor,
+                        const double neutral_smear_factor,
+                        const bool charged_only,
+                        const bool final_only,
+                        const std::vector<int> use_pids,
+                        const std::vector<int> exclude_pids) {
     // Storing particles of an event as PseudoJets
     PseudoJets particles;
 
+    // Gaussian random numbers for energy uncertainties
+    // https://arxiv.org/pdf/2402.13864#page=5&view=fitH&zoom=100,0,500
+    // only used if smear_momentum is true
+    std::normal_distribution<double> photon_smearer(1.0,
+                                        photon_smear_factor);
+    std::normal_distribution<double> charged_smearer(1.0,
+                                        charged_smear_factor);
+    std::normal_distribution<double> neutral_smearer(1.0,
+                                        neutral_smear_factor);
+
+    // Extracting particles to PseudoJets
     for (int ipart = 0; ipart < event.size(); ipart++) {
+        // If only using final states, skip intermediates
+        if (final_only and not event[ipart].isFinal())
+            continue;
+
+        // If only using charged particles, skip neutrals
+        // NOTE: this can lead to selection bias -- use mindfully
+        if (charged_only and event[ipart].charge() == 0)
+            continue;
+
+
         // Finding relevant final states and converting to pseudojets
         bool include_particle = (
             // Use only given PIDs if relevant
@@ -243,16 +307,38 @@ PseudoJets get_particles_pythia(const Pythia8::Event event,
             (exclude_pids.size() == 0 or
              std::find(exclude_pids.begin(), exclude_pids.end(),
                  event[ipart].id()) == exclude_pids.end())
-                and
-            // Final states only:
-            (event[ipart].isFinal() or not final_only)
             );
 
-        // Storing the particle if it passes all checks
-        if (include_particle){
-            PseudoJet particle = pythia_particle_to_pseudojet(event[ipart]);
+        if (not include_particle)
+            continue;
+
+        // Converting the particle to a PseudoJet
+        PseudoJet particle = pythia_particle_to_pseudojet(event[ipart]);
+
+        // Smearing momentum if desired
+        if (photon_smear_factor > 0 || charged_smear_factor > 0 ||
+                neutral_smear_factor > 0) {
+            double scaling_factor = 1.0;
+
+            if (event[ipart].id() == 22) {
+                if (photon_smear_factor > 0)
+                    scaling_factor = photon_smearer(generator);
+            }
+            else if (event[ipart].charge() != 0) {
+                if (charged_smear_factor > 0)
+                    scaling_factor = charged_smearer(generator);
+            }
+            else {
+                if (neutral_smear_factor > 0)
+                    scaling_factor = neutral_smearer(generator);
+            }
+
+            particle = rescale_momentum(particle,
+                                        scaling_factor);
+            }
+
+            // Storing the (potentially smeared) particle
             particles.push_back(particle);
-        }
     }
 
     return particles;
@@ -737,13 +823,12 @@ bool not_ghost_jet(const PseudoJet jet) { return !is_ghost_jet(jet); }
 // ---------------------------------
 // Ghost grid setup
 // ---------------------------------
-
-PseudoJets uniform_ghosts(const double min_rap,
+PseudoJets uniform_ghosts(const double mean_ghost_pt,
+                          const double min_rap,
                           const double max_rap,
                           const double min_phi,
                           const double max_phi,
                           const double ghost_area,
-                          const double mean_ghost_pt,
                           const Selector selector,
                           const double grid_scatter,
                           const double pt_scatter) {
@@ -803,6 +888,71 @@ PseudoJets uniform_ghosts(const double min_rap,
 
 
 // ---------------------------------
+// Add a grid of ghosts to existing event
+// ---------------------------------
+PseudoJets add_uniform_ghosts(PseudoJets& particles,
+        const double mean_ghost_pt,
+        const double min_rap,
+        const double max_rap,
+        const double min_phi,
+        const double max_phi,
+        const double ghost_area,
+        const Selector selector,
+        const double grid_scatter,
+        const double pt_scatter) {
+    // - - - - - - - - - - - - - - - - -
+    // Setting up grid
+    // - - - - - - - - - - - - - - - - -
+    // Determining grid parameters
+    double drap = sqrt(ghost_area);
+    double dphi = drap;
+
+    // Using nearest int for number of grid rows/cols
+    double nrap = int((max_rap-min_rap) / (2*drap));
+    int nphi = int((max_phi-min_phi) / (2*dphi));
+    // Factor of 2 to go from -N to N in the iteration over ghosts;
+    // legacy from fastjet code.
+
+    // Re-evaluating grid spacing and parameters
+    drap = (max_rap-min_rap) / (2*nrap);
+    dphi = (max_phi-min_phi) / (2*nphi);
+
+    // - - - - - - - - - - - - - - - - -
+    // Adding to the list of ghosts
+    // - - - - - - - - - - - - - - - - -
+    // Iterating over grid
+    for (int irap = -nrap; irap <= nrap-1; irap++) {
+        for (int iphi = -nphi; iphi < nphi; iphi++) {
+            // Grid points and pT, plus random offsets
+            double phi = (iphi+0.5) * dphi + dphi*(rand()%1 - 0.5)*grid_scatter
+                                                          + (max_phi+min_phi)/2.;
+            double rap = (irap+0.5) * drap + drap*(rand()%1 - 0.5)*grid_scatter
+                                                          + (max_rap+min_rap)/2.;
+            double pt = mean_ghost_pt*(1 + (rand()%1 - 0.5)*pt_scatter);
+
+            // Initializing ghost particle
+            double exprap = exp(+rap);
+            double pminus = pt/exprap;
+            double pplus  = pt*exprap;
+            double px = pt*cos(phi);
+            double py = pt*sin(phi);
+            PseudoJet ghost(px,py,0.5*(pplus-pminus),0.5*(pplus+pminus));
+            ghost.set_cached_rap_phi(rap,phi);
+            ghost.set_user_index(_ghost_index);
+
+            // If our particle does not pass the condition placed by an active selector
+            if (selector.worker().get() && !selector.pass(ghost)) continue;
+
+            // Add the particle at this grid point to our list of ghost particles
+            particles.push_back(ghost);
+        }
+    }
+
+    return particles;
+}
+
+
+// ---------------------------------
 // Visualization with ghosts
 // ---------------------------------
 
@@ -830,13 +980,14 @@ void write_ptyphis_jets_with_ghosts(const PseudoJets particles,
     double ghost_area = .005 / (10 * twopi) * grid_area;
 
     // Initializing ghosts
-    PseudoJets ghosts = uniform_ghosts(min_rap-jet_def.R(),
-                                       max_rap+jet_def.R(),
-                                       // Extending limits by jet radius;
-                                       std::max(min_phi-jet_def.R(), double(0.0)),
-                                       std::min(max_phi + jet_def.R(), twopi),
-                                       // also, respecting limits on phi.
-                                       ghost_area);
+    PseudoJets ghosts = uniform_ghosts(_mean_ghost_pt,
+            min_rap-jet_def.R(),
+            max_rap+jet_def.R(),
+            // Extending limits by jet radius;
+            std::max(min_phi-jet_def.R(), double(0.0)),
+            std::min(max_phi + jet_def.R(), twopi),
+            // also, respecting limits on phi.
+            ghost_area);
 
     // - - - - - - - - - - - - - - - - -
     // Active Ghosts

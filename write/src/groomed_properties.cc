@@ -1,7 +1,7 @@
 /**
- * @file    jet_properties.cc
+ * @file    groomed_properties.cc
  *
- * @brief   Code for making histograms of several jet properties:
+ * @brief   Code for making histograms of several groomed jet properties:
  *          Mass
  *          pT
  *          Energy
@@ -38,6 +38,9 @@ using namespace std::chrono;
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
 
+#include "fastjet/contrib/SoftDrop.hh"
+using namespace fastjet::contrib;
+
 // Local imports:
 #include "../include/general_utils.h"
 #include "../include/jet_utils.h"
@@ -46,10 +49,21 @@ using namespace std::chrono;
 
 #include "../include/opendata_utils.h"
 
-
 // Type definition for histograms
 typedef std::vector<double> Hist;
 // (we are only differential in a single angle)
+
+// Definitions for enums within RecursiveSymmetryCutBase
+/*
+typedef RecursiveSymmetryCutBase::SymmetryMeasure SymmetryMeasure;
+const SymmetryMeasure scalar_z = RecursiveSymmetryCutBase::scalar_z;
+const SymmetryMeasure theta_E = RecursiveSymmetryCutBase::theta_E;
+
+
+typedef RecursiveSymmetryCutBase::RecursionChoice RecursionChoice;
+const RecursionChoice larger_pt = RecursiveSymmetryCutBase::larger_pt;
+const RecursionChoice larger_E = RecursiveSymmetryCutBase::larger_E;
+*/
 
 // =====================================
 // Switches, flags, and options
@@ -57,15 +71,20 @@ typedef std::vector<double> Hist;
 // List of jet properties we want to store
 int MAX_N_CONSTITUENTS = 250;
 std::vector<std::string> property_names = {"mass", "pT", "energy",
-                                        "eta", "n_constituents"};
+                                           "eta", "n_constituents"};
 bool is_logarithmic(std::string prop) {
-    return false;
-    /* if (str_eq(prop, "mass") or str_eq(prop, "pT") */
-    /*         or str_eq(prop, "energy")) */
-    /*     return true; */
-    /* if (str_eq(prop, "eta") or str_eq(prop, "n_constituents")) */
-    /*     return false; */
-    /* throw std::runtime_error("Invalid property name " + prop); */
+    if (str_eq(prop, "mass"))
+        return true;
+    for (auto other_prop : property_names)
+        if (str_eq(prop, other_prop))
+            return false;
+    throw std::runtime_error("Invalid property name " + prop);
+}
+
+std::string binspace(std::string prop) {
+    if (is_logarithmic(prop))
+        return "log";
+    return "lin";
 }
 
 
@@ -97,7 +116,8 @@ int main (int argc, char* argv[]) {
     // ---------------------------------
     // File to which we want to write
     const std::string file_prefix = cmdln_string("file_prefix",
-                                                 argc, argv, "");
+                                                 argc, argv, "",
+                                                 true);
 
     // =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
     // Basic Pythia Settings
@@ -136,23 +156,24 @@ int main (int argc, char* argv[]) {
     const bool charged_only = cmdln_bool("charged_only",
                                          argc, argv, false);
 
-    const bool smear_momenta = cmdln_bool("smear_momenta",
-                                          argc, argv, false);
+    const double smear_factor = cmdln_double("smear_factor",
+                                             argc, argv, 0, false);
 
-    double photon_smear_factor,
-           charged_smear_factor,
-           neutral_smear_factor;
+    double photon_smear_factor  = 1,
+           charged_smear_factor = 1,
+           neutral_smear_factor = 1;
 
     if (charged_only)
         std::cout << "Charged particles only." << std::endl;
-    if (smear_momenta)
-        std::cout << "Smearing momenta roughly commensurate w/CMS "
+
+    if (smear_factor > 0) {
+        std::cout << "Smearing momenta roughly commensurate w/"
+                  << smear_factor << " x CMS smearing"
                   << "(2402.13864)." << std::endl;
 
-    if (smear_momenta) {
-        photon_smear_factor = CMS_PHOTON_SMEAR_FACTOR;
-        charged_smear_factor = CMS_CHARGED_SMEAR_FACTOR;
-        neutral_smear_factor = CMS_NEUTRAL_SMEAR_FACTOR;
+        photon_smear_factor  = smear_factor*CMS_PHOTON_SMEAR_FACTOR;
+        charged_smear_factor = smear_factor*CMS_CHARGED_SMEAR_FACTOR;
+        neutral_smear_factor = smear_factor*CMS_NEUTRAL_SMEAR_FACTOR;
     }
 
     if (use_opendata && charged_only) {
@@ -160,7 +181,7 @@ int main (int argc, char* argv[]) {
                "analysis with CMS open data: "
                "Particle IDs are not stored in the local dataset.");
     }
-    if (use_opendata && smear_momenta) {
+    if (use_opendata && smear_factor > 0) {
         throw std::invalid_argument("Cannot smear CMS open data: "
                "Particle IDs are not stored in the local dataset.");
     }
@@ -204,28 +225,43 @@ int main (int argc, char* argv[]) {
                                  // default depends on collision
                                  is_proton_collision ? CMS_ETA_CUT
                                  : -1.0);
+    // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-
+    // Grooming Settings
+    // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-
+    // Basic options
+    const double beta_SD = cmdln_double("beta_SD", argc, argv,
+                                        0); // mMDT by default
+    const double zcut = cmdln_double("zcut", argc, argv,
+                                     0.1);
+    const double R_SD = cmdln_double("R_SD", argc, argv,
+                                     1.0);
+
+    // Additional pp vs e+e- options
+    /* const SymmetryMeasure symm_measure = is_proton_collision ? */
+    /*                                         scalar_z : theta_E; */
+    /* const RecursionChoice rec_choice   = is_proton_collision ? */
+    /*                                         larger_pt : larger_E; */
 
     // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-
     // Histogram Settings
     // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-
     const int   nbins  = cmdln_int("nbins", argc, argv, 500, false);
 
-    const double E_min = cmdln_double("E_min", argc, argv,
-                                      0, false);
-    const double m_min = cmdln_double("m_min", argc, argv,
-                                      0, false);
+    const double E_min_bin = cmdln_double("E_min_bin", argc, argv,
+                                       0, false);
+    const double m_min_bin = cmdln_double("m_min_bin", argc, argv,
+                                       -2, false);
 
     const double pt_min_bin = cmdln_int("pt_min_bin", argc, argv,
-                                        pt_min, false);
+                                        0, false);
     const double pt_max_bin = cmdln_int("pt_max_bin", argc, argv,
                                         3500, false);
     const double E_max_bin = cmdln_double("E_max_bin", argc, argv,
                                           2*pt_max_bin, false);
     const double m_max_bin = cmdln_double("m_max_bin", argc, argv,
-                                          2*pt_max_bin, false);
+                                          4, false);
 
-    const bool uflow = charged_only or smear_momenta;
-    const bool oflow = true;
+    const bool uflow = true, oflow = true;
 
 
     // Initializing bin edges and centers
@@ -238,14 +274,14 @@ int main (int argc, char* argv[]) {
     std::map<std::string, std::vector<double>> bin_edges;
 
     bin_centers.insert(std::pair("mass",
-            get_bin_centers(m_min, m_max_bin, nbins, uflow, oflow)));
+            get_bin_centers(m_min_bin, m_max_bin, nbins, uflow, oflow)));
     bin_centers.insert(std::pair("pT",
             get_bin_centers(pt_min_bin, pt_max_bin, nbins,
                             uflow, oflow)));
     bin_centers.insert(std::pair("energy",
-            get_bin_centers(E_min, E_max_bin, nbins, uflow, oflow)));
+            get_bin_centers(E_min_bin, E_max_bin, nbins, uflow, oflow)));
     bin_centers.insert(std::pair("eta",
-            get_bin_centers(-eta_cut, eta_cut, nbins,
+            get_bin_centers(-2*eta_cut, 2*eta_cut, nbins,
                             false, false)));
     bin_centers.insert(std::pair("n_constituents",
             get_bin_centers(-0.5, MAX_N_CONSTITUENTS+0.5,
@@ -253,18 +289,21 @@ int main (int argc, char* argv[]) {
                             false, false)));
 
     bin_edges.insert(std::pair("mass",
-            get_bin_edges(m_min, m_max_bin, nbins, uflow, oflow)));
+            get_bin_edges(m_min_bin, m_max_bin, nbins,
+                          uflow, oflow)));
     bin_edges.insert(std::pair("pT",
-            get_bin_edges(pt_min_bin, pt_max_bin, nbins, uflow, oflow)));
+            get_bin_edges(pt_min_bin, pt_max_bin, nbins,
+                          uflow, oflow)));
     bin_edges.insert(std::pair("energy",
-            get_bin_edges(E_min, E_max_bin, nbins, uflow, oflow)));
+            get_bin_edges(E_min_bin, E_max_bin, nbins,
+                          uflow, oflow)));
     bin_edges.insert(std::pair("eta",
-            get_bin_edges(-eta_cut, eta_cut, nbins,
-                            uflow, oflow)));
+            get_bin_edges(-2*eta_cut, 2*eta_cut, nbins,
+                          false, false)));
     bin_edges.insert(std::pair("n_constituents",
             get_bin_edges(-0.5, MAX_N_CONSTITUENTS+0.5,
                           MAX_N_CONSTITUENTS+1,
-                          uflow, oflow)));
+                          false, false)));
 
     // =====================================
     // Output Setup
@@ -273,17 +312,16 @@ int main (int argc, char* argv[]) {
     std::map<std::string, Hist> jet_properties;
     std::map<std::string, std::string> filenames;
 
-    for (auto prop : property_names) {
+    for (auto prop : property_names){
         // Setting up histograms
         Hist hist (str_eq(prop, "n_constituents") ?
                         MAX_N_CONSTITUENTS+1 : nbins);
         jet_properties.insert(std::pair(prop, hist));
 
         // Setting up output files
-        std::string filename = "output/jet_properties/";
-        if (!str_eq(file_prefix, ""))
-            filename += file_prefix+"_";
-        filename += prop;
+        std::string filename = "output/jet_properties/groomed";
+        filename += "_"+file_prefix;
+        filename += "_"+prop;
         filename += file_ext;
         filenames.insert(std::pair(prop, filename));
         // Write a header
@@ -427,7 +465,7 @@ int main (int argc, char* argv[]) {
                 const PseudoJet& jet = all_jets[i];
                 passes_cuts = false;
 
-                // Adding jets that satisfy certain criteria to good jets list
+                // Adding jets satisfying criteria to good jets list
                 if (is_proton_collision) {
                     // For pp, ensuring pt_min < pt < pt_max
                     // and |eta| < eta_cut   (or no eta_cut given)
@@ -463,8 +501,15 @@ int main (int argc, char* argv[]) {
         // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
         // Loop on jets
         // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
-        for (const auto& jet : good_jets) {
+        for (auto& jet : good_jets) {
         try {
+            /* SoftDrop groomer = SoftDrop(beta_SD, zcut, */
+            /*             symm_measure, R_SD, */
+            /*             std::numeric_limits<double>::infinity(), */
+            /*             rec_choice); */
+            SoftDrop groomer = SoftDrop(beta_SD, zcut, R_SD);
+            jet = groomer(jet);
+
             const double num  = jet.constituents().size();
             const double mass = jet.m() > 0 ? jet.m() : 0;
             const double pT   = jet.pt();
@@ -478,20 +523,24 @@ int main (int argc, char* argv[]) {
                                    false, false)]
                 += 1;
             jet_properties["mass"][bin_position(mass,
-                                   m_min, m_max_bin,
-                                   nbins, "lin", uflow, oflow)]
+                                   m_min_bin, m_max_bin,
+                                   nbins, binspace("mass"),
+                                   uflow, oflow)]
                 += 1;
             jet_properties["pT"][bin_position(pT,
                                    pt_min_bin, pt_max_bin,
-                                   nbins, "lin", uflow, oflow)]
+                                   nbins, binspace("pT"),
+                                   uflow, oflow)]
                 += 1;
             jet_properties["energy"][bin_position(E,
-                                   E_min, E_max_bin,
-                                   nbins, "lin", uflow, oflow)]
+                                   E_min_bin, E_max_bin,
+                                   nbins, binspace("energy"),
+                                   uflow, oflow)]
                 += 1;
             jet_properties["eta"][bin_position(eta,
-                                   -eta_cut, eta_cut,
-                                   nbins, "lin", uflow, oflow)]
+                                   -eta_cut*2, eta_cut*2,
+                                   nbins, binspace("eta"),
+                                   false, false)]
                 += 1;
 
             // Counting total num jets for normalization

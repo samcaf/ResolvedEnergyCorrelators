@@ -334,12 +334,13 @@ void setup_pythia_cmdln(Pythia8::Pythia &pythia, int argc, char* argv[]) {
               << str_round(E_cm/1000., 3) << " TeV\n"
               << "# ==+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+= #\n";
 
-    if (verbose >= 2) {
-        std::cout << "\t- ISR: " << (use_isr ? "on" : "off")
-                  << ", FSR: " << (use_fsr ? "on" : "off")
-                  << ", MPI: " << (use_mpi ? "on" : "off")
-                  << ";\n";
+    std::cout << "\t # " << level << " level, "
+              << "ISR: " << (use_isr ? "on" : "off")
+              << ", FSR: " << (use_fsr ? "on" : "off")
+              << ", MPI: " << (use_mpi ? "on" : "off")
+              << ";\n";
 
+    if (verbose >= 2) {
         std::cout << "\t- Shower model: " << shower_model << ".\n";
     }
 

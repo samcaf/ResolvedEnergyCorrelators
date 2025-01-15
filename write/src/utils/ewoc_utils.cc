@@ -69,6 +69,8 @@ void write_ewocfile_header(std::string filename,
                                           _PID_1_DEFAULT);
     int         pid_2         = cmdln_int("pid_2", argc, argv,
                                           _PID_2_DEFAULT);
+    bool        mpi           = cmdln_bool("mpi", argc, argv,
+                                           false);
     std::string outstate_str  = cmdln_string("outstate", argc, argv,
                                              _OUTSTATE_DEFAULT);
 
@@ -144,9 +146,10 @@ void write_ewocfile_header(std::string filename,
 
          << "# Process\n"
          << "energy = " << E_cm << "\n"
-         << "level = " + level << "\n"
+         << "level = \"" << level << "\"\n"
+         << "mpi = \"" << mpi << "\"\n"
          << "pid_1, pid_2 = " << pid_1 << ", " << pid_2 << "\n"
-         << "outstate_str = " + outstate_str << "\n"
+         << "outstate_str = \"" << outstate_str << "\"\n"
 
          << "# Weight information:\n"
          << "weight = " << e_weight << "\n";
@@ -171,8 +174,8 @@ void write_ewocfile_header(std::string filename,
 
     // Subjet information
     file << "# Subjet information:\n"
-         << "sub_alg = " + sub_alg << "\n"
-         << "sub_scheme = " + sub_scheme << "\n"
+         << "sub_alg = \"" + sub_alg << "\"\n"
+         << "sub_scheme = \"" + sub_scheme << "\"\n"
          << "sub_rad = " + std::to_string(sub_rad) << "\n\n"
 
          << "# ==================================\n"

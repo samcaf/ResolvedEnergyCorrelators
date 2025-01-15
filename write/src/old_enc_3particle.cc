@@ -342,6 +342,57 @@ int main (int argc, char* argv[]) {
     const bool use_opendata = cmdln_bool("use_opendata", argc, argv,
                                          true);
 
+    // Exclude neutrals
+    const bool charged_only = cmdln_bool("charged_only",
+                                         argc, argv, false);
+
+    // Momentum smearing
+    const bool smear_momenta = cmdln_bool("smear_momenta",
+                                          argc, argv, false);
+    double photon_smear_factor,
+           charged_smear_factor,
+           neutral_smear_factor;
+
+    // Ghosts
+    const bool add_ghosts    = cmdln_bool("add_uniform_ghosts",
+                                          argc, argv, false);
+    const double mean_ghost_pt = cmdln_double("mean_ghost_pt",
+                                              argc, argv, 1.0,
+                                              false);
+
+    // Processing
+    if (charged_only)
+        std::cout << "Charged particles only." << std::endl;
+    if (smear_momenta) {
+        std::cout << "Smearing momenta roughly commensurate w/CMS "
+                  << "(2402.13864)." << std::endl;
+
+        photon_smear_factor = CMS_PHOTON_SMEAR_FACTOR;
+        charged_smear_factor = CMS_CHARGED_SMEAR_FACTOR;
+        neutral_smear_factor = CMS_NEUTRAL_SMEAR_FACTOR;
+    }
+    if (add_ghosts) {
+        std::cout << "Adding a grid of nearly uniform ghosts with "
+                  << "<pt>=" << mean_ghost_pt << " GeV."
+                  << std::endl;
+    }
+
+    // Validating input options
+    if (use_opendata && charged_only) {
+        throw std::invalid_argument("Cannot do ''charged_only'' "
+               "analysis with CMS open data: "
+               "Particle IDs are not stored in the local dataset.");
+    }
+    if (use_opendata && smear_momenta) {
+        throw std::invalid_argument("Cannot smear CMS open data: "
+               "Particle IDs are not stored in the local dataset.");
+    }
+    if (use_opendata && add_ghosts) {
+        throw std::invalid_argument("Adding uniform ghosts to "
+               "CMS open data is not yet supported.");
+    }
+
+
     // =====================================
     // Output Setup
     // =====================================
@@ -412,6 +463,8 @@ int main (int argc, char* argv[]) {
     std::vector<PseudoJet> good_jets;
     std::vector<std::pair<double, PseudoJet>> sorted_angs_parts;
 
+    bool passes_cuts;
+
     // Reserving memory
     particles.reserve(150);
     all_jets.reserve(20);
@@ -451,8 +504,13 @@ int main (int argc, char* argv[]) {
 
             // Initializing particles for this event
             particles.clear();
-            particles = get_particles_pythia(pythia.event);
-
+            particles = get_particles_pythia(pythia.event,
+                    photon_smear_factor, charged_smear_factor,
+                    neutral_smear_factor);
+            if (add_ghosts) {
+                particles = add_uniform_ghosts(particles,
+                                               mean_ghost_pt);
+            }
 
             // Initializing jets
             if (iev == 0) {  // Muting FastJet banner
@@ -497,6 +555,7 @@ int main (int argc, char* argv[]) {
                       i < static_cast<size_t>(n_exclusive_jets));
              ++i) {
                 const PseudoJet& jet = all_jets[i];
+                passes_cuts = false;
 
                 // Getting jets that satisfy certain criteria
                 if (is_proton_collision) {
@@ -505,13 +564,24 @@ int main (int argc, char* argv[]) {
                     if (pt_min <= jet.pt() and jet.pt() <= pt_max
                             and (abs(jet.eta()) <= eta_cut
                                 or eta_cut < 0)) {
-                        good_jets.push_back(jet);
+                        passes_cuts = true;
                     }
                 } else {
                     // For other collisions, ensuring E_min < E < E_max
                     // (for now, keeping confusing notation with, e.g.,
                     //    E_min represented by `pt_min` below)
                     if (pt_min <= jet.E() and jet.E() <= pt_max) {
+                        passes_cuts = true;
+                    }
+                }
+
+                // If we have a jet that passes cuts
+                if (passes_cuts) {
+                    // If we only want charged, remove neutrals
+                    if (charged_only) {
+                        good_jets.push_back(
+                                create_charged_jet(jet));
+                    } else {
                         good_jets.push_back(jet);
                     }
                 }

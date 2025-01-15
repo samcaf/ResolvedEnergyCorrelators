@@ -109,8 +109,6 @@ int main (int argc, char* argv[]) {
     const int verbose = cmdln_int("verbose", argc, argv, 0);
     if (verbose >= 1) std::cout << ewoc_banner << "\n\n";
 
-    const bool DEBUG = cmdln_bool("DEBUG", argc, argv, false);
-
     // Starting timer
     auto start = high_resolution_clock::now();
 
@@ -140,10 +138,6 @@ int main (int argc, char* argv[]) {
                                           _PID_1_DEFAULT);
     const int         pid_2    = cmdln_int("pid_2", argc, argv,
                                           _PID_2_DEFAULT);
-    const std::string outstate_str  = cmdln_string("outstate",
-                                            argc, argv,
-                                            _OUTSTATE_DEFAULT);
-
 
     const bool is_proton_collision = (pid_1 == 2212 and
                                         pid_2 == 2212);
@@ -273,6 +267,58 @@ int main (int argc, char* argv[]) {
     bool use_opendata = cmdln_bool("use_opendata", argc, argv,
                                    false);
 
+    // Exclude neutrals
+    const bool charged_only = cmdln_bool("charged_only",
+                                         argc, argv, false);
+
+    // Momentum smearing
+    const double smear_factor = cmdln_double("smear_factor",
+                                             argc, argv, 0, false);
+    double photon_smear_factor  = 1,
+           charged_smear_factor = 1,
+           neutral_smear_factor = 1;
+
+    // Ghosts
+    const bool add_ghosts    = cmdln_bool("add_uniform_ghosts",
+                                          argc, argv, false);
+    const double mean_ghost_pt = cmdln_double("mean_ghost_pt",
+                                              argc, argv, 1.0,
+                                              false);
+
+    // Processing
+    if (charged_only)
+        std::cout << "Charged particles only." << std::endl;
+
+    if (smear_factor > 0) {
+        std::cout << "Smearing momenta roughly commensurate w/"
+                  << smear_factor << " x CMS smearing"
+                  << "(2402.13864)." << std::endl;
+
+        photon_smear_factor  = smear_factor*CMS_PHOTON_SMEAR_FACTOR;
+        charged_smear_factor = smear_factor*CMS_CHARGED_SMEAR_FACTOR;
+        neutral_smear_factor = smear_factor*CMS_NEUTRAL_SMEAR_FACTOR;
+    }
+
+    if (add_ghosts) {
+        std::cout << "Adding a grid of nearly uniform ghosts with "
+                  << "<pt>=" << mean_ghost_pt << " GeV."
+                  << std::endl;
+    }
+
+    if (use_opendata && charged_only) {
+        throw std::invalid_argument("Cannot do ''charged_only'' "
+               "analysis with CMS open data: "
+               "Particle IDs are not stored in the local dataset.");
+    }
+    if (use_opendata && smear_factor > 0) {
+        throw std::invalid_argument("Cannot smear CMS open data: "
+               "Particle IDs are not stored in the local dataset.");
+    }
+    if (use_opendata && add_ghosts) {
+        throw std::invalid_argument("Adding uniform ghosts to "
+               "CMS open data is not yet supported.");
+    }
+
 
     // =====================================
     // Output Setup
@@ -362,6 +408,8 @@ int main (int argc, char* argv[]) {
     std::vector<PseudoJet> good_jets;
     std::vector<PseudoJet> subjets;
 
+    bool passes_cuts;
+
     // Reserving memory
     particles.reserve(150);
     all_jets.reserve(20);
@@ -373,8 +421,7 @@ int main (int argc, char* argv[]) {
     // Looping over events
     // =====================================
     for (int iev = 0; iev < n_events; ++iev) {
-        if (not DEBUG)
-            progressbar(double(iev+1)/double(n_events));
+        progressbar(double(iev+1)/double(n_events));
 
         if (not use_opendata) {
             // Considering next event, if valid
@@ -382,7 +429,13 @@ int main (int argc, char* argv[]) {
 
             // Initializing particles for this event
             particles.clear();
-            particles = get_particles_pythia(pythia.event);
+            particles = get_particles_pythia(pythia.event,
+                    photon_smear_factor, charged_smear_factor,
+                    neutral_smear_factor);
+            if (add_ghosts) {
+                particles = add_uniform_ghosts(particles,
+                                               mean_ghost_pt);
+            }
         }
 
         // ---------------------------------
@@ -456,21 +509,33 @@ int main (int argc, char* argv[]) {
                           i < static_cast<size_t>(n_exclusive_jets));
                  ++i) {
                     const PseudoJet& jet = all_jets[i];
+                    passes_cuts = false;
 
                     // Adding jets that satisfy certain criteria to good jets list
                     if (is_proton_collision) {
                         // For pp, ensuring pt_min < pt < pt_max
-                        // and |eta| < eta_cut   (or no eta_cut given)
+                        // and |eta| < eta_cut (or no eta_cut given)
                         if (pt_min <= jet.pt() and jet.pt() <= pt_max
                                 and (abs(jet.eta()) <= eta_cut
                                      or eta_cut < 0)) {
-                            good_jets.push_back(jet);
+                            passes_cuts = true;
                         }
                     } else {
-                        // For other collisions, ensuring E_min < E < E_max
-                        // (for now, keeping confusing notation with, e.g.,
-                        //    E_min represented by `pt_min` below)
+                        // For other collisions, E_min < E < E_max
+                        // (note the confusing notation with, e.g.,
+                        //  E_min represented by `pt_min` below)
                         if (pt_min <= jet.E() and jet.E() <= pt_max) {
+                            passes_cuts = true;
+                        }
+                    }
+
+                    // If we have a jet that passes cuts
+                    if (passes_cuts) {
+                        // If we only want charged, remove neutrals
+                        if (charged_only) {
+                            good_jets.push_back(
+                                    create_charged_jet(jet));
+                        } else {
                             good_jets.push_back(jet);
                         }
                     }
@@ -494,8 +559,6 @@ int main (int argc, char* argv[]) {
                                          : particle.e();
                 }
 
-
-
                 // Getting subjets
                 subjets.clear();
 
@@ -505,10 +568,13 @@ int main (int argc, char* argv[]) {
                 else {
                     ClusterSequence sub_cluster_seq(
                                 jet.constituents(), sub_def);
-                    subjets = sorted_by_pt(
-                                sub_cluster_seq.inclusive_jets());
+                    if (use_pt)
+                        subjets = sorted_by_pt(
+                                    sub_cluster_seq.inclusive_jets());
+                   else
+                        subjets = sorted_by_E(
+                                    sub_cluster_seq.inclusive_jets());
                 }
-
                 // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-
                 // Loop on subjet pairs within the jet
                 // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-
@@ -683,8 +749,8 @@ int main (int argc, char* argv[]) {
         // -:-:-:-:-:-:-:-:-:-:-:-:
         // bin edges
         // -:-:-:-:-:-:-:-:-:-:-:-:
-        if (not(mathematica_format)) outfile << "obs_edges = [\n\t";
-        else outfile << "(* obs_edges *)\n";
+        if (not(mathematica_format)) outfile << "pair_obs_edges = [\n\t";
+        else outfile << "(* pair_obs_edges *)\n";
 
         for (int ibin = 0; ibin < nbins+1; ++ibin) {
             double edge = lin_bins ? bin_edges[ibin]
@@ -704,8 +770,8 @@ int main (int argc, char* argv[]) {
         // -:-:-:-:-:-:-:-:-:-:-:-:
         // bin centers
         // -:-:-:-:-:-:-:-:-:-:-:-:
-        if (not(mathematica_format)) outfile << "obs_centers = [\n\t";
-        else outfile << "\n(* obs_centers *)\n";
+        if (not(mathematica_format)) outfile << "pair_obs_centers = [\n\t";
+        else outfile << "\n(* pair_obs_centers *)\n";
 
         for (int ibin = 0; ibin < nbins; ++ibin) {
             double val = lin_bins ? bin_centers[ibin]
