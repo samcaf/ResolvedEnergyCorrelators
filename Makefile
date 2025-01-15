@@ -1,5 +1,4 @@
-#
-#Makefile for ResolvedEnergyCorrelators
+# Makefile for ResolvedEnergyCorrelators
 
 #===========================================
 # Include the configuration.
@@ -29,7 +28,7 @@
 #       - Pythia and Fastjet
 .PHONY : setup plot_venv get_cms_od remove_venv update_local \
 	ewocs new_encs new_encs_force \
-		jet_properties \
+		jet_properties groomed_properties \
 		new_enc_2particle new_enc_3particle new_enc_4particle new_enc_2special old_enc_3particle \
 	install_dependencies \
 		download_pythia install_pythia \
@@ -141,6 +140,29 @@ jet_properties: $(FASTJET) $(PYTHIA) write/src/jet_properties.cc
 	$(CXX) write/src/jet_properties.cc \
 		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia_cmdln.cc write/src/utils/opendata_utils.cc\
 		-o write/jet_properties \
+		$(CXX_COMMON);
+	@printf "\n"
+
+
+groomed_properties: $(FASTJET) $(PYTHIA) $(CONTRIB_TOOLS) $(CONTRIB) write/src/groomed_properties.cc
+	# =======================================================
+	# Compiling c++ code for writing histograms of basic groomed properties:
+	# =======================================================
+	# Compiling `write/src/groomed_properties.cc` to the executable `write/groomed_properties`
+	$(CXX) write/src/groomed_properties.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia_cmdln.cc write/src/utils/opendata_utils.cc \
+		-o write/groomed_properties \
+		$(CXX_COMMON);
+	@printf "\n"
+
+mpi_properties: $(FASTJET) $(PYTHIA) $(CONTRIB_TOOLS) $(CONTRIB) write/src/mpi_properties.cc
+	# =======================================================
+	# Compiling c++ code for writing histograms of basic mpi properties:
+	# =======================================================
+	# Compiling `write/src/mpi_properties.cc` to the executable `write/mpi_properties`
+	$(CXX) write/src/mpi_properties.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia_cmdln.cc write/src/utils/opendata_utils.cc \
+		-o write/mpi_properties \
 		$(CXX_COMMON);
 	@printf "\n"
 
