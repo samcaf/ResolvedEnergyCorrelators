@@ -244,6 +244,7 @@ The weights (1.0, 1.0, 1.0) can be changed to any list of triples.
 ## Energy Weighted Observable Correlations (EWOCs)
 
 <img src="assets/ewocs/lhc_ewoc.png" width="200"> <img src="assets/ewocs/lhc_eec.png" width="200"> <img src="assets/ewocs/e+e-_ewoc.png" width="200">
+
 To generate files containing EWOCs `./output/ewocs/`, try running the following command for generating a histogram containing a mass EWOC for 10000 simulated W-boson pair production at the LHC:
 ```
 ./write/ewocs --pair_obs mass --n_events 10000 \
