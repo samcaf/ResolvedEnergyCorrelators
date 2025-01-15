@@ -25,6 +25,7 @@ tmux send-keys './write/jet_properties --use_opendata false --energy 14000 --isr
 tmux split-window -v
 tmux send-keys './write/jet_properties --use_opendata false --energy 14000 --isr on --fsr on --mpi on --pid_1 2212 --pid_2 2212 --outstate top --jet_rad 0.4 --pt_min 500 --pt_max 550 --m_max 500 --E_max 4000 --n_events 100000 --nbins 200 --file_prefix top_AKT4_100k_200bins' C-m
 
+tmux select-layout even-vertical
 
 # Attach to the session
 if ! [ "$TERM_PROGRAM" = tmux ]; then

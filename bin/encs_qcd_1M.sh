@@ -19,6 +19,7 @@ tmux split-window -v
 # tmux send-keys './write/new_enc/old_3particle --use_opendata false --use_deltaR --use_pt --weights 1 1 --energy 14000 --isr on --fsr on --mpi on --pid_1 2212 --pid_2 2212 --jet_rad 0.8 --pt_min 500 --pt_max 550 --minbin -6 --n_events 1000000 --nbins 150 --file_prefix qcd_1M_150bins' C-m
 tmux send-keys './write/new_enc/3particle --use_opendata false --use_deltaR --use_pt --weights 1 1 --energy 14000 --level parton --isr on --fsr on --mpi on --pid_1 2212 --pid_2 2212 --jet_rad 0.8 --pt_min 500 --pt_max 550 --minbin -6 --n_events 1000000 --nbins 150 --file_prefix qcd_parton_1M_150bins' C-m
 
+tmux select-layout even-vertical
 
 # Attach to the session
 if ! [ "$TERM_PROGRAM" = tmux ]; then
