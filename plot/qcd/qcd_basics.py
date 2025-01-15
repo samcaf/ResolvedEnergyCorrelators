@@ -66,7 +66,6 @@ scale_name = {'qcd' : r"$\Lambda_{\rm QCD}$",
 
 scale_col = {'qcd' : 'rebeccapurple',
              'z'   : 'cadetblue',
-             # 'w'   : 'plum',
              'w'   : 'firebrick',
              'top' : 'peru'}
 

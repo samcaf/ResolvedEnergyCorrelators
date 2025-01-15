@@ -8,9 +8,6 @@ from scipy.linalg import expm
 # Conversion from mathematica expressions
 from sympy import var
 
-# Logging
-from project_info import LOGGER
-
 # QCD basics
 from qcd.qcd_basics import alpha_s, TF, CF, CA, N_F, beta_0
 
@@ -163,6 +160,7 @@ def moment_evolution_matrix(initial_scale, final_scale, weight):
     #     for the possibility of multiple values of scale_change)
     # the second index/row denotes the initial parton and
     # the third index/column denotes the final parton.
+    scale_change = np.nan_to_num(scale_change, nan=0)
     evolution_matrix = np.array([
         expm(Delta * inclusive_splitting_moment(weight))
         for Delta in scale_change

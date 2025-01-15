@@ -33,6 +33,8 @@ def obs_to_energy_value(observable, obs_vals, **kwargs):
         return energy * np.sqrt((1.-obs_vals)/8.)
     elif observable == 'theta':
         return energy * obs_vals/4
+    elif observable == 'deltaR':
+        return energy * obs_vals/4
     elif observable == 'theta2':
         return energy * np.sqrt(obs_vals)/4
     elif observable == 'z':
@@ -131,6 +133,8 @@ def region_bounds(observable, region_name, **kwargs):
         return (1 - 8*(E_high/energy)**2., 1 - 8*(E_low/energy)**2)
     elif observable == 'theta':
         return (4*E_low/energy, 4*E_high/energy)
+    elif observable == 'deltaR':
+        return (4*E_low/energy, 4*E_high/energy)
     elif observable == 'theta2':
         return ((4*E_low/energy)**2., (4*E_high/energy)**2.)
     elif observable == 'z':
@@ -159,6 +163,63 @@ def region_bounds(observable, region_name, **kwargs):
     raise AssertionError(f"Invalid {observable = }")
 
 
+default_moment = 1
+
+def pt_fudge(moment=default_moment):
+    if moment == 1:
+        # average pt
+        return 1.227
+    if moment == 2:
+        # sqrt(average pt^2)
+        return 1.2557
+
+def pt_val_from_min(pt_min, moment=default_moment):
+    if pt_min == 500:
+        if moment == 1:
+            # average pt
+            energy = 653.26
+        if moment == 2:
+            # sqrt(average pt^2)
+            energy = 676.34
+        if moment == -1:
+            # 1/ (average 1/pt)
+            energy = 622.12
+        if moment == -2:
+            # 1/ sqrt(average 1/pt^2)
+            energy = 611.26
+    elif pt_min == 400:
+        if moment == 1:
+            # average pt
+            energy = 532.07
+        if moment == 2:
+            # sqrt(average pt^2)
+            energy = 553.08
+        if moment == -1:
+            # 1/ (average 1/pt)
+            energy = 503.94
+        if moment == -2:
+            # 1/ sqrt(average 1/pt^2)
+            energy = 494.24
+    elif pt_min == 600:
+        if moment == 1:
+            # average pt
+            energy = 766.94
+        if moment == 2:
+            # sqrt(average pt^2)
+            energy = 789.46
+        if moment == -1:
+            # 1/ (average 1/pt)
+            energy = 735.46
+        if moment == -2:
+            # 1/ sqrt(average 1/pt^2)
+            energy = 724.17
+    else:
+        raise ValueError(f"Untested {pt_min=}.")
+
+    return energy
+
+
+
 def expected_obs_peak(observable, **kwargs):
     """Returns the expected peak for the given
     observable.
@@ -175,6 +236,9 @@ def expected_obs_peak(observable, **kwargs):
         if pid == 2212:
             energy /= np.sqrt(13)  # DEBUG: how is this changed by
                                    # DEBUG: the energy of the collision?
+
+    if kwargs['PID_1'] == 2212 and kwargs['PID_2'] == 2212:
+        energy = pt_val_from_min(kwargs.get('pt_min', 500))
 
     # Rough estimates of the energies of softer/harder emissions
     expected_hard_energy = energy/3
@@ -195,6 +259,8 @@ def expected_obs_peak(observable, **kwargs):
         peak = 1 - 8.*mass**2./energy**2.
     elif observable == 'theta':
         peak = 4*mass/energy
+    elif observable == 'deltaR':
+        peak = 2*mass/energy * pt_fudge()
     elif observable == 'theta2':
         peak = (4*mass/energy)**2.
     elif observable == 'z':
