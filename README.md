@@ -2,7 +2,7 @@
 
 A project for obtaining energy-weighted correlations in Pythia and on CMS Open Data.
 
-<img src="assets/w_combined_1d.png" width="200"> <img src="assets/qcd_3particle_bullseye.png" width="200"> <img src="assets/od_4particle_bullseye.png" width="200"> <img src="assets/od_nonpert_density.png" width="200">
+<img src="assets/encs/w_combined_1d.png" width="200"> <img src="assets/encs/qcd_3particle_bullseye.png" width="200"> <img src="assets/encs/od_4particle_bullseye.png" width="200"> <img src="assets/encs/od_nonpert_density.png" width="200">
 
 
 
@@ -41,17 +41,17 @@ Using CMS Open Data without performing the correct experimental data analysis pr
 
 - **New Angles on Energy Correlators**:
 
-  Introduces a new parameterization for N-point Energy Correlators (ENCs) as detailed in [2410.xxxx].
+  Introduces a new parameterization for N-point Energy Correlators (ENCs) as detailed in [2410.16368].
             <details>
                 <summary>*Pseudocode*</summary>
-                <img src="assets/enc_pseudocode.png" width="600">
+                <img src="assets/encs/enc_pseudocode.png" width="600">
             </details>
 
 
 
 - **Energy Weighted Observable Correlators (EWOCs)**:
 
-  Not yet included: will introduce a new type of energy correlator on non-angular observables as detailed in [24yy.xxxx].
+  Not yet included: will introduce a new type of energy correlator on non-angular observables as detailed in [25yy.xxxx].
 
 - **Python Classes**:
 
@@ -205,12 +205,12 @@ Additional examples, including examples for computing ENCs in Pythia, can be fou
 
 To generate files containing N-Point Energy Correlators (ENCs) with the keyword `opendata_test` in the directory `./output/new_encs/`, try running one of the commands below.
 
-You can use the plotting tools in `./plot/encs`, which can be modified to produce your own versions of the plots from [2410.xxxx].
+You can use the plotting tools in `./plot/encs`, which can be modified to produce your own versions of the plots from [2410.16368].
 Additional examples for computing ENCs, including examples for computing ENCs in Pythia, can be found in `./bin/`.
 
 ### Projected ENCs (PENCs)
 
-<img src="assets/od_highN_1d.png" width="200"> <img src="assets/w_combined_1d.png" width="200">
+<img src="assets/encs/od_highN_1d.png" width="200"> <img src="assets/encs/w_combined_1d.png" width="200">
 
 Generate PENCs by running:
 
@@ -221,7 +221,7 @@ The weight 1.0 indicates the energy weight associated with a particle in the jet
 
 ### Resolved 3-Point ENCs (RE3Cs)
 
-<img src="assets/qcd_3particle_bullseye.png" width="200"> <img src="assets/od_newdef_density.png" width="200">
+<img src="assets/encs/qcd_3particle_bullseye.png" width="200"> <img src="assets/encs/od_newdef_density.png" width="200">
 
 Generate RE3Cs with:
 
@@ -232,13 +232,32 @@ The weights (1.0, 1.0) indicate the energy weights associated with a pair of res
 
 ### Resolved 4-Point ENCs (RE4Cs)
 
-<img src="assets/od_4particle_bullseye.png" width="200"> <img src="assets/od_4particle_bullseye-1.png" width="200">
+<img src="assets/encs/od_4particle_bullseye.png" width="200"> <img src="assets/encs/od_4particle_bullseye-1.png" width="200">
 
 Generate RE4Cs using:
 ```
 ./write/new_enc/4particle --use_opendata true --use_deltaR --use_pt --weights 1.0 1.0 1.0 --n_events 100000 --nbins 150 --file_prefix opendata_test
 ```
 The weights (1.0, 1.0, 1.0) can be changed to any list of triples.
+
+
+## Energy Weighted Observable Correlations (EWOCs)
+
+<img src="assets/ewocs/lhc_ewoc.png" width="200"> <img src="assets/ewocs/lhc_eec.png" width="200"> <img src="assets/ewocs/e+e-_ewoc.png" width="200">
+To generate files containing EWOCs `./output/ewocs/`, try running the following command for generating a histogram containing a mass EWOC for 10000 simulated W-boson pair production at the LHC:
+```
+./write/ewocs --pair_obs mass --n_events 10000 \
+    --pid_1 2212 --pid_2 2212 --energy 14000 --outstate w \
+    --jet_rad 0.8 --sub_rad 0.3 --jet_alg akt --sub_alg kt \
+    --nbins 400 --minbin -2 --maxbin 4 \
+    --pt_min 500 --pt_max 100000 \
+    --file_prefix lhc_w_highres120bins_parton
+
+```
+or change the subjet radius, jet radius, or EWOC observable to suit your needs.
+
+You can use the plotting tools in `./plot/ewocs`, which can be modified to produce your own versions of the plots from [25yy.xxxx].
+Additional examples for computing EWOCs, including examples for computing ENCs in Pythia, can be found in `./bin/`.
 
 
 
