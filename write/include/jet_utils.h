@@ -19,6 +19,7 @@
 #include <string>
 #include <string.h>
 #include <algorithm>
+#include <random>
 
 #include <utility>
 #include <stdexcept>
@@ -79,6 +80,10 @@ bool valid_status(int status,
                   bool allow_hard, bool allow_fsr,
                   bool allow_remnants);
 
+PseudoJet rescale_momentum(const PseudoJet& particle,
+                           const double scaling_factor);
+
+PseudoJet create_charged_jet(const PseudoJet& original_jet);
 
 // ---------------------------------
 // Jet-Pair utilities
@@ -91,14 +96,19 @@ double pj_cos(const PseudoJet pj1, const PseudoJet pj2);
 // ---------------------------------
 // Event utilities
 // ---------------------------------
+const double CMS_PHOTON_SMEAR_FACTOR = 0.03;
+const double CMS_CHARGED_SMEAR_FACTOR = 0.01;
+const double CMS_NEUTRAL_SMEAR_FACTOR = 0.05;
+
+
 PseudoJets get_particles_pythia(const Pythia8::Event event,
-                        const std::vector<int> use_pids = {},
-                            /*reasonable PIDs to use:
-                             * `{}`, `qcd_pids`*/
-                        const std::vector<int> exclude_pids = nu_pids,
-                            /*reasonable PIDs to exclude:
-                             * `{}`, `nu_pids`, `lepton_and_nu_pids`*/
-                        bool final_only = true);
+                    const double photon_smear_factor = 0,
+                    const double charged_smear_factor = 0,
+                    const double neutral_smear_factor = 0,
+                    const bool charged_only = false,
+                    const bool final_only = true,
+                    const std::vector<int> use_pids = {},
+                    const std::vector<int> exclude_pids = nu_pids);
 
 PseudoJets add_events(const PseudoJets event1, const PseudoJets event2);
 
@@ -201,26 +211,42 @@ bool not_ghost_jet(const PseudoJet jet);
 // ---------------------------------
 // Ghost grid setup
 // ---------------------------------
+PseudoJets uniform_ghosts(
+        const double mean_ghost_pt = _mean_ghost_pt,
+        const double min_rap = -_ghost_maxrap,
+        const double max_rap = _ghost_maxrap,
+        const double min_phi = _ghost_minphi,
+        const double max_phi = _ghost_maxphi,
+        const double ghost_area = _ghost_area,
+        const Selector selector = _no_selector,
+        const double grid_scatter = _grid_scatter,
+        const double pt_scatter = _pt_scatter);
 
-PseudoJets uniform_ghosts(const double min_rap = -_ghost_maxrap,
-                          const double max_rap = _ghost_maxrap,
-                          const double min_phi = _ghost_minphi,
-                          const double max_phi = _ghost_maxphi,
-                          const double ghost_area = _ghost_area,
-                          const double mean_ghost_pt = _mean_ghost_pt,
-                          const Selector selector = _no_selector,
-                          const double grid_scatter = _grid_scatter,
-                          const double pt_scatter = _pt_scatter);
+
+// ---------------------------------
+// Ghost grid setup
+// ---------------------------------
+PseudoJets add_uniform_ghosts(PseudoJets& particles,
+        const double mean_ghost_pt = _mean_ghost_pt,
+        const double min_rap = -_ghost_maxrap,
+        const double max_rap = _ghost_maxrap,
+        const double min_phi = _ghost_minphi,
+        const double max_phi = _ghost_maxphi,
+        const double ghost_area = _ghost_area,
+        const Selector selector = _no_selector,
+        const double grid_scatter = _grid_scatter,
+        const double pt_scatter = _pt_scatter);
 
 
 // ---------------------------------
 // Visualization with ghosts
 // ---------------------------------
 
-void write_ptyphis_jets_with_ghosts(const PseudoJets particles,
-                                    const JetDefinition jet_def,
-                                    std::fstream& file,
-                                    const std::string ghost_type = "active",
-                                    bool write_ghost_jets = false);
+void write_ptyphis_jets_with_ghosts(
+        const PseudoJets particles,
+        const JetDefinition jet_def,
+        std::fstream& file,
+        const std::string ghost_type = "active",
+        bool write_ghost_jets = false);
 
 #endif
