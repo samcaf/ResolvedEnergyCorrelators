@@ -1,8 +1,84 @@
+import os
 import numpy as np
 import importlib.util
 
+import warnings
+
 from matplotlib.colors import Normalize, LogNorm
 from plotter import Plotter, PolarPlotter
+
+
+def save_histogram_to_file(hist_data, file_name):
+    """
+    Saves the histogram data to a file in a format compatible with HistogramData.load().
+
+    Parameters:
+    - hist_data: HistogramData object containing histogram, edges, centers, and metadata.
+    - file_name: str, the name of the file to save the histogram data to.
+    """
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(file_name), exist_ok=True)
+
+    with open(file_name, 'w') as f:
+        # Write the import statement
+        f.write("import numpy as np\n\n")
+
+        # Write metadata as comments
+        f.write("# ==================================\n")
+        f.write("# Metadata\n")
+        f.write("# ==================================\n")
+        for key, value in hist_data.metadata.items():
+            if isinstance(value, str):
+                f.write(f"{key} = \"{value}\"\n")
+            else:
+                f.write(f"{key} = {value}\n")
+        f.write("\n")
+
+        # Write the histogram data
+        f.write("# ==================================\n")
+        f.write("# Histogram Data\n")
+        f.write("# ==================================\n")
+
+        # Write the histogram array
+        f.write("hist = np.array([\n")
+        # Format the histogram values
+        hist_values = ", ".join(map(str, hist_data.hist.flatten()))
+        f.write(f"    {hist_values}\n")
+        f.write("])\n\n")
+
+        # Write edges and centers
+        var_list = hist_data.variable_order
+        if not var_list:
+            var_list = hist_data.edges.keys()
+
+        for var_name in var_list:
+            # Edges
+            edges_var_name = f"{var_name}_edges"
+            edges_values = ", ".join(map(str, hist_data.edges[var_name]))
+            f.write(f"{edges_var_name} = np.array([\n")
+            f.write(f"    {edges_values}\n")
+            f.write("])\n\n")
+
+            # Centers
+            centers_var_name = f"{var_name}_centers"
+            centers_values = ", ".join(map(str, hist_data.centers[var_name]))
+            f.write(f"{centers_var_name} = np.array([\n")
+            f.write(f"    {centers_values}\n")
+            f.write("])\n\n")
+
+    print(f"Histogram data saved to '{file_name}' successfully.")
+
+
+def check_normalization(hist, scheme='linear'):
+    """Checks for histogram normalization."""
+    hist.integrate_histogram(scheme=scheme, outflow_weight=1)
+
+    if not np.isclose(hist.integral, 1.0, rtol=5e-2):
+        warnings.warn(f"Histogram does not integrate to 1 "
+                      f"({hist.integral=})")
+        return False
+
+
 
 
 # #:#:#:#:#:#:#:#:#:#:#:#:#:#:#:#:#:#:#:#
@@ -263,11 +339,6 @@ class HistogramData:
             non_outflow_values = func(bin_centers_grid)
             total *= np.where(outflow_mask, outflow_weight, non_outflow_values)
 
-            # TODO: implement?
-            # # Apply the function to the entire grid of bin centers
-            # total *= func(bin_centers_grid)
-        # END TODO/DEBUG
-
         # Finally, sum up all the elements in the weighted histogram
         self.integral = np.nansum(total)
         return np.nansum(total)
@@ -479,6 +550,60 @@ class HistogramData1D(HistogramData):
         super().validate()
 
 
+    def cumulative(self, scheme='linear', outflow_weight=None,
+                   **kwargs):
+        """Returns a histogram associated with the cumulative
+        distribution of self, whose values are the cumulative sum
+        of self.histogram multiplied by the bin widths.
+        """
+        # Getting attributes
+        hist = self.hist
+        edges = list(self.edges.values())[0]
+        centers = list(self.centers.values())[0]
+
+        # Finding bin widths
+        if scheme == 'linear':
+            bin_widths = np.diff(edges)
+        elif scheme == 'log':
+            bin_widths = np.diff(np.log(edges))
+        elif scheme == 'log10':
+            bin_widths = np.diff(np.log10(edges))
+        else:
+            raise ValueError("Invalid integration scheme "
+                             f"'{scheme}'.")
+
+        # If using special weights for outflow
+        if outflow_weight is not None:
+            bin_widths = np.nan_to_num(bin_widths,
+                                       nan=outflow_weight,
+                                       posinf=outflow_weight)
+
+        # Getting cumulative
+        cml_hist = np.cumsum(hist * bin_widths)
+
+        # Packaging and returning
+        variable_order = self.variable_order
+        if variable_order:
+            if len(variable_order) > 1:
+                raise RuntimeError("1D hist was given several "
+                                   f"variables: {variable_order}.")
+            var = self.variable_order[0]
+        else:
+            var = self.edges.keys()[0]
+
+        edges = {var: edges}
+        centers = {var: centers}
+
+        cml_data = ({'hist': cml_hist,
+                     'edges': edges,
+                     'centers': centers,
+                     'variable_order': self.variable_order,
+                     'metadata': dict(**{'cumulative': True},
+                                      **self.metadata)})
+
+        return HistogramData1D(**cml_data)
+
+
     def make_plot(self, **kwargs):
         """
         Plots the one-dimensional histogram using the Plotter class.
@@ -636,7 +761,6 @@ class HistogramData2D(HistogramData):
         ax.grid(False)
         pc = ax.pcolormesh(phi, radius, hist2d,
                            cmap=cmap, norm=norm,
-                           vmin=vmin, vmax=vmax,
                            alpha=1.0,
                            rasterized=True,
                            antialiased=True)

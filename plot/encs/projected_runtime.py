@@ -102,7 +102,6 @@ trad_time = {
 trad_cols = {
     2: adjust_lightness(colors['1-00'], 1.6),
     5: adjust_lightness(colors['4-00'], 1.25),
-    # 6: adjust_lightness(colors['5-00'], 1.5),
 }
 
 
@@ -205,4 +204,4 @@ if __name__ == "__main__":
     cplotter.fig.tight_layout()
     cplotter.savefig(
         f'od_projected_runtime.pdf',
-        enc_figure_dir/'supplementary/2particle/')
+        enc_figure_dir/'supplemental/2particle/')

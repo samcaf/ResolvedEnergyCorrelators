@@ -19,13 +19,13 @@ from encs.plots import bl_prop
 # =====================================
 # Whether to plot OD
 opendata = True
-draw_np = False
+draw_np = True
 
 # Which pythia data to plot
 pythia = []
-pythia.append('qcd')
-pythia.append('w')
-pythia.append('top')
+# pythia.append('qcd')
+# pythia.append('w')
+# pythia.append('top')
 npyth  = '1M_150bins'
 
 
@@ -132,8 +132,8 @@ if __name__ == "__main__":
         )
         new_hist2d = plot_2d_density(
             hist_data=new_hist3d,
-            vmax=50, log_normalize=False,
-            # vmax=1, log_normalize=True,
+            # vmax=50, log_normalize=False,
+            vmax=1, log_normalize=True,
             log_colorbar=False,
             save=None, **new_density['opendata'])
         ax = new_hist2d.density.axes[0]
@@ -216,7 +216,7 @@ if __name__ == "__main__":
         stamp_density(ax, olddef=False, **new_hist2d.metadata)
         new_hist2d.density.fig.tight_layout()
         new_hist2d.density.savefig(
-            str(enc_figure_dir/f'supplementary/density/{process}_newdef_density.pdf'))
+            str(enc_figure_dir/f'supplemental/density/{process}_newdef_density.pdf'))
 
         # =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
         # Plots with old variables
@@ -236,4 +236,4 @@ if __name__ == "__main__":
         stamp_density(ax, olddef=True, **old_pythiahist2d.metadata)
         old_pythiahist2d.density.fig.tight_layout()
         old_pythiahist2d.density.savefig(
-            str(enc_figure_dir/f'supplementary/density/{process}_olddef_density.pdf'))
+            str(enc_figure_dir/f'supplemental/density/{process}_olddef_density.pdf'))

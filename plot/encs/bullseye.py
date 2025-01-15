@@ -22,15 +22,15 @@ from re import search
 # Flags
 # =====================================
 # Whether to plot OD
-opendata = False
+opendata = True
 
 pythia = []
 # Which pythia data to plot
-pythia.append('qcd')
+# pythia.append('qcd')
 # pythia.append('w')
-pythia.append('top')
+# pythia.append('top')
 
-# npyth3 = '1M_150bins'
+npyth3 = '1M_150bins'
 npyth4 = '1M_25bins'
 
 
@@ -261,9 +261,43 @@ if __name__ == "__main__":
 
             # Saving
             new_hist3d.bullseye.fig.tight_layout()
-            new_hist3d.bullseye.savefig(
-                f'/od/od_3particle_bullseye_{t1}.pdf', enc_figure_dir)
+            # new_hist3d.bullseye.savefig(
+            #     f'/od/od_3particle_bullseye_{t1}.pdf', enc_figure_dir)
 
+            # ==========================================
+            # Open Data: 3-Particle Plots, old variables
+            # ==========================================
+            # Setup
+            old_hist3d = HistogramData(
+                file_name=enc_data_dir/
+                          'old_3particle_od_100k_150bins.py'
+            )
+            tL_ind = np.digitize([t1_val],
+                                 old_hist3d.edges['thetaL'])[0] - 1
+            tL = old_hist3d.centers['thetaL'][tL_ind]
+            tL_bin = (old_hist3d.edges['thetaL'][tL_ind],
+                      old_hist3d.edges['thetaL'][tL_ind+1])
+
+            # Making bullseye
+            old_hist3d = plot_2d_bullseye(
+                hist_data=old_hist3d,
+                save=None, theta1=tL,
+                **old_3part_params['opendata'],
+                vmin=3e-3/tL**4.2, vmax=8e1/tL**2.2,
+            )
+
+            # Decorating plot
+            ax = old_hist3d.bullseye.axes[0]
+            bullseye_arrows(ax)
+            stamp_bullseye(ax, {'theta_L': tL_bin},
+                           olddef=True,
+                           **old_hist3d.metadata)
+
+            # Saving
+            old_hist3d.bullseye.fig.tight_layout()
+            old_hist3d.bullseye.savefig(
+                f'/od/od_3particle_old_bullseye_{t1}.pdf',
+                enc_figure_dir)
 
             # ==========================================
             # Open Data: 4-Particle
@@ -353,44 +387,6 @@ if __name__ == "__main__":
                     f'/od/od_4particle_bullseye_{t1}_{t2_t1}_{phi2}.pdf',
                     enc_figure_dir)
 
-
-            # ==========================================
-            # Open Data: 3-Particle Plots, old variables
-            # ==========================================
-            # Setup
-            old_hist3d = HistogramData(
-                file_name=enc_data_dir/
-                          'old_3particle_od_100k_150bins.py'
-            )
-            tL_ind = np.digitize([t1_val],
-                                 old_hist3d.edges['thetaL'])[0] - 1
-            tL = old_hist3d.centers['thetaL'][tL_ind]
-            tL_bin = (old_hist3d.edges['thetaL'][tL_ind],
-                      old_hist3d.edges['thetaL'][tL_ind+1])
-
-            # Making bullseye
-            old_hist3d = plot_2d_bullseye(
-                hist_data=old_hist3d,
-                save=None, theta1=tL,
-                **old_3part_params['opendata'],
-                vmin=3e-3/tL**4.2, vmax=8e1/tL**2.2,
-            )
-
-            # Decorating plot
-            ax = old_hist3d.bullseye.axes[0]
-            bullseye_arrows(ax)
-            stamp_bullseye(ax, {'theta_L': tL_bin},
-                           olddef=True,
-                           **old_hist3d.metadata)
-
-            # Saving
-            old_hist3d.bullseye.fig.tight_layout()
-            old_hist3d.bullseye.savefig(
-                f'/od/od_3particle_old_3part_params_{t1}.pdf',
-                enc_figure_dir)
-
-
-
     # =#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
     # Pythia:
     # =#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
@@ -429,7 +425,7 @@ if __name__ == "__main__":
             # Saving
             new_hist3d.bullseye.fig.tight_layout()
             new_hist3d.bullseye.savefig(
-                f'/supplementary/3particle/{process}{t1}_3particle_bullseye.pdf',
+                f'/supplemental/3particle/{process}{t1}_3particle_bullseye.pdf',
                 enc_figure_dir)
 
             # =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
@@ -464,7 +460,7 @@ if __name__ == "__main__":
             # Saving
             old_hist3d.bullseye.fig.tight_layout()
             old_hist3d.bullseye.savefig(
-                f'/supplementary/wedge/{process}{tL}_3particle_bullseye.pdf',
+                f'/supplemental/wedge/{process}{tL}_3particle_bullseye.pdf',
                 enc_figure_dir)
 
             # ==========================================
@@ -573,6 +569,6 @@ if __name__ == "__main__":
 
                 bullseye_4part.bullseye.fig.tight_layout()
                 bullseye_4part.bullseye.savefig(
-                    '/supplementary/4particle/'
+                    '/supplemental/4particle/'
                     f'{process}{t1}_{t2_t1}_{phi2}_4particle_bullseye.pdf',
                     enc_figure_dir)

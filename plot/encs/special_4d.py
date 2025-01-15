@@ -21,5 +21,5 @@ if __name__ == "__main__":
     fig, ax = density_4d(new_hist3d, colormap=density_colormap['opendata'])
 
     fig.savefig(enc_figure_dir /
-                'supplementary/od_2special_density.png',
+                'supplemental/od_2special_density.png',
                 dpi=100)

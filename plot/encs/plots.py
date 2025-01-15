@@ -69,6 +69,7 @@ def plot_1d_enc(file_name=None, hist_data=None,
                 primary_observable='theta1',
                 variable_order=None,
                 integration_scheme=None,
+                cumulative=False,
                 **kwargs):
     # If no variable order is given, assume data is 1d
     if variable_order is None:
@@ -92,6 +93,11 @@ def plot_1d_enc(file_name=None, hist_data=None,
 
     hist1d = HistogramData1D(hist_data=hist1d)
     check_normalization(hist1d)
+
+    if cumulative:
+        scheme = integration_scheme[primary_observable]
+        hist1d = hist1d.cumulative(outflow_weight=1, scheme=scheme,
+                                   **kwargs)
 
     # Plotting test
     if kwargs:

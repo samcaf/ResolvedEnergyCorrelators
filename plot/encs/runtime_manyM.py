@@ -179,4 +179,4 @@ if __name__ == "__main__":
     ax.legend(loc=(0.38, 0.02))
     cplotter.fig.tight_layout()
     cplotter.savefig('opendata_runtimes.pdf',
-                     enc_figure_dir/'supplementary/')
+                     enc_figure_dir/'supplemental/')

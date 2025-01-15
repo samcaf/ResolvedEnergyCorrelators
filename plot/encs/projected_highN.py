@@ -133,7 +133,7 @@ if __name__ == "__main__":
         cplotter.fig.tight_layout()
         cplotter.savefig(
             f'od_highN_1d.pdf',
-            enc_figure_dir/'supplementary/2particle/')
+            enc_figure_dir/'supplemental/2particle/')
 
 
     # =====================================
@@ -163,4 +163,4 @@ if __name__ == "__main__":
         cplotter.fig.tight_layout()
         cplotter.savefig(
             f'{process}_highN_1d.pdf',
-            enc_figure_dir/'supplementary/2particle/')
+            enc_figure_dir/'supplemental/2particle/')

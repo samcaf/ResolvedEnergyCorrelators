@@ -13,7 +13,8 @@ from plotter import enc_data_dir, enc_figure_dir, combine_plotters
 opendata = True
 
 # Which pythia data to plot
-pythia = ['qcd', 'w', 'top']
+pythia = []
+# pythia = ['qcd', 'w', 'top']
 npyth  = '1M_500bins'
 
 
@@ -142,7 +143,7 @@ if __name__ == "__main__":
         cplotter.fig.tight_layout()
         cplotter.savefig(
             f'od_combined_1d.pdf',
-            enc_figure_dir/'supplementary/2particle/')
+            enc_figure_dir/'supplemental/2particle/')
 
 
     # =====================================
@@ -215,4 +216,4 @@ if __name__ == "__main__":
         cplotter.fig.tight_layout()
         cplotter.savefig(
             f'{process}_combined_1d.pdf',
-            enc_figure_dir/'supplementary/2particle/')
+            enc_figure_dir/'supplemental/2particle/')

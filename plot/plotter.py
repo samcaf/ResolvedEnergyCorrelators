@@ -450,14 +450,16 @@ class Plotter():
               axes_index=0, delta_y=0.075,
               ha='left', va='center',
               fontsize=8.5, transform='default',
-              **text):
+              text_options=None, **text):
         # Stamp formatting
         if transform == 'default':
             transform = self.axes[axes_index].transAxes
-        text_options = {'horizontalalignment': ha,
-                        'verticalalignment': va,
-                        'fontsize': fontsize,
-                        'transform': transform}
+        if not text_options:
+            text_options = {}
+        text_options.update({'horizontalalignment': ha,
+                            'verticalalignment': va,
+                            'fontsize': fontsize,
+                            'transform': transform})
 
         # Stamp text (add text line-by-line)
         for line in range(len(text)):
@@ -474,7 +476,7 @@ class Plotter():
     def savefig(self, filename, dirname=''):
         if dirname:
             dirname = str(dirname) + '/'
-        self.fig.savefig(dirname+filename)
+        self.fig.savefig(str(dirname)+str(filename))
 
 
 

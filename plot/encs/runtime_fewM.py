@@ -156,4 +156,4 @@ if __name__ == "__main__":
     plotter.fig.tight_layout()
 
     plotter.savefig('opendata_runtimes_fewM.pdf',
-                     enc_figure_dir/'supplementary/')
+                     enc_figure_dir/'supplemental/')
