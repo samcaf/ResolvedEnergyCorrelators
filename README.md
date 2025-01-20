@@ -51,7 +51,7 @@ Using CMS Open Data without performing the correct experimental data analysis pr
 
 - **Energy Weighted Observable Correlators (EWOCs)**:
 
-  Not yet included: will introduce a new type of energy correlator on non-angular observables as detailed in [25yy.xxxx].
+  Not yet included: will introduce a new type of energy correlator on non-angular observables as detailed in [2502.xxxx].
 
 - **Python Classes**:
 
@@ -243,9 +243,9 @@ The weights (1.0, 1.0, 1.0) can be changed to any list of triples.
 
 ## Energy Weighted Observable Correlations (EWOCs)
 
-<img src="assets/ewocs/lhc_ewoc.png" width="200"> <img src="assets/ewocs/lhc_eec.png" width="200"> <img src="assets/ewocs/e+e-_ewoc.png" width="200">
+<img src="assets/ewocs/lhc_ewoc.png" width="200"> <img src="assets/ewocs/lhc_eec.png" width="200"> <img src="assets/ewocs/table.png" width="200"> <img src="assets/ewocs/e+e-_ewoc.png" width="200">
 
-To generate files containing EWOCs `./output/ewocs/`, try running the following command for generating a histogram containing a mass EWOC for 10000 simulated W-boson pair production at the LHC:
+To generate files containing EWOCs in the folder `./output/ewocs/`, try running the following command for generating a histogram containing a mass EWOC for 10000 simulated W-boson pair production at the LHC:
 ```
 ./write/ewocs --pair_obs mass --n_events 10000 \
     --pid_1 2212 --pid_2 2212 --energy 14000 --outstate w \
@@ -254,9 +254,9 @@ To generate files containing EWOCs `./output/ewocs/`, try running the following 
     --pt_min 500 --pt_max 100000 \
     --file_prefix lhc_w_highres120bins_parton
 ```
-or change the subjet radius, jet radius, or EWOC observable to suit your needs.
+or change the subjet radius, jet radius, EWOC observable, or any other option to suit your needs.
 
-You can use the plotting tools in `./plot/ewocs`, which can be modified to produce your own versions of the plots from [25yy.xxxx].
+You can use the plotting tools in `./plot/ewocs`, which can be modified to produce your own versions of the plots from [2502.xxxx].
 Additional examples for computing EWOCs, including examples for computing ENCs in Pythia, can be found in `./bin/`.
 
 
