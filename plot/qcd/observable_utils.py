@@ -246,6 +246,7 @@ def expected_obs_peak(observable, **kwargs):
 
     # Observables
     if observable in ['jet_mass',
+                      'mmdt',
                       'mass',
                       'mass_onshell',
                       'mass_approx',

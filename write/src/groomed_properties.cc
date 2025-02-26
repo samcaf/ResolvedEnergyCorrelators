@@ -159,9 +159,9 @@ int main (int argc, char* argv[]) {
     const double smear_factor = cmdln_double("smear_factor",
                                              argc, argv, 0, false);
 
-    double photon_smear_factor  = 1,
-           charged_smear_factor = 1,
-           neutral_smear_factor = 1;
+    double photon_smear_factor  = 0,
+           charged_smear_factor = 0,
+           neutral_smear_factor = 0;
 
     if (charged_only)
         std::cout << "Charged particles only." << std::endl;
@@ -503,10 +503,6 @@ int main (int argc, char* argv[]) {
         // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
         for (auto& jet : good_jets) {
         try {
-            /* SoftDrop groomer = SoftDrop(beta_SD, zcut, */
-            /*             symm_measure, R_SD, */
-            /*             std::numeric_limits<double>::infinity(), */
-            /*             rec_choice); */
             SoftDrop groomer = SoftDrop(beta_SD, zcut, R_SD);
             jet = groomer(jet);
 
@@ -644,9 +640,11 @@ int main (int argc, char* argv[]) {
             outfile << "hist = [\n\t";
         else outfile << "\n(* " << prop << " hist *)\n";
 
+        double total_sum = 0.0;
         for (size_t bin=0; bin<jet_properties[prop].size(); ++bin){
             // Expectation values over N jets
             jet_properties[prop][bin] /= njets_tot;
+            total_sum += jet_properties[prop][bin];
 
             // Not normalizing outflow bins further
             // If not in an outflow bin
@@ -670,6 +668,30 @@ int main (int argc, char* argv[]) {
         if (not(mathematica_format)) outfile << "]\n\n";
 
         outfile.close();
+
+        // Printing out weight information if verbose
+        if (verbose >= 1) {
+            float total_integral = 0;
+            // Looping over all bins
+            for (int bin=0; bin < nbins; ++bin) {
+                // Not normalizing outflow bins further
+                if (bin < bins_finite_start or bin >= nbins_finite) {
+                    total_integral += jet_properties[prop][bin];
+                    continue;
+                }
+
+                // Otherwise, getting differential "volume" element
+                double dlogbin = (bin_edges[prop][bin+1] - bin_edges[prop][bin]);
+
+                total_integral += jet_properties[prop][bin]*dlogbin;
+            }
+
+            // Printing normalization
+            std::cout << "\nTotal weight for " << prop << ": "
+                      << total_sum;
+            std::cout << "\nIntegrated weight for " << prop << ": "
+                      << total_integral;
+        }
     }
 
     // =====================================

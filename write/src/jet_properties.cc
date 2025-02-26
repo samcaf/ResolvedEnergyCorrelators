@@ -139,9 +139,9 @@ int main (int argc, char* argv[]) {
     const bool smear_momenta = cmdln_bool("smear_momenta",
                                           argc, argv, false);
 
-    double photon_smear_factor,
-           charged_smear_factor,
-           neutral_smear_factor;
+    double photon_smear_factor  = 0,
+           charged_smear_factor = 0,
+           neutral_smear_factor = 0;
 
     if (charged_only)
         std::cout << "Charged particles only." << std::endl;

@@ -51,7 +51,7 @@ Using CMS Open Data without performing the correct experimental data analysis pr
 
 - **Energy Weighted Observable Correlators (EWOCs)**:
 
-  Not yet included: will introduce a new type of energy correlator on non-angular observables as detailed in [2502.xxxx].
+  Not yet included: will introduce a new type of energy correlator on non-angular observables as detailed in [2501.17218].
 
 - **Python Classes**:
 
@@ -256,7 +256,7 @@ To generate files containing EWOCs in the folder `./output/ewocs/`, try running 
 ```
 or change the subjet radius, jet radius, EWOC observable, or any other option to suit your needs.
 
-You can use the plotting tools in `./plot/ewocs`, which can be modified to produce your own versions of the plots from [2502.xxxx].
+You can use the plotting tools in `./plot/ewocs`, which can be modified to produce your own versions of the plots from [2501.17218].
 Additional examples for computing EWOCs, including examples for computing ENCs in Pythia, can be found in `./bin/`.
 
 

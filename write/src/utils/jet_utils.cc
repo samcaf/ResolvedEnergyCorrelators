@@ -270,7 +270,10 @@ PseudoJets get_particles_pythia(const Pythia8::Event event,
                         const bool charged_only,
                         const bool final_only,
                         const std::vector<int> use_pids,
-                        const std::vector<int> exclude_pids) {
+                        const std::vector<int> exclude_pids,
+                        const std::vector<int> use_status_codes,
+                        const std::vector<int> exclude_status_codes
+                        ) {
     // Storing particles of an event as PseudoJets
     PseudoJets particles;
 
@@ -307,6 +310,18 @@ PseudoJets get_particles_pythia(const Pythia8::Event event,
             (exclude_pids.size() == 0 or
              std::find(exclude_pids.begin(), exclude_pids.end(),
                  event[ipart].id()) == exclude_pids.end())
+                and
+            // Use only given status codes if relevant
+            (use_status_codes.size() == 0 or
+             std::find(use_status_codes.begin(),
+                 use_status_codes.end(),
+                 event[ipart].id()) != use_status_codes.end())
+                and
+            // Exclude given status codes if relevant
+            (exclude_status_codes.size() == 0 or
+             std::find(exclude_status_codes.begin(),
+                 exclude_status_codes.end(),
+                 event[ipart].id()) == exclude_status_codes.end())
             );
 
         if (not include_particle)

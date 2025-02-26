@@ -206,7 +206,6 @@ int main (int argc, char* argv[]) {
     const double e_weight = cmdln_double("weight", argc, argv,
                                          _DEFAULT_WEIGHT);
 
-
     if (not(pair_terms) and not(contact_terms))
         throw std::runtime_error("Cannot create an EWOC histogram "
                 "without including either pair terms or contact "
@@ -274,9 +273,10 @@ int main (int argc, char* argv[]) {
     // Momentum smearing
     const double smear_factor = cmdln_double("smear_factor",
                                              argc, argv, 0, false);
-    double photon_smear_factor  = 1,
-           charged_smear_factor = 1,
-           neutral_smear_factor = 1;
+
+    double photon_smear_factor  = 0,
+           charged_smear_factor = 0,
+           neutral_smear_factor = 0;
 
     // Ghosts
     const bool add_ghosts    = cmdln_bool("add_uniform_ghosts",

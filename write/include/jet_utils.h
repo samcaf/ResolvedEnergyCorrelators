@@ -108,7 +108,10 @@ PseudoJets get_particles_pythia(const Pythia8::Event event,
                     const bool charged_only = false,
                     const bool final_only = true,
                     const std::vector<int> use_pids = {},
-                    const std::vector<int> exclude_pids = nu_pids);
+                    const std::vector<int> exclude_pids = nu_pids,
+                    const std::vector<int> use_status_codes = {},
+                    const std::vector<int> exclude_status_codes = {}
+                    );
 
 PseudoJets add_events(const PseudoJets event1, const PseudoJets event2);
 

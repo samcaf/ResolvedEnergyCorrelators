@@ -276,6 +276,20 @@ old_enc_3particle: $(FASTJET) $(PYTHIA) write/src/old_enc_3particle.cc
 		$(CXX_COMMON);
 	@printf "\n"
 
+
+new_enc_ue: $(FASTJET) $(PYTHIA) write/src/new_enc_2particle_UE.cc
+	# =======================================================
+	# Compiling code for UE PENC histograms:
+	# =======================================================
+	# Compiling `write/src/new_enc_2particle_UE.cc` to the executable `write/new_enc/ue`
+	$(CXX) write/src/new_enc_2particle_UE.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc\
+		-o write/new_enc/ue\
+		$(CXX_COMMON);
+	@printf "\n"
+
+
+
 new_enc_benchmarks: $(FASTJET) $(PYTHIA) write/src/benchmark/new_enc_2particle.cc write/src/benchmark/new_enc_3particle.cc write/src/benchmark/new_enc_4particle.cc
 	# =======================================================
 	# Compiling c++ code for benchmarking ENC histograms:

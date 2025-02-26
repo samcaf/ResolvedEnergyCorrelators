@@ -197,6 +197,15 @@ class HistogramData:
             else:
                 self.metadata[attr_name] = attr_value
 
+        if self.hist is None or not self.edges or not self.centers:
+            raise ValueError("\nNot enough info to make histogram:"
+                             f"\n\t* metadata = {self.metadata}"
+                             f"\n\t* hist     = {self.hist}"
+                             f"\n\t* edges    = {self.edges}"
+                             f"\n\t* centers  = {self.centers}"
+                             f"\n\n\t* {file_name=}"
+                             )
+
 
     def validate(self):
         """
