@@ -2,10 +2,10 @@
 
 This directory contains a minimal working example to calculate energy-weighted correlations:
 
-- [Build Instructions](#build)
-- [PENCs](#pencs)
-<!-- - [RE3Cs](#re3cs) -->
-<!-- - [EWOCs](#ewocs) -->
+- [Build Instructions](#build-instructions)
+- [Calculating Example PENCs](#calculating-example-pencs)
+<!-- - [Calculating Example RE3Cs](#calculating-example-re3cs) -->
+<!-- - [Calculating Example EWOCs](#calculating-example-ewocs) -->
 
 
 
