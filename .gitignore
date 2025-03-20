@@ -22,6 +22,9 @@ datasets/*/
 # C extensions
 *.so
 
+# C compilation files
+*.gch
+
 # Distribution / packaging
 .Python
 build/
@@ -177,6 +180,7 @@ assets/presentations/*.zip
 assets/presentations/MIT_LNS_2024/*
 
 # TODO or incomplete
+TODO
 write/TODO
 # TODO
 write/src/utils/pileup_utils.cc

@@ -26,7 +26,7 @@
 #       - New Angles on Energy Correlators
 #   * Scripts for installing dependencies
 #       - Pythia and Fastjet
-.PHONY : setup plot_venv get_cms_od remove_venv update_local \
+.PHONY : setup plot_venv get_cms_od get_cms_od_force remove_venv update_local \
 	ewocs new_encs new_encs_force \
 		jet_properties groomed_properties \
 		new_enc_2particle new_enc_3particle new_enc_4particle new_enc_2special old_enc_3particle \
@@ -57,12 +57,7 @@ setup:
 		$(MAKE) plot_venv;\
 	fi
 	@printf "\n\n"
-	@if [ -d "./write/data/cms_jet_run2011A.opendata.txt" ];\
-		then printf "CMS 2011A Jet Primary Dataset found";\
-		printf "\n";\
-	else\
-		$(MAKE) get_cms_od;\
-	fi
+	@$(MAKE) get_cms_od
 	@printf "\n\n"
 	# =======================================
 	# Compiling C++ Tools
@@ -92,7 +87,17 @@ plot_venv:
 	@printf "\n";
 
 
+
 get_cms_od:
+	@if [ -f "./write/data/cms_jet_run2011A.opendata.txt" ];\
+		then printf "CMS 2011A Jet Primary Dataset found. Use \`make get_cms_od_force\` to re-download anyway";\
+		printf "\n";\
+	else\
+		$(MAKE) get_cms_od_force;\
+	fi
+
+
+get_cms_od_force:
 	# =======================================
 	# Getting CMS 2011A Jet Primary Dataset
 	# =======================================
@@ -102,7 +107,7 @@ get_cms_od:
 	elif [ "$$(uname)" = "Linux" ]; then \
 		sed -i 's|const std::string cms_jets_file = .*|const std::string cms_jets_file = "$(PWD)/write/data/cms_jet_run2011A.opendata.txt";|' write/include/opendata_utils.h; \
 	else \
-		echo "Unsupported OS: $$(uname). Please see `get_cms_od` in the Makefile"; exit 1; \
+		echo "Unsupported OS: $$(uname). Please see `get_cms_od` in the Makefile or download the CMS Open Data dataset manually from `https://github.com/abudhraj/FastEEC/releases/download/0.1/data.txt`"; exit 1; \
     fi
 
 
@@ -217,6 +222,30 @@ new_encs_force:
 	$(MAKE) old_enc_3particle;
 
 
+penc_example: $(FASTJET) $(PYTHIA) write/src/examples/penc_example.cc
+	# =======================================================
+	# Compiling c++ code for writing PENC example:
+	# =======================================================
+	$(CXX) write/src/examples/penc_example.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc\
+		write/include/histogram.h write/include/PENC.h\
+		-o examples/write_penc\
+		$(CXX_COMMON);
+	@printf "\n"
+
+re3c_example: $(FASTJET) $(PYTHIA) write/src/examples/re3c_example.cc
+	# =======================================================
+	# Compiling c++ code for writing RE3C example:
+	# =======================================================
+	$(CXX) write/src/examples/re3c_example.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc\
+		write/include/histogram.h write/include/RE3C.h\
+		-o examples/write_re3c\
+		$(CXX_COMMON);
+	@printf "\n"
+
+
+
 new_enc_2particle: $(FASTJET) $(PYTHIA) write/src/new_enc_2particle.cc
 	# =======================================================
 	# Compiling c++ code for writing (two particle) ENC histograms:
@@ -225,6 +254,18 @@ new_enc_2particle: $(FASTJET) $(PYTHIA) write/src/new_enc_2particle.cc
 	$(CXX) write/src/new_enc_2particle.cc \
 		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc\
 		-o write/new_enc/2particle \
+		$(CXX_COMMON);
+	@printf "\n"
+
+penc: $(FASTJET) $(PYTHIA) write/src/penc.cc
+	# =======================================================
+	# Compiling c++ code for writing PENC histograms:
+	# =======================================================
+	# From `write/src/penc.cc` to the executable `write/new_enc/penc`
+	$(CXX) write/src/penc.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc\
+		write/include/histogram.h write/include/PENC.h\
+		-o bin/compute_penc \
 		$(CXX_COMMON);
 	@printf "\n"
 
