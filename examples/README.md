@@ -1,19 +1,28 @@
-# Resolved Energy Correlator Example
+# Resolved Energy Correlator Examples
 
-This directory contains a minimal working example to calculate Projected Energy Correlators (PENC) and Resolved Energy Correlators (R3NC) as presented in [PAPER].
+This directory contains a minimal working example to calculate energy-weighted correlations:
 
-## Requirements
+- [Build Instructions](#build)
+- [PENCs](#pencs)
+<!-- - [RE3Cs](#re3cs) -->
+<!-- - [EWOCs](#ewocs) -->
+
+
+
+
+## Build Instructions
+
+Building the code in this directory requires:
 - C++ compiler (GCC or Clang)
 - FastJet (version 3.0+)
 - Python 3.6+ with matplotlib and numpy (for visualization)
-
-## Build Instructions
 
 To download the CMS Open Data dataset and compile the code used for the examples in this folder, return to the main directory and run
 
 ```bash
 make
 ```
+
 
 
 ## Calculating Example PENCs:
@@ -31,7 +40,7 @@ This script will:
 
 If you have not generated any other PENC data, then the visualization this produces should look like
 
-<img src="assets/encs/penc_examples.png" width="600">
+<img src="../assets/encs/penc_examples.png" width="600">
 
 which resembles [Fig. 6 in the Supplemental Material of "New Angles on Energy Correlators" (arxiv:2410.16368)](https://arxiv.org/pdf/2410.16368#figure.6).
 
