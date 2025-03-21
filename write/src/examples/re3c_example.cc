@@ -34,14 +34,12 @@ using namespace std::chrono;
 #include "fastjet/ClusterSequence.hh"
 
 // Local imports:
-#include "../include/general_utils.h"
-#include "../include/jet_utils.h"
-#include "../include/cmdln.h"
-#include "../include/pythia_cmdln.h"
-
-#include "../include/enc_utils.h"
-
-#include "../include/opendata_utils.h"
+#include "../../include/general_utils.h"
+#include "../../include/jet_utils.h"
+#include "../../include/cmdln.h"
+#include "../../include/enc_utils.h"
+#include "../../include/opendata_utils.h"
+#include "../../include/RE3C.h"
 
 
 // ####################################
@@ -75,29 +73,19 @@ int main (int argc, char* argv[]) {
                                    -8, false);
     const double maxbin   = cmdln_double("maxbin", argc, argv,
                                    0.05, false);
-    const bool bin1_uflow = true, bin1_oflow = true;
-
-    // Phi is binned linearly, with same nbins by default
-    const int   nphibins  = cmdln_int("nphibins", argc, argv,
-                                nbins, false);
-
-    // theta2/theta1 is binned linearly by default, but can be log
-    const bool lin_bin2   = cmdln_bool("lin_bin2", argc, argv,
-                                 true, false);
 
 
     // =====================================
     // Output Setup
     // =====================================
     RE3C re3c_calculator(nu_weights, minbin, maxbin, nbins,
-                    true, true, true,
-                    uflow, oflow, true,
-                    "output/penc_example", false);
-    // TODO: different options for this... stealing from PENC
+                         nbins, true,
+                         true, true, true,
+                         true, true, 1,
+                         "output/re3c_example", false);
 
 
-
-    for (int inu=0; inu < nu_weights.size(); ++inu){
+    for (size_t inu=0; inu < nu_weights.size(); ++inu){
         // Setting up output files
         std::string filename = re3c_calculator.enc_outfiles[inu];
         std::pair<double, double> nus = nu_weights[inu];
@@ -137,19 +125,17 @@ int main (int argc, char* argv[]) {
     // Verifying successful run
     // =====================================
     // ---------------------------------
-    if (verbose >= 0) {
-        std::cout << "\nComplete!\n";
-        auto stop = high_resolution_clock::now();
-        auto duration = duration_cast<microseconds>(stop-start);
-        std::cout << "Analyzed and saved data from "
-                  << std::to_string(n_events)
-                  << " events in "
-                  << std::to_string(float(duration.count())/std::pow(10, 6))
-                  << " seconds.\n";
-    }
+    std::cout << "\nComplete!\n";
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop-start);
+    std::cout << "Analyzed and saved data from "
+              << std::to_string(n_events)
+              << " events in "
+              << std::to_string(float(duration.count())/std::pow(10, 6))
+              << " seconds.\n";
 
     std::cout << "Output file: \n";
-    for (auto filename : penc_calculator.enc_outfiles)
+    for (auto filename : re3c_calculator.enc_outfiles)
         std::cout << filename << std::endl;
 
     return 0;

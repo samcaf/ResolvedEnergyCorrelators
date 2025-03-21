@@ -88,7 +88,7 @@ int main (int argc, char* argv[]) {
     // =====================================
     PENC penc_calculator(nu_weights, minbin, maxbin, nbins,
                     true, true, true,
-                    uflow, oflow, true,
+                    uflow, oflow, 1,
                     "output/penc_example", false);
 
 

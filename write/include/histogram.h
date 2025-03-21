@@ -10,27 +10,32 @@
 #include <iomanip>
 
 
+
 // Base class for histogram-based observables
 class Histogram {
 public:
     Histogram(double minbin, double maxbin, int nbins,
-              bool uflow = true, bool oflow = true);
+              bool uflow = true, bool oflow = true,
+              std::string scaling = "log");
     virtual ~Histogram() = default;
 
-    // Write to files
-    virtual void writeOutput() = 0;
+    int nBins() {return nbins_;}
+    int nFiniteBins() {return nbins_finite_;}
+    int firstFiniteBin() {return bins_finite_start_;}
+    std::vector<double> binEdges() {return bin_edges_;}
+    std::vector<double> binCenters() {return bin_centers_;}
 
-    // Reset all histograms
-    virtual void reset();
+    // Common utility functions
+    int binPosition(double value) const;
 
 protected:
     // Histogram parameters
     const double minbin_;
     const double maxbin_;
     const int nbins_;
-    const std::string scaling_;
     const bool uflow_;
     const bool oflow_;
+    const std::string scaling_;
 
     // Histogram data
     std::vector<double> bin_edges_;
@@ -41,11 +46,6 @@ protected:
     // Output formatting
     std::string getHistDelim() const;
 
-    // Common utility functions
-    int binPosition(double value, double minbin, double maxbin,
-                    int nbins, std::string scaling = "log",
-                    bool uflow = true, bool oflow = true) const;
-
     // Function to calculate bin edges and centers
     void initializeBins();
 };
@@ -55,9 +55,9 @@ protected:
 // Implementation of the Histogram base class
 Histogram::Histogram(
         double minbin, double maxbin, int nbins,
-        bool uflow, bool oflow)
+        bool uflow, bool oflow, std::string scaling)
     : minbin_(minbin), maxbin_(maxbin), nbins_(nbins),
-      uflow_(uflow), oflow_(oflow)
+      uflow_(uflow), oflow_(oflow), scaling_(scaling)
 {
     initializeBins();
 }
@@ -116,23 +116,17 @@ void Histogram::initializeBins() {
 }
 
 
-void Histogram::reset() {
-    // Base class reset can be overridden by derived classes
-}
 
-
-int Histogram::binPosition(double value, double minbin, double maxbin,
-                                    int nbins, std::string scaling,
-                                    bool uflow, bool oflow) const {
+int Histogram::binPosition(double value) const {
     // Convert value to log scale if needed
     double scaled_value = value;
-    if (scaling == "log") {
+    if (scaling_ == "log") {
         scaled_value = std::log10(value);
     }
 
     // Handle underflow
-    if (scaled_value < minbin) {
-        if (uflow) return 0;
+    if (scaled_value < minbin_) {
+        if (uflow_) return 0;
 
         /* throw std::underflow_error( */
         /*         "Invalid val "+std::to_string(scaled_value)+ */
@@ -143,8 +137,8 @@ int Histogram::binPosition(double value, double minbin, double maxbin,
     }
 
     // Handle overflow
-    if (scaled_value >= maxbin) {
-        if (oflow) return nbins - 1;
+    if (scaled_value >= maxbin_) {
+        if (oflow_) return nbins_ - 1;
 
 
         /* throw std::overflow_error( */
@@ -156,8 +150,8 @@ int Histogram::binPosition(double value, double minbin, double maxbin,
     }
 
     // Regular bin
-    int bin = static_cast<int>((scaled_value - minbin) / (maxbin - minbin) * nbins_finite_);
-    if (uflow) bin++; // Account for underflow bin
+    int bin = static_cast<int>((scaled_value - minbin_) / (maxbin_ - minbin_) * nbins_finite_);
+    if (uflow_) bin++; // Account for underflow bin
 
     return bin;
 }

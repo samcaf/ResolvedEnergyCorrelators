@@ -16,25 +16,31 @@
 
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
-#include "../include/jet_utils.h"
 
-#include "../include/general_utils.h"
 #include "histogram.h"
+
+
+// Misc utilities
+# define PI 3.14159265358979323846
+
+typedef std::vector<double> Hist1d;
+typedef std::vector< std::vector<double>> Hist2d;
+typedef std::vector< std::vector< std::vector<double>>> Hist3d;
 
 
 // Angle utilities
 inline double mod2pi(double phi) {
     while (phi > PI)
-        phi -= TWOPI;
+        phi -= 2*PI;
     while (phi <= -PI)
-        phi += TWOPI;
+        phi += 2*PI;
 
     return phi;
 }
 
-double enc_azimuth(const PseudoJet part1,
-                   const PseudoJet part_sp,
-                   const PseudoJet part2) {
+double enc_azimuth(const fastjet::PseudoJet part1,
+                   const fastjet::PseudoJet part_sp,
+                   const fastjet::PseudoJet part2) {
     // NOTE: I think this doesn't work for very fat jets --
     // NOTE:   roughly because fat jets require a bit more care
     // NOTE:   with mod(2pi) arithmetic
@@ -66,7 +72,7 @@ double enc_azimuth(const PseudoJet part1,
     double phi = mod2pi(atan2(det, dot));
 
     // Setting it to be between -pi and pi
-    phi = phi > PI ? phi - TWOPI : phi;
+    phi = phi > PI ? phi - 2*PI : phi;
     if (phi < -PI or PI < phi)
         throw std::range_error(
                 "Found azimuthal angle not between -pi and pi.");
@@ -82,10 +88,11 @@ double enc_azimuth(const PseudoJet part1,
 // ==============================================
 typedef std::pair<double, double> weight_pair;
 
-class RE3C : public Histogram {
+class RE3C {
 public:
     RE3C(const std::vector<weight_pair>& weights,
          double minbin, double maxbin, int nbins,
+         int nphibins, bool lin_bin2,
          bool contact_terms = true,
          bool use_deltaR = true, bool use_pt = true,
          bool uflow = true, bool oflow = true,
@@ -99,10 +106,7 @@ public:
     void processJet(const fastjet::PseudoJet& jet);
 
     // Normalize histograms and write to files
-    void writeOutput() override;
-
-    // Reset histograms and counters
-    void reset() override;
+    void writeOutput();
 
 
     // Output histogram information
@@ -117,6 +121,7 @@ public:
 private:
     // RE3C specific parameters
     std::vector<weight_pair> weights_;
+    bool lin_bin2_;
     bool contact_terms_;
     bool use_deltaR_;
     bool use_pt_;
@@ -125,7 +130,11 @@ private:
     bool use_output_folder_;
 
     // Histogram data
-    std::vector<std::vector<double>> enc_hists_;
+    std::vector<Hist3d> enc_hists_;
+    Histogram R1_;
+    Histogram R2_;
+    Histogram Phi_;
+    int phizerobin_;
 
     // Statistics
     int njets_tot_;
@@ -152,20 +161,28 @@ private:
 // Implementation of the RE3C class
 RE3C::RE3C(const std::vector<weight_pair>& weights,
            double minbin, double maxbin, int nbins,
+           int nphibins, bool lin_bin2,
            bool contact_terms, bool use_deltaR,
            bool use_pt, bool uflow, bool oflow,
            int verbose,
            const std::string& file_prefix,
            const bool use_output_folder)
-    : Histogram(minbin, maxbin, nbins,
-                uflow, oflow),
-      weights_(weights), contact_terms_(contact_terms),
+    : weights_(weights),
+      lin_bin2_(lin_bin2),
+      contact_terms_(contact_terms),
       use_deltaR_(use_deltaR), use_pt_(use_pt),
       file_prefix_(file_prefix),
       verbose_(verbose),
       use_output_folder_(use_output_folder),
+      R1_(minbin, maxbin, nbins, uflow, oflow, "log"),
+      R2_(lin_bin2_ ? 0 : minbin, lin_bin2 ? 1 : 0,
+          nbins, lin_bin2 ? false : true,
+          lin_bin2 ? "linear" : "log"),
+      Phi_(-PI, PI, nphibins, false, false, "linear"),
       njets_tot_(0)
 {
+    phizerobin_ = Phi_.binPosition(0);
+
     initializeHistograms();
 }
 
@@ -175,18 +192,17 @@ void RE3C::initializeHistograms() {
     enc_hists_.clear();
     enc_outfiles.clear();
 
-    for (auto nus : weights_) {
-        // Create histogram with zeros
-        // TODO
+    for (auto nus : weights_){
+        // Setting up histograms
+        enc_hists_.emplace_back(Hist3d
+                (R1_.nBins(), Hist2d(R2_.nBins(), Hist1d(Phi_.nBins()))));
 
         // Create output filename
         std::string filename;
-        if (use_output_folder_)
-            filename += "output/new_encs/re3c_";
 
         filename += file_prefix_ +
-                    "_nus_" + str_round(nus.first, 2) +
-                    "_" + str_round(nus.second, 2);
+                    "_nus_" + std::to_string(nus.first) +
+                    "_" + std::to_string(nus.second);
 
         // Replace periods with hyphens
         std::replace(filename.begin(), filename.end(), '.', '-');
@@ -199,21 +215,6 @@ void RE3C::initializeHistograms() {
     }
 }
 
-
-void RE3C::reset() {
-    // Reset base class
-    Histogram::reset();
-
-    // Reset RE3C specific data
-    njets_tot_ = 0;
-    jet_runtimes_.clear();
-
-    // Reset all histograms
-    for (auto& hist : enc_hists_) {
-        std::fill(hist.begin(), hist.end(), 0.0);
-        // TODO: implement
-    }
-}
 
 
 void RE3C::processJet(const fastjet::PseudoJet& jet) {
@@ -253,8 +254,8 @@ void RE3C::computeRE3C(const fastjet::PseudoJet& jet) {
     }
 
     // Vector to store angle/weight pairs for sorting
-    std::vector<std::pair<double, double>> sorted_angsweights;
-    sorted_angsweights.reserve(constituents.size());
+    std::vector<std::pair<double, fastjet::PseudoJet>> sorted_angs_parts;
+    sorted_angs_parts.reserve(constituents.size());
 
     // Loop over "special" particles
     for (const auto& part_sp : constituents) {
@@ -272,13 +273,13 @@ void RE3C::computeRE3C(const fastjet::PseudoJet& jet) {
             for (size_t inu = 0; inu < weights_.size(); ++inu) {
                 double nu1 = weights_[inu].first;
                 double nu2 = weights_[inu].second;
-                enc_hists_[inu][0] += std::pow(sum_weight1,
-                                               1+nu1+nu2);
+                enc_hists_[inu][0][0][phizerobin_] += std::pow(sum_weight1,
+                                                              1+nu1+nu2);
             }
         }
 
         // Clear and prepare for sorting angles/weights
-        sorted_angsweights.clear();
+        sorted_angs_parts.clear();
 
         // Calculate angles and weights for all particles
         for (const auto& part1 : constituents) {
@@ -287,7 +288,7 @@ void RE3C::computeRE3C(const fastjet::PseudoJet& jet) {
                     part_sp.delta_R(part1) :
                     fastjet::theta(part_sp, part1);
 
-            sorted_angsweights.emplace_back(theta1, part1);
+            sorted_angs_parts.emplace_back(theta1, part1);
         }
         // Sorting by angle
         std::sort(sorted_angs_parts.begin(),
@@ -297,18 +298,16 @@ void RE3C::computeRE3C(const fastjet::PseudoJet& jet) {
                  });
 
         // Loop over sorted particles and calculate RE3C
-        for (size_t jpart = 1; jpart < sorted_angsweights.size(); ++jpart) {
-            double theta1 = sorted_angsweights[jpart].first;
-            PseudoJet& part1 = sorted_angs_parts[jpart].second;
+        for (size_t jpart = 1; jpart < sorted_angs_parts.size(); ++jpart) {
+            double theta1 = sorted_angs_parts[jpart].first;
+            fastjet::PseudoJet& part1 = sorted_angs_parts[jpart].second;
 
-            double weight1 = use_pt ?
+            double weight1 = use_pt_ ?
                     part1.pt() / weight_tot :
                     part1.e() / weight_tot;
 
             // Calculating the theta1 bin in the histogram
-            int bin1 = bin_position(theta1, minbin, maxbin,
-                                    nbins, "log",
-                                    bin1_uflow, bin1_oflow);
+            int bin1 = R1_.binPosition(theta1);
 
             // Skip if bin is invalid
             if (bin1 < 0) continue;
@@ -316,24 +315,24 @@ void RE3C::computeRE3C(const fastjet::PseudoJet& jet) {
 
             // Initializing the sum of weights
             // within an angle of the 2nd non-special particle
-            std::vector<double> sum_weight2(nphibins);
+            std::vector<double> sum_weight2(Phi_.nBins());
 
-            sum_weight2[phizerobin] += weight_sp;
+            sum_weight2[phizerobin_] += weight_sp;
 
             if (contact_terms_) {
                 // Looping on _E^nu C_ weights [`nu's]
                 for (size_t inu = 0; inu < weights_.size(); ++inu) {
-                    weight_t nus = weights_[inu];
+                    std::pair<double, double> nus = weights_[inu];
                     double nu1   = nus.first;
                     double nu2   = nus.second;
 
                     // part2 = part_sp != part_1
-                    enc_hists[inu][bin1][0][phizerobin] +=
+                    enc_hists_[inu][bin1][0][phizerobin_] +=
                         2*std::pow(weight_sp, 1+nu2)*
                           std::pow(weight1, nu1);
 
                     // part2 = part1 != part_sp
-                    enc_hists[inu][bin1][nbins-1][phizerobin] +=
+                    enc_hists_[inu][bin1][R2_.nBins()-1][phizerobin_] +=
                                 std::pow(weight_sp, 1)*
                                 std::pow(weight1, nu1+nu2);
                 }
@@ -343,21 +342,15 @@ void RE3C::computeRE3C(const fastjet::PseudoJet& jet) {
             for (size_t kpart=1; kpart<jpart; ++kpart) {
                 // Getting 2nd particle information
                 double theta2    = sorted_angs_parts[kpart].first;
-                PseudoJet& part2 = sorted_angs_parts[kpart].second;
-                double weight2 = use_pt ?
+                fastjet::PseudoJet& part2 = sorted_angs_parts[kpart].second;
+                double weight2 = use_pt_ ?
                         part2.pt() / weight_tot :
                         part2.e() / weight_tot;
                 double theta2_over_theta1 =
                     theta1 == 0 ? 0 : theta2/theta1;
 
                 // Calculating the theta2/theta1 bin position
-                int bin2 = bin_position(theta2_over_theta1,
-                                    bin2_min, bin2_max,
-                                    nbins, bin2_scheme,
-                                    bin2_uflow, false);
-                                /* Variable spacing scheme,
-                                 * but with no overflow. */
-                // TODO: bin2 related stuff
+                int bin2 = R2_.binPosition(theta2_over_theta1);
 
                 // Getting azimuthal angle
                 // (angle from part1 to part_sp to part2
@@ -366,16 +359,14 @@ void RE3C::computeRE3C(const fastjet::PseudoJet& jet) {
                         part1, part_sp, part2);
 
                 // Calculating the phi bin
-                int binphi = bin_position(phi, -PI, PI,
-                                      nphibins, "linear",
-                                      false, false);
+                int binphi = Phi_.binPosition(phi);
 
                 // -:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-:-
                 // Looping on _E^nu C_ weights [`nu's]
                 for (size_t inu = 0;
-                        inu < nu_weights.size(); ++inu) {
+                        inu < weights_.size(); ++inu) {
                     // Preparing properties of the correlator
-                    weight_t nus = nu_weights[inu];
+                    std::pair<double, double> nus = weights_[inu];
                     double nu1   = nus.first;
                     double nu2   = nus.second;
 
@@ -401,7 +392,7 @@ void RE3C::computeRE3C(const fastjet::PseudoJet& jet) {
                                 delta_weight2;
 
                     // Add to appropriate histogram bin
-                    enc_hists[inu][bin1][bin2][binphi] +=
+                    enc_hists_[inu][bin1][bin2][binphi] +=
                             perm*hist_weight;
                 } // end EEC weight [nu] loop
 
@@ -421,30 +412,29 @@ void RE3C::normalizeHistograms() {
     for (size_t inu = 0; inu < weights_.size(); ++inu) {
         double total_sum = 0.0;
 
-        // TODO: other bins
         // Looping over all bins
-        for (int bin1=0; bin1<nbins; ++bin1) {
-            for (int bin2=0; bin2<nbins; ++bin2) {
-                for (int binphi=0; binphi<nphibins; ++binphi) {
+        for (int bin1=0; bin1<R1_.nBins(); ++bin1) {
+            for (int bin2=0; bin2<R2_.nBins(); ++bin2) {
+                for (int binphi=0; binphi<Phi_.nBins(); ++binphi) {
                     // Dealing with expectation value over N jets
-                    enc_hists[inu][bin1][bin2][binphi] /= njets_tot;
+                    enc_hists_[inu][bin1][bin2][binphi] /= njets_tot_;
 
-                    total_sum += enc_hists[inu][bin1][bin2][binphi];
+                    total_sum += enc_hists_[inu][bin1][bin2][binphi];
 
                     // Not normalizing outflow bins further
-                    if (bin1 < bin1_finite_start
-                            or bin1 >= nbins1_finite
-                            or bin2 < bin2_finite_start
-                            or bin2 >= nbins2_finite)
+                    if (bin1 < R1_.firstFiniteBin()
+                            or bin1 >= R1_.nFiniteBins()
+                            or bin2 < R2_.firstFiniteBin()
+                            or bin2 >= R2_.nFiniteBins())
                         continue;
 
                     // Getting differential "volume" element
-                    double dlogtheta1 = (bin1_edges[bin1+1] - bin1_edges[bin1]);
-                    double dtheta2_over_theta1 = (bin2_edges[bin2+1] - bin2_edges[bin2]);
-                    double dphi = (phi_edges[binphi+1] - phi_edges[binphi]);
+                    double dlogtheta1 = (R1_.binEdges()[bin1+1] - R1_.binEdges()[bin1]);
+                    double dtheta2_over_theta1 = (R2_.binEdges()[bin2+1] - R2_.binEdges()[bin2]);
+                    double dphi = (Phi_.binEdges()[binphi+1] - Phi_.binEdges()[binphi]);
 
                     double dvol = dlogtheta1 * dtheta2_over_theta1 * dphi;
-                    enc_hists[inu][bin1][bin2][binphi] /= dvol;
+                    enc_hists_[inu][bin1][bin2][binphi] /= dvol;
 
                     // NOTE: This is theta1^2 times the
                     // NOTE:    linearly normed distribution
@@ -455,31 +445,31 @@ void RE3C::normalizeHistograms() {
         // Print diagnostic information if verbose
         if (verbose_ >= 0) {
             double total_integral = 0.0;
-            for (int bin1=0; bin1<nbins; ++bin1) {
-                for (int bin2=0; bin2<nbins; ++bin2) {
-                    for (int binphi=0; binphi<nphibins; ++binphi) {
-                        if (bin1 < bin1_finite_start
-                                or bin1 >= nbins1_finite
-                                or bin2 < bin2_finite_start
-                                or bin2 >= nbins2_finite) {
-                            total_integral += enc_hists[inu][bin1][bin2][binphi];
+            for (int bin1=0; bin1<R1_.nBins(); ++bin1) {
+                for (int bin2=0; bin2<R2_.nBins(); ++bin2) {
+                    for (int binphi=0; binphi<Phi_.nBins(); ++binphi) {
+                        if (bin1 < R1_.firstFiniteBin()
+                                or bin1 >= R1_.nFiniteBins()
+                                or bin2 < R2_.firstFiniteBin()
+                                or bin2 >= R2_.nFiniteBins()) {
+                            total_integral += enc_hists_[inu][bin1][bin2][binphi];
                             continue;
                         }
 
                         // Getting differential "volume" element
-                        double dlogtheta1 = (bin1_edges[bin1+1] - bin1_edges[bin1]);
-                        double dtheta2_over_theta1 = (bin2_edges[bin2+1] - bin2_edges[bin2]);
-                        double dphi = (phi_edges[binphi+1] - phi_edges[binphi]);
+                        double dlogtheta1 = (R1_.binEdges()[bin1+1] - R1_.binEdges()[bin1]);
+                        double dtheta2_over_theta1 = (R2_.binEdges()[bin2+1] - R2_.binEdges()[bin2]);
+                        double dphi = (Phi_.binEdges()[binphi+1] - Phi_.binEdges()[binphi]);
 
                         double dvol = dlogtheta1 * dtheta2_over_theta1 * dphi;
 
-                        total_integral += enc_hists[inu][bin1][bin2][binphi] * dvol;
+                        total_integral += enc_hists_[inu][bin1][bin2][binphi] * dvol;
                     }
                 }
             }
 
             // Print diagnostics
-            weight_t nu = nu_weights[inu];
+            std::pair<double, double> nu = weights_[inu];
             std::cout << "\nTotal weight for nu=("
                       << nu.first << "," << nu.second << "): "
                       << total_sum;
@@ -517,8 +507,6 @@ void RE3C::writeHistogram(size_t inu) {
         throw std::runtime_error(errMsg.str().c_str());
     }
 
-    // TODO: higher dimensional bins, make consistent
-
     // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
     // theta1s
     // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
@@ -529,12 +517,12 @@ void RE3C::writeHistogram(size_t inu) {
 
     // nbins+1 bin edges:
     //   include -infty and infty for under/overflow
-    for (int ibin = 0; ibin < nbins; ++ibin)
-        outfile << std::pow(10, bin1_edges[ibin]) << HIST_DELIM;
-    if (std::isinf(bin1_edges[nbins]))
+    for (int ibin = 0; ibin < R1_.nBins(); ++ibin)
+        outfile << std::pow(10, R1_.binEdges()[ibin]) << ", ";
+    if (std::isinf(R1_.binEdges()[R1_.nBins()]))
         outfile << "np.inf\n";
     else
-        outfile << std::pow(10, bin1_edges[nbins]) << "\n";
+        outfile << std::pow(10, R1_.binEdges()[R1_.nBins()]) << "\n";
 
     outfile << "]\n\n";
 
@@ -543,12 +531,12 @@ void RE3C::writeHistogram(size_t inu) {
     // -:-:-:-:-:-:-:-:-:-:-:-:
     outfile << "theta1_centers = [\n\t";
 
-    for (int ibin = 0; ibin < nbins-1; ++ibin)
-        outfile << std::pow(10, bin1_centers[ibin]) << HIST_DELIM;
-    if (std::isinf(bin1_centers[nbins-1]))
+    for (int ibin = 0; ibin < R1_.nBins()-1; ++ibin)
+        outfile << std::pow(10, R1_.binCenters()[ibin]) << ", ";
+    if (std::isinf(R1_.binCenters()[R1_.nBins()-1]))
         outfile << "np.inf\n";
     else
-        outfile << std::pow(10, bin1_centers[nbins-1]) << "\n";
+        outfile << std::pow(10, R1_.binCenters()[R1_.nBins()-1]) << "\n";
 
     outfile << "]\n\n";
 
@@ -562,12 +550,12 @@ void RE3C::writeHistogram(size_t inu) {
     outfile << "theta2_over_theta1_edges = [\n\t";
 
     // nbins+1 bin edges:
-    for (int ibin = 0; ibin < nbins+1; ++ibin) {
-        double bin2_edge = lin_bin2 ? bin2_edges[ibin]
-                                    : std::pow(10, bin2_edges[ibin]);
+    for (int ibin = 0; ibin < R2_.nBins()+1; ++ibin) {
+        double bin2_edge = lin_bin2_ ? R2_.binEdges()[ibin]
+                                     : std::pow(10, R2_.binEdges()[ibin]);
         outfile << bin2_edge;
-        if (ibin < nbins)
-            outfile << HIST_DELIM;
+        if (ibin < R2_.nBins())
+            outfile << ", ";
         else
             outfile << std::endl;
     }
@@ -579,12 +567,12 @@ void RE3C::writeHistogram(size_t inu) {
     // -:-:-:-:-:-:-:-:-:-:-:-:
     outfile << "theta2_over_theta1_centers = [\n\t";
 
-    for (int ibin = 0; ibin < nbins; ++ibin) {
-        double bin2_val = lin_bin2 ? bin2_centers[ibin]
-                                   : std::pow(10, bin2_centers[ibin]);
+    for (int ibin = 0; ibin < R2_.nBins(); ++ibin) {
+        double bin2_val = lin_bin2_ ? R2_.binCenters()[ibin]
+                                   : std::pow(10, R2_.binCenters()[ibin]);
         outfile << bin2_val;
-        if (ibin < nbins-1)
-            outfile << HIST_DELIM;
+        if (ibin < R2_.nBins()-1)
+            outfile << ", ";
         else
             outfile << std::endl;
     }
@@ -600,9 +588,9 @@ void RE3C::writeHistogram(size_t inu) {
     outfile << "phi_edges = [\n\t";
 
     // nphibins+1 bin edges:
-    for (int ibin = 0; ibin < nphibins; ++ibin)
-        outfile << phi_edges[ibin] << HIST_DELIM;
-    outfile << phi_edges[nphibins] << "\n";
+    for (int ibin = 0; ibin < Phi_.nBins(); ++ibin)
+        outfile << Phi_.binEdges()[ibin] << ", ";
+    outfile << Phi_.binEdges()[Phi_.nBins()] << "\n";
 
     outfile << "]\n\n";
 
@@ -611,9 +599,9 @@ void RE3C::writeHistogram(size_t inu) {
     // -:-:-:-:-:-:-:-:-:-:-:-:
     outfile << "phi_centers = [\n\t";
 
-    for (int ibin = 0; ibin < nphibins-1; ++ibin)
-        outfile << phi_centers[ibin] << HIST_DELIM;
-    outfile << phi_centers[nphibins-1] << "\n";
+    for (int ibin = 0; ibin < Phi_.nBins()-1; ++ibin)
+        outfile << Phi_.binCenters()[ibin] << ", ";
+    outfile << Phi_.binCenters()[Phi_.nBins()-1] << "\n";
 
     outfile << "]\n\n";
 
@@ -624,32 +612,32 @@ void RE3C::writeHistogram(size_t inu) {
     outfile << "hist = [\n\t";
 
     // theta1s
-    for (int bin1 = 0; bin1 < nbins; ++bin1) {
+    for (int bin1 = 0; bin1 < R1_.nBins(); ++bin1) {
         outfile << "[\n\t";
 
         // theta2s
-        for (int bin2 = 0; bin2 < nbins; ++bin2) {
+        for (int bin2 = 0; bin2 < R2_.nBins(); ++bin2) {
             // Phis
-            if (nphibins == 1){
-                outfile << hist[bin1][bin2][0];
-                outfile << (bin2 != nbins-1 ? HIST_DELIM
+            if (Phi_.nBins() == 1){
+                outfile << enc_hists_[inu][bin1][bin2][0];
+                outfile << (bin2 != R2_.nBins()-1 ? ", "
                                                 : "\n");
             } else {
                 outfile << "\t[\n\t\t\t";
 
                 // Loop over phis
-                for (int binphi = 0; binphi < nphibins-1; ++binphi) {
+                for (int binphi = 0; binphi < Phi_.nBins()-1; ++binphi) {
                     outfile << std::setprecision(10)
-                            << hist[bin1][bin2][binphi] << HIST_DELIM;
+                            << enc_hists_[inu][bin1][bin2][binphi] << ", ";
                 }
-                outfile << hist[bin1][bin2][nphibins-1] << "\n";
+                outfile << enc_hists_[inu][bin1][bin2][Phi_.nBins()-1] << "\n";
 
-                outfile << (bin2 != nbins-1 ? "\t\t],\n\t"
+                outfile << (bin2 != R2_.nBins()-1 ? "\t\t],\n\t"
                                             : "\t\t]\n");
             }
         }
 
-        outfile << (bin1 != nbins-1 ? "\t],\n\t"
+        outfile << (bin1 != R1_.nBins()-1 ? "\t],\n\t"
                                     : "\t]\n");
     }
     outfile << "]";

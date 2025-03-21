@@ -324,6 +324,12 @@ int main (int argc, char* argv[]) {
     // =====================================
     // Output Setup
     // =====================================
+    RE3C re3c_calculator(nu_weights, minbin, maxbin, nbins,
+                         nphibins, lin_bin2,
+                         true, true, true,
+                         uflow, oflow, true,
+                         "output/penc_example", false);
+
     for (int inu=0; inu < nu_weights.size(); ++inu){
         // Setting up output files
         std::pair<double, double> nus = nu_weights[inu];

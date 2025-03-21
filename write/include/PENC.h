@@ -37,10 +37,10 @@ public:
     void processJet(const fastjet::PseudoJet& jet);
 
     // Normalize histograms and write to files
-    void writeOutput() override;
+    void writeOutput();
 
     // Reset histograms and counters
-    void reset() override;
+    void reset();
 
 
     // Output histogram information
@@ -96,7 +96,7 @@ PENC::PENC(const std::vector<double>& weights,
            const std::string& file_prefix,
            const bool use_output_folder)
     : Histogram(minbin, maxbin, nbins,
-                uflow, oflow),
+                uflow, oflow, "log"),
       weights_(weights), contact_terms_(contact_terms),
       use_deltaR_(use_deltaR), use_pt_(use_pt),
       file_prefix_(file_prefix),
@@ -137,9 +137,6 @@ void PENC::initializeHistograms() {
 
 
 void PENC::reset() {
-    // Reset base class
-    Histogram::reset();
-
     // Reset PENC specific data
     njets_tot_ = 0;
     jet_runtimes_.clear();
@@ -236,7 +233,7 @@ void PENC::computePENC(const fastjet::PseudoJet& jet) {
             double weight1 = sorted_angsweights[jpart].second;
 
             // Find histogram bin for this angle
-            int bin = binPosition(theta1, minbin_, maxbin_, nbins_, "log", uflow_, oflow_);
+            int bin = binPosition(theta1);
 
             // Skip if bin is invalid
             if (bin < 0) continue;
