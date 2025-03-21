@@ -1,6 +1,6 @@
 # Resolved Energy Correlator Examples
 
-This directory contains a minimal working example to calculate energy-weighted correlations, all of which can be run by `make`:
+This directory contains a minimal working example to calculate energy-weighted correlations, all of which can be run by `make`. The source code is in `:/write/src/examples`.
 
 - [Build Instructions](#build-instructions)
 - [Calculating Example PENCs](#calculating-example-pencs)
