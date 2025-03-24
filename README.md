@@ -35,11 +35,7 @@ Using CMS Open Data without performing the correct experimental data analysis pr
 
 # Features
 
-- **Jet Properties**:
-
-  Basic properties of jets -- useful for testing the structure of the C++ code and for seeing how python histograms can be plotted.
-
-- **New Angles on Energy Correlators**:
+- **New Angles on Energy Correlators** (see `examples/`):
 
   Introduces a new parameterization for N-point Energy Correlators (ENCs) as detailed in [2410.16368].
             <details>
@@ -47,11 +43,14 @@ Using CMS Open Data without performing the correct experimental data analysis pr
                 <img src="assets/encs/enc_pseudocode.png" width="600">
             </details>
 
-
-
 - **Energy Weighted Observable Correlators (EWOCs)**:
 
-  Not yet included: will introduce a new type of energy correlator on non-angular observables as detailed in [2501.17218].
+    Introduce a new type of energy-weighted correlator on non-angular observables as detailed in [2501.17218].
+
+- **Jet Properties**:
+
+  Basic properties of jets -- useful for testing the structure of the C++ code and for seeing how python histograms can be plotted.
+
 
 - **Python Classes**:
 
@@ -190,20 +189,11 @@ Note that to use the plotting tools provided in `./plot`, you will need to have 
 source ./plot/venv/bin/activate
 ```
 
-
-## Jet Properties
-
-To generate histogram files containing jet properties (mass, transverse momentum, pseudorapidity, etc.) with the keyword `opendata_test` in the directory `./output/jet_properties/`, try running the following command:
-```
-./write/jet_properties --use_opendata true --n_events 100000 --nbins 100 --file_prefix opendata_test
-```
-You can look at/use/modify the plotting tools in `./plot/jet_properties` for some example plots of jet masses.
-Additional examples, including examples for computing ENCs in Pythia, can be found in `./bin/`.
-
-
 ## New Angles on Energy Correlators
 
-To generate files containing N-Point Energy Correlators (ENCs) with the keyword `opendata_test` in the directory `./output/new_encs/`, try running one of the commands below.
+The easiest way to generate simple plots involving our new N-Point Energy Correlators (ENCs) is to navigate to the `examples/` directory and use the `make` commands detailed in the `README.md` of that directory.
+
+To generate files containing ENCs with the keyword `opendata_test` in the directory `./output/new_encs/`, try running one of the commands below.
 
 You can use the plotting tools in `./plot/encs`, which can be modified to produce your own versions of the plots from [2410.16368].
 Additional examples for computing ENCs, including examples for computing ENCs in Pythia, can be found in `./bin/`.
@@ -260,8 +250,18 @@ You can use the plotting tools in `./plot/ewocs`, which can be modified to produ
 Additional examples for computing EWOCs, including examples for computing ENCs in Pythia, can be found in `./bin/`.
 
 
+## Jet Properties
 
-## Contributing
+To generate histogram files containing jet properties (mass, transverse momentum, pseudorapidity, etc.) with the keyword `opendata_test` in the directory `./output/jet_properties/`, try running the following command:
+```
+./write/jet_properties --use_opendata true --n_events 100000 --nbins 100 --file_prefix opendata_test
+```
+You can look at/use/modify the plotting tools in `./plot/jet_properties` for some example plots of jet masses.
+Additional examples, including examples for computing ENCs in Pythia, can be found in `./bin/`.
+
+
+
+# Contributing
 
 We welcome contributions from the community! To [contribute](https://github.com/actions/checkout/blob/main/CONTRIBUTING.md):
 
@@ -289,11 +289,11 @@ We welcome contributions from the community! To [contribute](https://github.com/
     Navigate to the original repository and click on 'New Pull Request'.
 
 
-## License
+# License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 
-## Contact
+# Contact
 For any questions or suggestions:
 
 * **Email**: samuelaf@mit.edu
