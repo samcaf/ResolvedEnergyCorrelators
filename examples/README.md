@@ -47,7 +47,7 @@ If you have not generated any other PENC data, then the visualization this produ
 
 <img src="../assets/encs/penc_examples.png" width="600">
 
-which resembles [Fig. 6 in the Supplemental Material of "New Angles on Energy Correlators" (arxiv:2410.16368)](https://arxiv.org/pdf/2410.16368#figure.6).
+which resembles [Fig. 6(b) in the Supplemental Material of "New Angles on Energy Correlators" (arxiv:2410.16368)](https://arxiv.org/pdf/2410.16368#figure.6).
 
 ---
 
