@@ -95,7 +95,7 @@ This script will:
 
 If you have not generated any other RE3C data, then the visualization this produces should look like
 
-<img src="../assets/encs/re3c_density_example.png" width="200">
+<img src="../assets/encs/re3c_density_example.png" width="600">
 
 which resembles [Fig. 4(a) of "New Angles on Energy Correlators" (arxiv:2410.16368)](https://arxiv.org/pdf/2410.16368#subfigure.4.1).
 
