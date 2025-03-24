@@ -29,9 +29,7 @@ using namespace std::chrono;
 // ---------------------------------
 // HEP imports
 // ---------------------------------
-#include "Pythia8/Pythia.h"
 #include "fastjet/PseudoJet.hh"
-#include "fastjet/ClusterSequence.hh"
 
 // Local imports:
 #include "../../include/general_utils.h"
@@ -43,14 +41,8 @@ using namespace std::chrono;
 
 
 // ####################################
-// Main
-// ####################################
-/**
-* @brief: Generates events with Pythia and creates EWOC histograms.
-*
-* @return: int
-*/
 int main (int argc, char* argv[]) {
+// ####################################
     // Starting timer
     auto start = high_resolution_clock::now();
     const int n_events = cmdln_int("n_events",
@@ -79,7 +71,7 @@ int main (int argc, char* argv[]) {
     // Output Setup
     // =====================================
     RE3C re3c_calculator(nu_weights, minbin, maxbin, nbins,
-                         nbins, true,
+                         1, true,
                          true, true, true,
                          true, true, 1,
                          "output/re3c_example", false);

@@ -2,11 +2,11 @@
 #define ENC_HEADER
 
 #include <string>
-#include <string.h>
+#include <vector>
+#include <fstream>
+#include <sstream>
 
-#include "cmdln.h"
-#include "pythia_cmdln.h"
-
+#include "jet_utils.h"
 
 extern const std::string enc_banner;
 

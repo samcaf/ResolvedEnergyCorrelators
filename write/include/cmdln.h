@@ -9,6 +9,7 @@
 #include <string>
 #include <string.h>
 
+#include "cmdln_defaults.h"
 
 // =====================================
 // Command Line Basics

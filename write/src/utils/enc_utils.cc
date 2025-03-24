@@ -11,7 +11,6 @@
 #include <iostream>
 
 #include "../../include/cmdln.h"
-#include "../../include/pythia_cmdln.h"
 #include "../../include/enc_utils.h"
 
 

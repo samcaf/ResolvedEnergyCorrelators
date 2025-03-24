@@ -37,7 +37,6 @@
 // ---------------------------------
 // HEP imports
 // ---------------------------------
-#include "Pythia8/Pythia.h"
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
 
@@ -65,8 +64,6 @@ typedef std::pair<std::vector<double>, std::vector<double>> radius_vector_pair_t
 // ---------------------------------
 // Particle utilities
 // ---------------------------------
-PseudoJet pythia_particle_to_pseudojet(const Pythia8::Particle& p);
-
 extern const std::vector<int> qcd_pids;
 extern const std::vector<int> lepton_pids;
 extern const std::vector<int> nu_pids;
@@ -99,19 +96,6 @@ double pj_cos(const PseudoJet pj1, const PseudoJet pj2);
 const double CMS_PHOTON_SMEAR_FACTOR = 0.03;
 const double CMS_CHARGED_SMEAR_FACTOR = 0.01;
 const double CMS_NEUTRAL_SMEAR_FACTOR = 0.05;
-
-
-PseudoJets get_particles_pythia(const Pythia8::Event event,
-                    const double photon_smear_factor = 0,
-                    const double charged_smear_factor = 0,
-                    const double neutral_smear_factor = 0,
-                    const bool charged_only = false,
-                    const bool final_only = true,
-                    const std::vector<int> use_pids = {},
-                    const std::vector<int> exclude_pids = nu_pids,
-                    const std::vector<int> use_status_codes = {},
-                    const std::vector<int> exclude_status_codes = {}
-                    );
 
 PseudoJets add_events(const PseudoJets event1, const PseudoJets event2);
 

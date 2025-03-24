@@ -24,6 +24,8 @@ using namespace std::chrono;
 #include "fastjet/PseudoJet.hh"
 
 // Local imports:
+#include "../../include/general_utils.h"
+#include "../../include/jet_utils.h"
 #include "../../include/cmdln.h"
 
 #include "../../include/opendata_utils.h"
@@ -37,14 +39,8 @@ typedef std::vector<double> Hist;
 
 
 // ####################################
-// Main
-// ####################################
-/**
-* @brief: Generates events with Pythia and creates EWOC histograms.
-*
-* @return: int
-*/
 int main (int argc, char* argv[]) {
+// ####################################
     // Starting timer
     auto start = high_resolution_clock::now();
     const int n_events = cmdln_int("n_events",

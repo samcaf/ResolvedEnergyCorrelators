@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
 """
 Simple visualization script for Energy Correlator outputs.
-This script reads the histogram data produced by the example_enc_calculator
-and creates plots to visualize the results.
+This script reads the histogram data produced by write_pencs and creates plots to visualize the results.
 """
-
 import os
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm
-
 
 colors = {
     2  : 'mediumseagreen',
@@ -114,7 +110,7 @@ def main():
     penc_fig.savefig(f"output/penc_example.png")
     plt.close()
 
-    print(f"All PENC visualizations saved")
+    print(f"PENC visualizations saved")
 
     return 0
 

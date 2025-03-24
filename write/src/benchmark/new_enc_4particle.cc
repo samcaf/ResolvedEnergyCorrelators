@@ -39,6 +39,7 @@ using namespace std::chrono;
 // Local imports:
 #include "../../include/general_utils.h"
 #include "../../include/jet_utils.h"
+#include "../../include/pythia2fastjet.h"
 #include "../../include/cmdln.h"
 #include "../../include/pythia_cmdln.h"
 

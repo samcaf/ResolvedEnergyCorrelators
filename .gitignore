@@ -171,6 +171,7 @@ write/ewocs
 write/new_enc/*
 write/jet_properties
 output/*
+examples/output/*
 
 # Additional auxiliary code
 plot/mathematica

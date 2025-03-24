@@ -33,6 +33,7 @@ using namespace std::chrono;
 #include "fastjet/PseudoJet.hh"
 
 #include "../include/cmdln.h"
+#include "../include/pythia2fastjet.h"
 #include "../include/pythia_cmdln.h"
 #include "../include/enc_utils.h"
 #include "../include/opendata_utils.h"

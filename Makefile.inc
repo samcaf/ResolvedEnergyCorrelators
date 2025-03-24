@@ -43,5 +43,6 @@ CONTRIB=$(CONTRIB_LIB)/libfastjetcontribfragile$(LIB_SUFFIX)
 CXX=g++ -g
 
 CXX_COMMON=-O2 -std=c++17 -pedantic -W -Wall -Wshadow -fPIC -pthread
-CXX_COMMON:=-I$(PYTHIA_INCLUDE) -I$(CONTRIB_INCLUDE) -I$(FASTJET_INCLUDE) $(CXX_COMMON) $(GZIP_LIB)
+CXX_FASTJET:=$(CXX_COMMON) `fastjet-config --libs --cxxflags`
+CXX_COMMON:=-I$(PYTHIA_INCLUDE) -I$(CONTRIB_INCLUDE) -I$(FASTJET_INCLUDE) $(CXX_COMMON)
 CXX_COMMON+= -L$(PYTHIA_LIB) -L$(CONTRIB_LIB) -L$(FASTJET_LIB) -Wl,-rpath,$(PYTHIA_LIB) -Wl,-rpath,$(CONTRIB_LIB) -Wl,-rpath,$(FASTJET_LIB) -lpythia8 -lfastjet -lfastjetcontribfragile -lfastjettools -ldl

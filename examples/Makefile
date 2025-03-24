@@ -16,5 +16,6 @@ penc_example:
 
 re3c_example:
 	./write_re3c
-	# ./visualize_re3cs.py
-	# open output/re3c_example_.png
+	./visualize_re3c.py
+	mv output/re3c_example_nus_1-000000_1-000000.png output/re3c_example.png
+	open output/re3c_example.png

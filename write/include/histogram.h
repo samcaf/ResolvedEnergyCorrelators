@@ -140,7 +140,6 @@ int Histogram::binPosition(double value) const {
     if (scaled_value >= maxbin_) {
         if (oflow_) return nbins_ - 1;
 
-
         /* throw std::overflow_error( */
         /*         "Invalid val "+std::to_string(scaled_value)+ */
         /*         " is larger than maximum bin edge "+ */

@@ -23,6 +23,12 @@ To download the CMS Open Data dataset and compile the code used for the examples
 make
 ```
 
+If you had trouble accessing the fastjet libraries (I had the error message `cannot find -lfastjettools: No such file or directory`), you may need to adjust your path manually so that `fastjet-config --libs` gives the correct fastjet path. I was able to use
+```bash
+export PATH=path-to-fastjet-install/bin:$PATH
+```
+in bash shell. In fish shell, instead use `fish_add_path --path path-to-fastjet-install/bin`.
+
 
 ## Calculating Example PENCs:
 
@@ -89,11 +95,9 @@ This script will:
 
 If you have not generated any other RE3C data, then the visualization this produces should look like
 
-<!-- <img src="assets/encs/re3c_example_1.png" width="200"> -->
-<!-- <img src="assets/encs/re3c_example_2.png" width="200"> -->
-<!-- <img src="assets/encs/re3c_example_3.png" width="200"> -->
+<img src="assets/encs/re3c_density_example.png" width="200">
 
-<!-- which resemble [Figs. XX in the Supplemental Material of "New Angles on Energy Correlators" (arxiv:2410.16368)](https://arxiv.org/pdf/2410.16368#figure.6). -->
+which resembles [Fig. 4(a) of "New Angles on Energy Correlators" (arxiv:2410.16368)](https://arxiv.org/pdf/2410.16368#subfigure.4.1).
 
 ---
 
@@ -109,11 +113,10 @@ The command line arguments are:
 - `--nbins`: Number of bins in the histogram (default: 100)
 - `--minbin`: Minimum bin for $R_1$ in log$_10$ scale (default: -8)
 - `--maxbin`: Maximum bin for $R_1$ in log$_10$ scale (default: 1)
-- `--nphibins`:
 
 This outputs histogram files in a Python-readable format in the `output/` folder:
-- Each file contains bin edges and centers for $R_1$, $R_2/R_1$, and $\phi$
-- The main histogram data is stored as a 3D array
+- Each file contains bin edges and centers for $R_1$ and $R_2/R_1$
+- The main $\phi_2$-integrated RE3C histogram data is stored as a 2D array whose first index corresponds to the $R_1$ bin, and the second to the $R_2/R_1$ ratio bin
 
 2. Visualize Results
 ```
@@ -121,4 +124,4 @@ This outputs histogram files in a Python-readable format in the `output/` folder
 ```
 The command line arguments are:
 - No arguments
-- Takes an RE3C histogram stored in `output/re3c_example.py` and creates a 2D density plot of the $\phi_2$-integrated RE3C in `output/re3c_example_density.png`
+- Take all $\phi_2$-integrated RE3C histograms stored in `output/re3c_example.py` and creates/saves 2D density plots in `output/`

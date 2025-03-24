@@ -26,13 +26,6 @@
 // Command Line Basics
 // =====================================
 // Command Line Defaults
-extern const int                           _NEVENTS_DEFAULT;
-extern const double                        _ENERGY_DEFAULT;
-extern const std::string                   _LEVEL_DEFAULT;
-extern const std::string                   _OUTSTATE_DEFAULT;
-extern const int                           _PID_1_DEFAULT;
-extern const int                           _PID_2_DEFAULT;
-
 int showermodel_cmdln(int argc, char* argv[]);
 
 
