@@ -172,6 +172,8 @@ write/new_enc/*
 write/jet_properties
 output/*
 examples/output/*
+examples/write_penc
+examples/write_re3c
 
 # Additional auxiliary code
 plot/mathematica

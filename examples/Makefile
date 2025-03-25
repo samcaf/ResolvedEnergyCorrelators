@@ -1,5 +1,5 @@
 all:
-	mkdir output
+	mkdir -p output
 	@$(MAKE) get_cms_od -C ..
 	@printf "\n"
 	@$(MAKE) penc_example -C ..

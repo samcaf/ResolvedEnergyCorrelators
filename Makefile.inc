@@ -1,17 +1,29 @@
 #===========================================
 # Install directory prefixes.
 #===========================================
+# =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+# If you want to install via make
+# =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 # Versions
 PYTHIA_VERSION=8310
 FASTJET_VERSION=3.4.2
 
 # Main Directory
-SOFTWARE_DIR=/home/samaf/Software
+SOFTWARE_INSTALL_DIR=/home/samaf/Software
+PYTHIA_INSTALL_DIR=$(SOFTWARE_DIR)/pythia$(PYTHIA_VERSION)
+FASTJET_INSTALL_DIR=$(SOFTWARE_DIR)/fastjet-$(FASTJET_VERSION)
+
+# =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+# Without direct references to dirs
+# =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+FJCONFIG=fastjet-config
+P8CONFIG=pythia8-config
+
+FASTJET_DIR=$(shell $(FJCONFIG) --prefix)
+PYTHIA_DIR=$(shell $(P8CONFIG) --prefix)
 
 # Subdirectories
-PYTHIA_DIR=$(SOFTWARE_DIR)/pythia$(PYTHIA_VERSION)
-FASTJET_DIR=$(SOFTWARE_DIR)/fastjet-$(FASTJET_VERSION)
-CONTRIB_INCLUDE=$(SOFTWARE_DIR)/fastjet-install/include
+CONTRIB_INCLUDE=$(FJCONFIG)/include
 
 # LIB_SUFFIX=.dylib
 LIB_SUFFIX=.so
@@ -31,7 +43,7 @@ FASTJET_INCLUDE=$(FASTJET_DIR)/include
 FASTJET=$(FASTJET_LIB)/libfastjet$(LIB_SUFFIX)
 
 # FastJet Contrib
-CONTRIB_LIB=$(SOFTWARE_DIR)/fastjet-install/lib
+CONTRIB_LIB=$(FASTJET_DIR)/lib
 CONTRIB_TOOLS=$(CONTRIB_LIB)/libfastjettools$(LIB_SUFFIX)
 CONTRIB=$(CONTRIB_LIB)/libfastjetcontribfragile$(LIB_SUFFIX)
 

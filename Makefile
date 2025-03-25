@@ -137,7 +137,7 @@ write_tools:
 	mkdir -p write/new_enc;
 	@$(MAKE) new_encs;
 
-jet_properties: $(FASTJET) $(PYTHIA) write/src/jet_properties.cc
+jet_properties:
 	# =======================================================
 	# Compiling c++ code for writing histograms of basic jet properties:
 	# =======================================================
@@ -149,7 +149,7 @@ jet_properties: $(FASTJET) $(PYTHIA) write/src/jet_properties.cc
 	@printf "\n"
 
 
-groomed_properties: $(FASTJET) $(PYTHIA) $(CONTRIB_TOOLS) $(CONTRIB) write/src/groomed_properties.cc
+groomed_properties:
 	# =======================================================
 	# Compiling c++ code for writing histograms of basic groomed properties:
 	# =======================================================
@@ -160,7 +160,7 @@ groomed_properties: $(FASTJET) $(PYTHIA) $(CONTRIB_TOOLS) $(CONTRIB) write/src/g
 		$(CXX_COMMON);
 	@printf "\n"
 
-mpi_properties: $(FASTJET) $(PYTHIA) $(CONTRIB_TOOLS) $(CONTRIB) write/src/mpi_properties.cc
+mpi_properties:
 	# =======================================================
 	# Compiling c++ code for writing histograms of basic mpi properties:
 	# =======================================================
@@ -222,7 +222,7 @@ new_encs_force:
 	$(MAKE) old_enc_3particle;
 
 
-penc_example: $(FASTJET) write/src/examples/penc_example.cc
+penc_example:
 	# =======================================================
 	# Compiling c++ code for writing PENC example:
 	# =======================================================
@@ -233,7 +233,7 @@ penc_example: $(FASTJET) write/src/examples/penc_example.cc
 		$(CXX_FASTJET);
 	@printf "\n"
 
-re3c_example: $(FASTJET) write/src/examples/re3c_example.cc
+re3c_example:
 	# =======================================================
 	# Compiling c++ code for writing RE3C example:
 	# =======================================================
@@ -246,7 +246,7 @@ re3c_example: $(FASTJET) write/src/examples/re3c_example.cc
 
 
 
-new_enc_2particle: $(FASTJET) $(PYTHIA) write/src/new_enc_2particle.cc
+new_enc_2particle:
 	# =======================================================
 	# Compiling c++ code for writing (two particle) ENC histograms:
 	# =======================================================
@@ -257,7 +257,7 @@ new_enc_2particle: $(FASTJET) $(PYTHIA) write/src/new_enc_2particle.cc
 		$(CXX_COMMON);
 	@printf "\n"
 
-penc: $(FASTJET) $(PYTHIA) write/src/penc.cc
+penc:
 	# =======================================================
 	# Compiling c++ code for writing PENC histograms:
 	# =======================================================
@@ -270,7 +270,7 @@ penc: $(FASTJET) $(PYTHIA) write/src/penc.cc
 	@printf "\n"
 
 
-new_enc_3particle: $(FASTJET) $(PYTHIA) write/src/new_enc_3particle.cc
+new_enc_3particle:
 	# =======================================================
 	# Compiling c++ code for writing (three particle) ENC histograms:
 	# =======================================================
@@ -282,7 +282,7 @@ new_enc_3particle: $(FASTJET) $(PYTHIA) write/src/new_enc_3particle.cc
 	@printf "\n"
 
 
-new_enc_4particle: $(FASTJET) $(PYTHIA) write/src/new_enc_4particle.cc
+new_enc_4particle:
 	# =======================================================
 	# Compiling c++ code for writing (four particle) ENC histograms:
 	# =======================================================
@@ -294,7 +294,7 @@ new_enc_4particle: $(FASTJET) $(PYTHIA) write/src/new_enc_4particle.cc
 	@printf "\n"
 
 
-new_enc_2special: $(FASTJET) $(PYTHIA) write/src/new_enc_2special.cc
+new_enc_2special:
 	# =======================================================
 	# Compiling c++ code for writing (four particle) ENC histograms:
 	# =======================================================
@@ -306,7 +306,7 @@ new_enc_2special: $(FASTJET) $(PYTHIA) write/src/new_enc_2special.cc
 	@printf "\n"
 
 
-old_enc_3particle: $(FASTJET) $(PYTHIA) write/src/old_enc_3particle.cc
+old_enc_3particle:
 	# =======================================================
 	# Compiling for writing Old (3 particle) ENC histograms:
 	# =======================================================
@@ -318,7 +318,7 @@ old_enc_3particle: $(FASTJET) $(PYTHIA) write/src/old_enc_3particle.cc
 	@printf "\n"
 
 
-new_enc_ue: $(FASTJET) $(PYTHIA) write/src/new_enc_2particle_UE.cc
+new_enc_ue:
 	# =======================================================
 	# Compiling code for UE PENC histograms:
 	# =======================================================
@@ -331,7 +331,7 @@ new_enc_ue: $(FASTJET) $(PYTHIA) write/src/new_enc_2particle_UE.cc
 
 
 
-new_enc_benchmarks: $(FASTJET) $(PYTHIA) write/src/benchmark/new_enc_2particle.cc write/src/benchmark/new_enc_3particle.cc write/src/benchmark/new_enc_4particle.cc
+new_enc_benchmarks:
 	# =======================================================
 	# Compiling c++ code for benchmarking ENC histograms:
 	# =======================================================
@@ -353,7 +353,7 @@ new_enc_benchmarks: $(FASTJET) $(PYTHIA) write/src/benchmark/new_enc_2particle.c
 
 
 
-ewocs: $(FASTJET) $(PYTHIA) write/src/ewocs.cc
+ewocs:
 	# =======================================================
 	# Compiling c++ code for writing EWOC histograms:
 	# =======================================================
@@ -366,13 +366,13 @@ ewocs: $(FASTJET) $(PYTHIA) write/src/ewocs.cc
 
 
 # =======================================
-# Dependencies
-# =======================================
 clean:
 	rm write/ewocs
 	rm write/jet_properties
 	rm write/new_enc/*
 	rm write/benchmark/*
+# =======================================
+#
 
 # =======================================
 # Dependencies
@@ -381,16 +381,16 @@ install_dependencies:
 	# #=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#
 	# Installing dependencies
 	# #=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#
-	@if [ -d "$(SOFTWARE_DIR)" ];\
+	@if [ -d "$(SOFTWARE_INSTALL_DIR)" ];\
 		then printf "Found software directory.\n";\
 	else\
-		mkdir -p $(SOFTWARE_DIR);\
+		mkdir -p $(SOFTWARE_INSTALL_DIR);\
 	fi
 	@printf "\n"
 	# =======================================
 	# Installing Pythia
 	# =======================================
-	@if [ -d "$(PYTHIA_DIR)" ];\
+	@if [ -d "$(PYTHIA_INSTALL_DIR)" ];\
 		then printf "Found Pythia directory. Not reinstalling.\n";\
 	else\
 		$(MAKE) download_pythia; $(MAKE) make_pythia;\
@@ -399,7 +399,7 @@ install_dependencies:
 	# =======================================
 	# Installing FastJet
 	# =======================================
-	@if [ -d "$(FASTJET_DIR)" ];\
+	@if [ -d "$(FASTJET_INSTALL_DIR)" ];\
 		then printf "Found FastJet directory. Not reinstalling.\n";\
 	else\
 		$(MAKE) download_fastjet; $(MAKE) make_fastjet;\
@@ -411,27 +411,27 @@ install_dependencies:
 # Installing Pythia
 # ---------------------------------------
 download_pythia:
-	cd $(SOFTWARE_DIR) && \
+	cd $(SOFTWARE_INSTALL_DIR) && \
 	curl -O $(PYTHIA_URL) && \
 	tar zxvf pythia$(PYTHIA_VERSION).tgz && \
 	rm pythia$(PYTHIA_VERSION).tgz
 
 make_pythia:
-	cd $(PYTHIA_DIR) && $(MAKE)
+	cd $(PYTHIA_INSTALL_DIR) && $(MAKE)
 
 
 # ---------------------------------------
 # Installing FastJet
 # ---------------------------------------
 download_fastjet:
-	cd $(SOFTWARE_DIR) && \
+	cd $(SOFTWARE_INSTALL_DIR) && \
 	curl -O $(FASTJET_URL) && \
 	tar zxvf fastjet-$(FASTJET_VERSION).tar.gz && \
 	rm fastjet-$(FASTJET_VERSION).tar.gz
 
 make_fastjet:
 	@printf "Making FastJet (without fastjet-contrib)"
-	cd $(FASTJET_DIR) && \
+	cd $(FASTJET_INSTALL_DIR) && \
 	./configure --prefix=$$PWD/../fastjet-install && \
 	$(MAKE) && \
 	$(MAKE) make check && \
