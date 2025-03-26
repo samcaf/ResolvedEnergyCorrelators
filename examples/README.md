@@ -32,7 +32,7 @@ in bash shell. In fish shell, instead use `fish_add_path --path path-to-fastjet-
 
 ## Calculating Example PENCs:
 
-To run a complete example calculation of PENCs, use:
+To run a complete example calculation of PENCs, run the following `make` command:
 
 ```bash
 make penc_example
@@ -82,7 +82,7 @@ This outputs histogram files in a Python-readable format in the `output/` folder
 
 ## Calculating Example RE3Cs:
 
-To run a complete example calculation of PENCs, use:
+To run a complete example calculation of PENCs, run the following `make` command:
 
 ```bash
 make re3c_examples
