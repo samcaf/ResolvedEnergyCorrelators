@@ -142,9 +142,10 @@ jet_properties:
 	# Compiling c++ code for writing histograms of basic jet properties:
 	# =======================================================
 	# Compiling `write/src/jet_properties.cc` to the executable `write/jet_properties`
-	$(CXX) write/src/jet_properties.cc \
-		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/opendata_utils.cc\
+	$(CXX) \
 		-o write/jet_properties \
+		write/src/jet_properties.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/opendata_utils.cc\
 		$(CXX_COMMON);
 	@printf "\n"
 
@@ -154,9 +155,10 @@ groomed_properties:
 	# Compiling c++ code for writing histograms of basic groomed properties:
 	# =======================================================
 	# Compiling `write/src/groomed_properties.cc` to the executable `write/groomed_properties`
-	$(CXX) write/src/groomed_properties.cc \
-		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/opendata_utils.cc \
+	$(CXX) \
 		-o write/groomed_properties \
+		write/src/groomed_properties.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/opendata_utils.cc \
 		$(CXX_COMMON);
 	@printf "\n"
 
@@ -165,9 +167,10 @@ mpi_properties:
 	# Compiling c++ code for writing histograms of basic mpi properties:
 	# =======================================================
 	# Compiling `write/src/mpi_properties.cc` to the executable `write/mpi_properties`
-	$(CXX) write/src/mpi_properties.cc \
-		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/opendata_utils.cc \
+	$(CXX) \
 		-o write/mpi_properties \
+		write/src/mpi_properties.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/opendata_utils.cc \
 		$(CXX_COMMON);
 	@printf "\n"
 
