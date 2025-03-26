@@ -226,21 +226,22 @@ penc_example:
 	# =======================================================
 	# Compiling c++ code for writing PENC example:
 	# =======================================================
-	$(CXX) write/src/examples/penc_example.cc \
-		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc\
-		write/include/histogram.h write/include/PENC.h\
-		-o examples/write_penc\
+	$(CXX) \
+		-o examples/write_penc \
+		write/src/examples/penc_example.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc \
 		$(CXX_FASTJET);
 	@printf "\n"
+
 
 re3c_example:
 	# =======================================================
 	# Compiling c++ code for writing RE3C example:
 	# =======================================================
-	$(CXX) write/src/examples/re3c_example.cc \
-		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc\
-		write/include/histogram.h write/include/RE3C.h\
-		-o examples/write_re3c\
+	$(CXX) \
+		-o examples/write_re3c \
+		write/src/examples/re3c_example.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc \
 		$(CXX_FASTJET);
 	@printf "\n"
 
@@ -251,9 +252,10 @@ new_enc_2particle:
 	# Compiling c++ code for writing (two particle) ENC histograms:
 	# =======================================================
 	# Compiling `write/src/new_enc_2particle.cc` to the executable `write/new_enc/2particle`
-	$(CXX) write/src/new_enc_2particle.cc \
-		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc\
+	$(CXX) \
 		-o write/new_enc/2particle \
+		write/src/new_enc_2particle.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc \
 		$(CXX_COMMON);
 	@printf "\n"
 
@@ -262,10 +264,10 @@ penc:
 	# Compiling c++ code for writing PENC histograms:
 	# =======================================================
 	# From `write/src/penc.cc` to the executable `write/new_enc/penc`
-	$(CXX) write/src/penc.cc \
-		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc\
-		write/include/histogram.h write/include/PENC.h\
+	$(CXX) \
 		-o bin/compute_penc \
+		write/src/penc.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc \
 		$(CXX_COMMON);
 	@printf "\n"
 
@@ -275,9 +277,10 @@ new_enc_3particle:
 	# Compiling c++ code for writing (three particle) ENC histograms:
 	# =======================================================
 	# Compiling `write/src/new_enc_3particle.cc` to the executable `write/new_enc/3particle`
-	$(CXX) write/src/new_enc_3particle.cc \
-		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc\
+	$(CXX) \
 		-o write/new_enc/3particle \
+		write/src/new_enc_3particle.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc \
 		$(CXX_COMMON);
 	@printf "\n"
 
@@ -287,9 +290,10 @@ new_enc_4particle:
 	# Compiling c++ code for writing (four particle) ENC histograms:
 	# =======================================================
 	# Compiling `write/src/new_enc_4particle.cc` to the executable `write/new_enc/4particle`
-	$(CXX) write/src/new_enc_4particle.cc \
-		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc\
+	$(CXX) \
 		-o write/new_enc/4particle \
+		write/src/new_enc_4particle.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc \
 		$(CXX_COMMON);
 	@printf "\n"
 
@@ -299,9 +303,10 @@ new_enc_2special:
 	# Compiling c++ code for writing (four particle) ENC histograms:
 	# =======================================================
 	# Compiling `write/src/new_enc_4particle.cc` to the executable `write/new_enc/4particle`
-	$(CXX) write/src/new_enc_2special.cc \
-		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc\
+	$(CXX) \
 		-o write/new_enc/2special \
+		write/src/new_enc_2special.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc \
 		$(CXX_COMMON);
 	@printf "\n"
 
@@ -311,9 +316,10 @@ old_enc_3particle:
 	# Compiling for writing Old (3 particle) ENC histograms:
 	# =======================================================
 	# Compiling `write/src/old_enc_3particle.cc` to the executable `write/new_enc/old_3particle`
-	$(CXX) write/src/old_enc_3particle.cc \
-		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc\
+	$(CXX) \
 		-o write/new_enc/old_3particle \
+		write/src/old_enc_3particle.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc \
 		$(CXX_COMMON);
 	@printf "\n"
 
@@ -323,9 +329,10 @@ new_enc_ue:
 	# Compiling code for UE PENC histograms:
 	# =======================================================
 	# Compiling `write/src/new_enc_2particle_UE.cc` to the executable `write/new_enc/ue`
-	$(CXX) write/src/new_enc_2particle_UE.cc \
-		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc\
-		-o write/new_enc/ue\
+	$(CXX) \
+		-o write/new_enc/ue \
+		write/src/new_enc_2particle_UE.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc \
 		$(CXX_COMMON);
 	@printf "\n"
 
@@ -335,19 +342,22 @@ new_enc_benchmarks:
 	# =======================================================
 	# Compiling c++ code for benchmarking ENC histograms:
 	# =======================================================
-	$(CXX) write/src/benchmark/new_enc_2particle.cc \
-		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc\
+	$(CXX) \
 		-o write/benchmark/new_enc_2particle \
+		write/src/benchmark/new_enc_2particle.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc \
 		$(CXX_COMMON);
 	@printf "\n"
-	$(CXX) write/src/benchmark/new_enc_3particle.cc \
-		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc\
+	$(CXX) \
 		-o write/benchmark/new_enc_3particle \
+		write/src/benchmark/new_enc_3particle.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc \
 		$(CXX_COMMON);
 	@printf "\n"
-	$(CXX) write/src/benchmark/new_enc_4particle.cc \
-		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc\
+	$(CXX) \
 		-o write/benchmark/new_enc_4particle \
+		write/src/benchmark/new_enc_4particle.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc \
 		$(CXX_COMMON);
 	@printf "\n"
 
@@ -358,9 +368,10 @@ ewocs:
 	# Compiling c++ code for writing EWOC histograms:
 	# =======================================================
 	# Compiling `write/src/ewocs.cc` to the executable `write/ewocs`
-	$(CXX) write/src/ewocs.cc \
-		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/ewoc_utils.cc write/src/utils/opendata_utils.cc\
+	$(CXX) \
 		-o write/ewocs \
+		write/src/ewocs.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/ewoc_utils.cc write/src/utils/opendata_utils.cc \
 		$(CXX_COMMON);
 	@printf "\n"
 
