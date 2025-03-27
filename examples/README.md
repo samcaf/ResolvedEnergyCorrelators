@@ -22,6 +22,12 @@ To download the CMS Open Data dataset and compile the code used for the examples
 ```bash
 make
 ```
+This script will:
+1. Make an output directory;
+2. Download a text file containing jets from CMS Open Data, to the directory `write/data` of the root directory;
+3. Compile the C++ code for computing PENCs and RE3Cs, located in `write/src/examples` of the root directory;
+4. Create the short executable scripts `penc_example` and `re3c_example`, detailed below. When executed, they compute and visualize PENCs and RE3Cs evaluated on the downloaded jet samples of CMS Open Data;
+
 
 If you had trouble accessing the fastjet libraries (I had the error message `cannot find -lfastjettools: No such file or directory`), you may need to adjust your path manually so that `fastjet-config --libs` gives the correct fastjet path. I was able to use
 ```bash
@@ -32,10 +38,10 @@ in bash shell. In fish shell, instead use `fish_add_path --path path-to-fastjet-
 
 ## Calculating Example PENCs:
 
-To run a complete example calculation of PENCs, run the following `make` command:
+To run a complete example calculation of PENCs, run the following command:
 
 ```bash
-make penc_example
+./penc_example
 ```
 
 This script will:
@@ -82,10 +88,10 @@ This outputs histogram files in a Python-readable format in the `output/` folder
 
 ## Calculating Example RE3Cs:
 
-To run a complete example calculation of PENCs, run the following `make` command:
+To run a complete example calculation of PENCs, run the following command:
 
 ```bash
-make re3c_examples
+./re3c_example
 ```
 
 This script will:
