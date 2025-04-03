@@ -30,6 +30,7 @@
 	ewocs new_encs new_encs_force \
 		jet_properties groomed_properties \
 		new_enc_2particle new_enc_3particle new_enc_4particle new_enc_2special old_enc_3particle \
+		penc_example re3c_example \
 	install_dependencies \
 		download_pythia install_pythia \
 		download_fastjet install_fastjet
@@ -138,6 +139,7 @@ write_tools:
 	@$(MAKE) new_encs;
 
 jet_properties:
+	@$(PYTHIA_WARNING)
 	# =======================================================
 	# Compiling c++ code for writing histograms of basic jet properties:
 	# =======================================================
@@ -151,6 +153,7 @@ jet_properties:
 
 
 groomed_properties:
+	@$(PYTHIA_WARNING)
 	# =======================================================
 	# Compiling c++ code for writing histograms of basic groomed properties:
 	# =======================================================
@@ -163,6 +166,7 @@ groomed_properties:
 	@printf "\n"
 
 mpi_properties:
+	@$(PYTHIA_WARNING)
 	# =======================================================
 	# Compiling c++ code for writing histograms of basic mpi properties:
 	# =======================================================
@@ -251,6 +255,7 @@ re3c_example:
 
 
 new_enc_2particle:
+	@$(PYTHIA_WARNING)
 	# =======================================================
 	# Compiling c++ code for writing (two particle) ENC histograms:
 	# =======================================================
@@ -263,6 +268,7 @@ new_enc_2particle:
 	@printf "\n"
 
 penc:
+	@$(PYTHIA_WARNING)
 	# =======================================================
 	# Compiling c++ code for writing PENC histograms:
 	# =======================================================
@@ -276,6 +282,7 @@ penc:
 
 
 new_enc_3particle:
+	@$(PYTHIA_WARNING)
 	# =======================================================
 	# Compiling c++ code for writing (three particle) ENC histograms:
 	# =======================================================
@@ -289,6 +296,7 @@ new_enc_3particle:
 
 
 new_enc_4particle:
+	@$(PYTHIA_WARNING)
 	# =======================================================
 	# Compiling c++ code for writing (four particle) ENC histograms:
 	# =======================================================
@@ -302,6 +310,7 @@ new_enc_4particle:
 
 
 new_enc_2special:
+	@$(PYTHIA_WARNING)
 	# =======================================================
 	# Compiling c++ code for writing (four particle) ENC histograms:
 	# =======================================================
@@ -315,6 +324,7 @@ new_enc_2special:
 
 
 old_enc_3particle:
+	@$(PYTHIA_WARNING)
 	# =======================================================
 	# Compiling for writing Old (3 particle) ENC histograms:
 	# =======================================================
@@ -328,6 +338,7 @@ old_enc_3particle:
 
 
 new_enc_ue:
+	@$(PYTHIA_WARNING)
 	# =======================================================
 	# Compiling code for UE PENC histograms:
 	# =======================================================
@@ -342,6 +353,7 @@ new_enc_ue:
 
 
 new_enc_benchmarks:
+	@$(PYTHIA_WARNING)
 	# =======================================================
 	# Compiling c++ code for benchmarking ENC histograms:
 	# =======================================================
@@ -367,6 +379,7 @@ new_enc_benchmarks:
 
 
 ewocs:
+	@$(PYTHIA_WARNING)
 	# =======================================================
 	# Compiling c++ code for writing EWOC histograms:
 	# =======================================================

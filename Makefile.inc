@@ -13,15 +13,39 @@ SOFTWARE_INSTALL_DIR=/home/samaf/Software
 PYTHIA_INSTALL_DIR=$(SOFTWARE_DIR)/pythia$(PYTHIA_VERSION)
 FASTJET_INSTALL_DIR=$(SOFTWARE_DIR)/fastjet-$(FASTJET_VERSION)
 
+
 # =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
-# Without direct references to dirs
+# Finding directories with locally-defined commands
 # =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+# ----------------------------
+# Local commands to find directories
+# ----------------------------
 FJCONFIG=fastjet-config
 P8CONFIG=pythia8-config
 
+# ----------------------------
+# FastJet directory:
+# ----------------------------
 FASTJET_DIR=$(shell $(FJCONFIG) --prefix)
-PYTHIA_DIR=$(shell $(P8CONFIG) --prefix)
 
+# ----------------------------
+# Pythia directory:
+# ----------------------------
+# Define a function to safely fetch Pythia's prefix
+PYTHIA_DIR:=$(shell if command -v $(P8CONFIG) > /dev/null 2>&1; then $(P8CONFIG) --prefix; else echo ""; fi)
+
+# Only print an error if PYTHIA_DIR is empty and the user tries to use it
+ifeq ($(PYTHIA_DIR),)
+PYTHIA_WARNING=@echo "WARNING:\npythia8-config not found.\nPlease use pythia8-config --help to set it up, or go to the Makefile.inc and directly define the relevant path to the Pythia install directory on your machine: PYTHIA_DIR=/path/to/pythia/install/\n"
+else
+PYTHIA_WARNING=@true
+endif
+
+
+
+# =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+# Defining directories used by C++
+# =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 # Subdirectories
 CONTRIB_INCLUDE=$(FJCONFIG)/include
 
