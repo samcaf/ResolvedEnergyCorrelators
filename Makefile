@@ -201,7 +201,7 @@ new_encs:
 		$(MAKE) new_enc_4particle;\
 	fi
 	@if [ -f "./write/new_enc/2special" ];\
-		then printf "New (2 ``special'' particle) ENC executable exists. Please run 'make old_enc_3particle' to recompile anyway.\n";\
+		then printf "New (''2 special'' particle) ENC executable exists. Please run 'make old_enc_3particle' to recompile anyway.\n";\
 	else\
 		printf "\n"; \
 		$(MAKE) new_enc_2special;\
