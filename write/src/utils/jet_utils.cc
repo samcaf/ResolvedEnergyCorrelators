@@ -84,11 +84,6 @@ int jet_alg_str_to_int(std::string alg_str) {
 // ---------------------------------
 // Particle utilities
 // ---------------------------------
-// PIDs for boosted objects that appear in our analyses
-const int Z_pid = 23;
-const int W_pid = 24;
-const int top_pid = 6;
-
 // PIDs for QCD particles:
 const std::vector<int> qcd_pids{
             1, -1, 2, -2, 3, -3,    // light quarks
