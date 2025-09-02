@@ -295,6 +295,22 @@ new_enc_3particle:
 	@printf "\n"
 
 
+root_enc_3particle:
+	@$(PYTHIA_WARNING)
+	# =======================================================
+	# Compiling c++ code for writing (three particle) ENC histograms:
+	# =======================================================
+	# Compiling `write/src/new_enc_3particle.cc` to the executable `write/new_enc/3particle`
+	. $(SOFTWARE_DIR)/root/root_install/bin/thisroot.sh && \
+	$(CXX) \
+		-o write/new_enc/root_3particle \
+		write/src/root_enc_3particle.cc \
+		write/src/utils/general_utils.cc write/src/utils/cmdln.cc write/src/utils/jet_utils.cc write/src/utils/pythia2fastjet.cc write/src/utils/pythia_cmdln.cc write/src/utils/enc_utils.cc write/src/utils/opendata_utils.cc \
+		$(CXX_COMMON) \
+		`root-config --cflags --glibs --ldflags`;
+	@printf "\n"
+
+
 new_enc_4particle:
 	@$(PYTHIA_WARNING)
 	# =======================================================
