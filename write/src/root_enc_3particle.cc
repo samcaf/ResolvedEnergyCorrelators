@@ -48,6 +48,8 @@ using namespace std::chrono;
 #include "TLegend.h"
 #include "TLine.h"
 #include "TLatex.h"
+#include "TGraph2D.h"
+#include "TPaletteAxis.h"
 
 // Local imports:
 #include "../include/general_utils.h"
@@ -142,20 +144,33 @@ double enc_azimuth(const PseudoJet part1,
 // =====================================
 const std::string plots_dir = "output/new_enc_figures";
 
+std::vector<int> special_r1_bins(int nbins) {
+    return {
+        3*nbins/4,
+        7*nbins/8-2,
+        7*nbins/8,
+        7*nbins/8+2};
+}
+
+
 // Helper function to set up axis styling
 void setupAxisStyling(TH1* hist, const std::string& xTitle, const std::string& yTitle,
                      bool logx = false, bool logy = false) {
     hist->GetXaxis()->SetTitle(xTitle.c_str());
-    hist->GetXaxis()->SetTitleSize(0.05);
-    hist->GetXaxis()->SetLabelSize(0.04);
-    hist->GetXaxis()->SetTitleOffset(1.2);
+    hist->GetXaxis()->SetTitleSize(0.06);
+    hist->GetXaxis()->SetLabelSize(0.06);
+    hist->GetXaxis()->SetTitleOffset(1.3);
     hist->GetXaxis()->SetNdivisions(505);
 
     hist->GetYaxis()->SetTitle(yTitle.c_str());
     hist->GetYaxis()->SetTitleSize(0.05);
-    hist->GetYaxis()->SetLabelSize(0.04);
-    hist->GetYaxis()->SetTitleOffset(1.3);
+    hist->GetYaxis()->SetLabelSize(0.05);
+    hist->GetYaxis()->SetTitleOffset(1.8);
     hist->GetYaxis()->SetNdivisions(505);
+
+    hist->GetZaxis()->SetTitleSize(0.05);
+    hist->GetZaxis()->SetLabelSize(0.05);
+    hist->GetZaxis()->SetNdivisions(505);
 
     if (logx) gPad->SetLogx();
     if (logy) gPad->SetLogy();
@@ -171,117 +186,255 @@ void addPlotDescription(const std::string& description, double x = 0.15, double 
     latex->DrawLatex(x, y, description.c_str());
 }
 
+
 // Function to create R1-R2 projection plot
 void makeR1R2Projection(TH3D* hist3d, const std::string& nu_str,
-                       double minRL, double maxRL) {
+                       double minbin, double maxbin,
+                       double theta = 60, double phi = 135,
+                       double z_max = -1) {
     // Project onto X-Y plane (R1 vs R2/R1) - use safer projection method
-    TH2D* proj_r1r2 = (TH2D*) hist3d->Project3D("xy");
-    if (!proj_r1r2) {
+    TH2D* proj_r1ratio = (TH2D*) hist3d->Project3D("yx");
+    if (!proj_r1ratio) {
         std::cerr << "Failed to create projection for " << nu_str << std::endl;
         return;
     }
 
-    std::string proj_name = "proj_r1r2_" + nu_str;
-    proj_r1r2->SetName(proj_name.c_str());
-    proj_r1r2->SetDirectory(0); // Detach from directory to prevent auto-delete
+    std::string proj_name = "proj_r1ratio_" + nu_str;
+    proj_r1ratio->SetName(proj_name.c_str());
+    proj_r1ratio->SetDirectory(0); // Detach from directory to prevent auto-delete
 
-    TCanvas* c1 = new TCanvas(("c_r1r2_" + nu_str).c_str(),
+    TCanvas* c1 = new TCanvas(("c_r1ratio_" + nu_str).c_str(),
                              "R1-R2 Projection", 800, 600);
 
     // Set up the plot
-    proj_r1r2->GetXaxis()->SetTitle("log_{10}(R_{1})");
-    proj_r1r2->GetYaxis()->SetTitle("R_{2}/R_{1}");
-    proj_r1r2->GetZaxis()->SetTitle("RE3C");
-    proj_r1r2->SetTitle("");
+    proj_r1ratio->GetXaxis()->SetTitle("log_{10}(R_{1})");
+    proj_r1ratio->GetXaxis()->SetRangeUser(minbin, maxbin);
+    proj_r1ratio->GetYaxis()->SetTitle("R_{2}/R_{1}");
+    proj_r1ratio->GetYaxis()->SetRangeUser(0.0, 1.0);
+    proj_r1ratio->GetZaxis()->SetTitle("RE3C");
+    proj_r1ratio->SetTitle("");
+
 
     // Draw as LEGO2
-    proj_r1r2->Draw("LEGO2");
-    setupAxisStyling(proj_r1r2, "log_{10}(R_{1})", "R_{2}/R_{1}");
+    proj_r1ratio->Draw("LEGO2");
+    setupAxisStyling(proj_r1ratio, "log_{10}(R_{1})", "R_{2}/R_{1}");
+
+    // Set manual Z-range if specified
+    proj_r1ratio->SetMinimum(0.0);
+    if (z_max > 0) {
+        proj_r1ratio ->SetMaximum(z_max);
+    }
+
+    // Rotate
+    gPad->SetTheta(theta);  // Polar angle (0-180)
+    gPad->SetPhi(phi);      // Azimuthal angle (0-360)
 
     // Add description
     addPlotDescription("R_{1} vs R_{2}/R_{1} projection");
 
-    c1->Update();
-
     // Save
-    std::string filename = plots_dir + "/enc_r1r2_proj_" + nu_str + ".png";
+    std::string filename = plots_dir + "/enc_r1ratio_proj_" + nu_str + ".png";
+    c1->Update();
     c1->SaveAs(filename.c_str());
 
     // Clean up
-    delete proj_r1r2;
+    delete proj_r1ratio;
     delete c1;
 
     std::cout << "Saved " << filename << std::endl;
 }
 
+
 void makePolarR2PhiPlot(TH3D* hist3d, const std::string& nu_str,
-                       int r1_bin_idx, const std::string& r1_desc) {
-    int nbins_r2 = hist3d->GetNbinsY();
+                           int r1_bin_idx, const std::string& r1_desc,
+                           double theta = 60, double phi = 45,
+                           double z_min = 5e-3, double z_max = -1) {
+    std::filesystem::create_directories(plots_dir);
+
+    int nbins_ratio = hist3d->GetNbinsY();
     int nbins_phi = hist3d->GetNbinsZ();
 
-    // Create 2D histogram for this R1 slice
-    std::string hist_name = "polar_r1bin" + std::to_string(r1_bin_idx) + "_" + nu_str;
-    TH2D* proj_polar = new TH2D(
-        hist_name.c_str(),
-        "", nbins_r2,
-        hist3d->GetYaxis()->GetXmin(), hist3d->GetYaxis()->GetXmax(),
-        nbins_phi,
-        hist3d->GetZaxis()->GetXmin(), hist3d->GetZaxis()->GetXmax());
+    // Create canvas with polar coordinate system
+    std::string canvas_name = "c_polar_" + nu_str + "_r1bin" + std::to_string(r1_bin_idx);
+    TCanvas* c_polar = new TCanvas(canvas_name.c_str(), "True Polar R2-Phi Plot", 800, 800);
 
-    proj_polar->SetDirectory(0); // Detach from current directory
+    // Create a polar pad
+    TPad* polar_pad = new TPad("polar_pad", "Polar Pad", 0, 0, 1, 1);
+    polar_pad->SetFrameFillColor(0);
+    polar_pad->Draw();
+    polar_pad->cd();
 
-    // Fill the projection
-    for (int jr2 = 1; jr2 <= nbins_r2; ++jr2) {
+    // Create vectors to store polar data
+    std::vector<double> x_cart, y_cart, z_values;
+
+    // Convert histogram data to polar coordinates
+    double ratio_max = hist3d->GetYaxis()->GetXmax();
+
+    for (int jratio = 1; jratio <= nbins_ratio; ++jratio) {
         for (int jphi = 1; jphi <= nbins_phi; ++jphi) {
-            double content = hist3d->GetBinContent(r1_bin_idx, jr2, jphi);
-            proj_polar->SetBinContent(jr2, jphi, content);
+            // Getting radius value
+            double ratio = hist3d->GetYaxis()->GetBinCenter(jratio);
+
+            // Getting histogram value
+            double content = hist3d->GetBinContent(r1_bin_idx, jratio, jphi);
+            // and including jacobian factor
+            content = content / ratio;
+
+            // Only plot non-zero content
+            if (content > 0) {
+                // Get bin centers
+                double phival = hist3d->GetZaxis()->GetBinCenter(jphi);
+
+                // Convert to Cartesian coordinates for plotting
+                // ratio is our radius, phi is our angle
+                double x = ratio * cos(phival);
+                double y = ratio * sin(phival);
+
+                x_cart.push_back(x);
+                y_cart.push_back(y);
+                z_values.push_back(content);
+            }
         }
     }
 
-    std::string canvas_name = "c_polar_" + nu_str + "_r1bin" + std::to_string(r1_bin_idx);
-    TCanvas* c_polar = new TCanvas(canvas_name.c_str(),
-                                  "Polar R2-Phi Plot", 800, 800);
+    if (x_cart.empty()) {
+        std::cerr << "No data points for polar plot " << nu_str << std::endl;
+        delete polar_pad;
+        delete c_polar;
+        return;
+    }
 
-    // Set up for polar-like visualization
-    proj_polar->GetXaxis()->SetTitle("R_{2}/R_{1}");
-    proj_polar->GetYaxis()->SetTitle("#phi");
-    proj_polar->SetTitle("");
+    // Create TH2D for the polar plot
+    int polar_nbins = std::min(nbins_phi, nbins_ratio)/2;
 
-    // Use SURF2 or LEGO2 for better 3D visualization
-    proj_polar->Draw("SURF2");
-    setupAxisStyling(proj_polar, "R_{2}/R_{1}", "#phi");
+    TH2D* polar_hist = new TH2D(
+        ("polar_hist_" + nu_str + "_" + std::to_string(r1_bin_idx)).c_str(),
+        "", polar_nbins, -1.0, 1.0, polar_nbins, -1.0, 1.0);
+
+    polar_hist->SetDirectory(0);  // Detach from current directory
+
+    // Set manual Z-range if specified
+    if (z_min > 0)
+        polar_hist->SetMinimum(z_min);
+    else
+        z_min = polar_hist->GetZaxis()->GetXmin();
+    if (z_max > 0)
+        polar_hist->SetMaximum(z_max);
+
+    // Set axis ranges to be symmetric (circular)
+    double max_r = ratio_max;
+    polar_hist->GetXaxis()->SetRangeUser(-max_r, max_r);
+    polar_hist->GetYaxis()->SetRangeUser(-max_r, max_r);
+    // and make the z-axis logarithmic
+    gPad->SetLogz();
+
+    // Fill the polar histogram
+    for (size_t i = 0; i < x_cart.size(); ++i) {
+        polar_hist->Fill(x_cart[i], y_cart[i], z_values[i]);
+    }
+    /* // and add an epsilonic value to all bins within plot bounds, */
+    /* // so that they appear in the plot */
+    /* for (int ix = 1; ix <= polar_nbins; ++ix) { */
+    /*     double x_val = polar_hist->GetXaxis()->GetBinCenter(ix) - 1./polar_nbins; */
+    /*     for (int iy = 1; iy <= polar_nbins; ++iy) { */
+    /*         double y_val = polar_hist->GetYaxis()->GetBinCenter(iy) - 1./polar_nbins; */
+
+    /*         if (x_val*x_val + y_val*y_val <= max_r*max_r) { */
+    /*             int bin = polar_hist->GetBin(ix, iy); */
+    /*             if (polar_hist->GetBinContent(bin) < z_min*1.1) */
+    /*                 polar_hist->SetBinContent(bin, z_min*1.1); */
+    /*         } */
+    /*     } */
+    /* } */
+
+    // Set titles - remove axis labels for cleaner polar appearance
+    polar_hist->SetTitle("");
+    polar_hist->GetXaxis()->SetTitle("");
+    polar_hist->GetYaxis()->SetTitle("");
+
+    // Remove axis ticks and labels for cleaner polar plot
+    polar_hist->GetXaxis()->SetTickLength(0);
+    polar_hist->GetYaxis()->SetTickLength(0);
+    polar_hist->GetZaxis()->SetTickLength(0);
+    polar_hist->GetXaxis()->SetLabelOffset(999);  // Hide labels by offsetting far away
+    polar_hist->GetYaxis()->SetLabelOffset(999);
+    /* polar_hist->GetZaxis()->SetLabelOffset(999); */
+
+    // Set the color for zero/background values to white
+    polar_hist->SetFillColor(kWhite);
+
+    // Draw with COLZ to get automatic colorbar
+    polar_hist->Draw("LEGO2Z0FBBBA");
+    // DEBUG: get polar working like Arjun
+    /* setupAxisStyling(polar_hist, "R_{2}/R_{1}", "#phi"); */
+    setupAxisStyling(polar_hist, "", "");
 
     // Add description
-    addPlotDescription(("R_{2} vs #phi projection, " + r1_desc).c_str());
+    c_polar->cd(); // Switch back to main canvas for text
+    addPlotDescription(r1_desc.c_str(), 0.15, 0.9);
+    addPlotDescription("RE3C", 0.87, 0.94);
 
+    // Rotate
+    gPad->SetTheta(theta);  // Polar angle (0-180)
+    gPad->SetPhi(phi);      // Azimuthal angle (0-360)
+
+    // Spacing margins
+    c_polar->SetRightMargin(0.15);  // space for colorbar
+
+    // Grab the palette axis object
+    TPaletteAxis* palette =
+        (TPaletteAxis*) polar_hist->GetListOfFunctions()->FindObject("palette");
+
+    if (palette) {
+        // Move palette slightly left (values are in NDC: 0=left, 1=right)
+        palette->SetX1NDC(0.87);  // left edge of palette
+        palette->SetX2NDC(0.90);  // right edge of palette
+        // You can also adjust vertical placement:
+        // palette->SetY1NDC(0.15);
+        // palette->SetY2NDC(0.95);
+    }
+
+    c_polar->Modified();
     c_polar->Update();
+    gPad->Update();
 
-    // Save
-    std::string filename = plots_dir + "/enc_polar_" + nu_str + "_r1bin" +
-                          std::to_string(r1_bin_idx) + ".png";
+    // Save as png
+    std::string filename = plots_dir + "/enc_polar_" +
+                           nu_str + "_r1bin" +
+                           std::to_string(r1_bin_idx) + ".png";
+
     c_polar->SaveAs(filename.c_str());
 
-    // Clean up
-    delete proj_polar;
-    delete c_polar;
+    // TOGGLE: Save as pdf
+    /* std::string filename_pdf = plots_dir + "/enc_jacobian_polar_" + */
+    /*                           nu_str + "_r1bin" + */
+    /*                           std::to_string(r1_bin_idx) + ".pdf"; */
+    /* c_polar->SaveAs(filename_pdf.c_str()); */
 
+    // Clearing memory
+    /* delete polar_graph; */
+    delete polar_hist;
+    delete polar_pad;
+    delete c_polar;
     std::cout << "Saved " << filename << std::endl;
 }
 
+
+// TODO: make polar by copying above
 void makeR2PhiProjections(TH3D* hist3d, const std::string& nu_str,
-                         const std::vector<double>& bin1_centers,
-                         int nbins_r1_to_plot = 5) {
+                         int nbins_r1_to_plot = 6,
+                         double theta = 60, double phi = 45) {
 
     // Get histogram dimensions
     int nbins_r1 = hist3d->GetNbinsX();
-    int nbins_r2 = hist3d->GetNbinsY();
+    int nbins_ratio = hist3d->GetNbinsY();
     int nbins_phi = hist3d->GetNbinsZ();
 
     // Create canvas with multiple pads
-    std::string canvas_name = "c_r2phi_multi_" + nu_str;
+    std::string canvas_name = "enc_polar_multi" + nu_str;
     TCanvas* c_multi = new TCanvas(canvas_name.c_str(),
                                   "R2-Phi Projections", 1200, 800);
-    c_multi->Divide(3, 2); // 3x2 grid
+    c_multi->Divide(3, ceil(nbins_r1_to_plot/3.0)); // 3xN grid
 
     // Select R1 bins to plot (evenly spaced)
     std::vector<int> r1_bins_to_plot;
@@ -301,43 +454,44 @@ void makeR2PhiProjections(TH3D* hist3d, const std::string& nu_str,
         double r1_value = hist3d->GetXaxis()->GetBinCenter(r1_bin);
 
         // Create 2D histogram for this R1 slice
-        std::string hist_name = "proj_r2phi_r1bin" + std::to_string(r1_bin) + "_" + nu_str;
-        TH2D* proj_r2phi = new TH2D(
+        std::string hist_name = "proj_ratiophi_r1bin" + std::to_string(r1_bin) + "_" + nu_str;
+        TH2D* proj_ratiophi = new TH2D(
             hist_name.c_str(),
-            "", nbins_r2,
+            "", nbins_ratio,
             hist3d->GetYaxis()->GetXmin(), hist3d->GetYaxis()->GetXmax(),
             nbins_phi,
             hist3d->GetZaxis()->GetXmin(), hist3d->GetZaxis()->GetXmax());
 
-        proj_r2phi->SetDirectory(0); // Detach from current directory
-        temp_hists.push_back(proj_r2phi);
+        proj_ratiophi->SetDirectory(0); // Detach from current directory
+        temp_hists.push_back(proj_ratiophi);
 
         // Fill the projection
-        for (int jr2 = 1; jr2 <= nbins_r2; ++jr2) {
+        for (int jratio = 1; jratio <= nbins_ratio; ++jratio) {
             for (int jphi = 1; jphi <= nbins_phi; ++jphi) {
-                double content = hist3d->GetBinContent(r1_bin, jr2, jphi);
-                proj_r2phi->SetBinContent(jr2, jphi, content);
+                double content = hist3d->GetBinContent(r1_bin, jratio, jphi);
+                proj_ratiophi->SetBinContent(jratio, jphi, content);
             }
         }
 
         // Set up axes
-        proj_r2phi->GetXaxis()->SetTitle("R_{2}/R_{1}");
-        proj_r2phi->GetYaxis()->SetTitle("#phi");
-        proj_r2phi->SetTitle("");
+        /* proj_ratiophi->GetXaxis()->SetTitle("R_{2}/R_{1}"); */
+        /* proj_ratiophi->GetYaxis()->SetTitle("#phi"); */
+        proj_ratiophi->SetTitle("");
 
         // Draw as polar-like plot
-        proj_r2phi->Draw("LEGO2");
-        setupAxisStyling(proj_r2phi, "R_{2}/R_{1}", "#phi");
+        proj_ratiophi->Draw("LEGO2");
 
         // Add R1 value label
         std::string r1_label = "R_{1} = " + std::to_string(std::pow(10, r1_value));
         addPlotDescription(r1_label, 0.15, 0.85);
 
+        gPad->SetTheta(theta);  // Polar angle (0-180)
+        gPad->SetPhi(phi);      // Azimuthal angle (0-360)
         gPad->Update();
     }
 
     // Save multi-panel plot
-    std::string filename = plots_dir + "/enc_r2phi_multi_" + nu_str + ".png";
+    std::string filename = plots_dir + "/enc_ratiophi_multi_" + nu_str + ".png";
     c_multi->SaveAs(filename.c_str());
 
     std::cout << "Saved " << filename << std::endl;
@@ -390,7 +544,6 @@ int main (int argc, char* argv[]) {
                                    -8, false);
     const double maxbin   = cmdln_double("maxbin", argc, argv,
                                    0.05, false);
-    // TODO/DEBUG: not sure how to deal with these
     const bool bin1_uflow = true, bin1_oflow = true;
 
     // Phi is binned linearly, with same nbins by default
@@ -432,8 +585,6 @@ int main (int argc, char* argv[]) {
     const double bin2_max = lin_bin2 ?   1   : 0;
     // Use underflow only if binning logarithmically
     const bool bin2_uflow        = lin_bin2 ? false : true;
-    const int  bin2_finite_start = lin_bin2 ?   0   : 1;
-    const int  nbins2_finite     = lin_bin2 ? nbins : nbins-1;
 
     const std::vector<double> bin2_edges = get_bin_edges(
                                         bin2_min, bin2_max,
@@ -494,9 +645,13 @@ int main (int argc, char* argv[]) {
     // =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
     // Plotting histograms if file exists
     // =:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=:=
-    std::cout << "Looking for file." << std::endl;
+    const bool recreate_hists = cmdln_bool("recreate_hists",
+                                          argc, argv, false);
 
-    if (std::filesystem::exists(filename)) {
+    if (!recreate_hists)
+        std::cout << "Looking for file." << std::endl;
+
+    if (std::filesystem::exists(filename) and !recreate_hists) {
         TFile* ROOTFile_read = TFile::Open(filename);
         if (!ROOTFile_read || ROOTFile_read->IsZombie()) {
             std::cerr << "Error: Existing ROOT file found, at" <<
@@ -573,16 +728,16 @@ int main (int argc, char* argv[]) {
                       << ", " << nus.second << ")..." << std::endl;
 
             // Create R1-R2 projection
-            makeR1R2Projection(hist3d, nu_str, minbin, maxbin);
+            makeR1R2Projection(hist3d, nu_str, minbin, maxbin,
+                               50, 110, 30);
 
             // Create multiple R2-Phi projections
-            makeR2PhiProjections(hist3d, nu_str, bin1_centers, 5);
+            makeR2PhiProjections(hist3d, nu_str, 6);
 
             // Create individual polar plots for specific R1 bins
             int nbins_r1 = hist3d->GetNbinsX();
-            std::vector<int> special_r1_bins = {nbins_r1/4, nbins_r1/2, 3*nbins_r1/4};
 
-            for (int r1_bin : special_r1_bins) {
+            for (int r1_bin : special_r1_bins(nbins_r1)) {
                 if (r1_bin > 0 && r1_bin <= nbins_r1) {
                     double r1_value = hist3d->GetXaxis()->GetBinCenter(r1_bin);
                     std::string r1_desc = "R_{1} = " + std::to_string(std::pow(10, r1_value));
@@ -597,7 +752,9 @@ int main (int argc, char* argv[]) {
                   << " directory." << std::endl;
         return 0;
     }
-    std::cout << "File not found." << std::endl;
+
+    if (!recreate_hists)
+        std::cout << "File not found." << std::endl;
 
 
     // ---------------------------------
@@ -766,9 +923,6 @@ int main (int argc, char* argv[]) {
     for (auto nus : nu_weights) {
         std::string nu_str = periods_to_hyphens(str_round(nus.first, 2)
                              + "_" + str_round(nus.second, 2));
-
-        // TODO: remove if not necessary
-        /* std::string histID = std::string("ThreePoint_RENC_") + nu_str; */
 
         TH3D* hist = new TH3D(nu_str.c_str(),
                               "RE3C in R1, R2/R1, phi coordinates",
@@ -961,9 +1115,6 @@ int main (int argc, char* argv[]) {
         // -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
         for (auto jet : good_jets) {
         try {
-            // Start timing
-            auto jet_start = std::chrono::high_resolution_clock::now();
-
             // Counting total num_jets across events
             ++njets_tot;
 
@@ -1173,7 +1324,64 @@ int main (int argc, char* argv[]) {
     // Writing ROOT output file itself
     ROOTFile->Write();
     ROOTFile->ls();  // printing contents of ROOT file
-    ROOTFile->Close();
+
+
+    // ===================================
+    // Writing histograms to output files
+    // ===================================
+    // Processing and plotting from histograms
+    for (auto nus : nu_weights) {
+        std::string nu_str = periods_to_hyphens(str_round(nus.first, 2)
+                             + "_" + str_round(nus.second, 2));
+
+        TH3D* hist3d = (TH3D*) ROOTFile->Get(nu_str.c_str());
+
+        // If the specified hist is not found
+        if (!hist3d) {
+            std::cerr << "Histogram " << nu_str << " not found!" << std::endl;
+
+            // Try alternative names that might exist
+            std::vector<std::string> alt_names = {
+                nu_str + ";1",  // ROOT sometimes appends cycle numbers
+                nu_str + ";2"
+            };
+
+            for (const auto& alt_name : alt_names) {
+                std::cout << "\tTrying alternative name: " << alt_name << std::endl;
+                hist3d = (TH3D*) ROOTFile->Get(alt_name.c_str());
+                if (hist3d) {
+                    std::cout << "Found histogram with name: " << alt_name << std::endl;
+                    break;
+                }
+            }
+
+            if (!hist3d) {
+                std::cerr << "\tHistogram not found!" << std::endl;
+                continue;
+            }
+        }
+
+        std::cout << "Creating plots for weights (" << nus.first
+                  << ", " << nus.second << ")..." << std::endl;
+
+        // Create R1-R2 projection
+        makeR1R2Projection(hist3d, nu_str, minbin, maxbin,
+                           50, 110, 30);
+
+        // Create multiple R2-Phi projections
+        makeR2PhiProjections(hist3d, nu_str, 6);
+
+        // Create individual polar plots for specific R1 bins
+        int nbins_r1 = hist3d->GetNbinsX();
+
+        for (int r1_bin : special_r1_bins(nbins_r1)) {
+            if (r1_bin > 0 && r1_bin <= nbins_r1) {
+                double r1_value = hist3d->GetXaxis()->GetBinCenter(r1_bin);
+                std::string r1_desc = "R_{1} = " + std::to_string(std::pow(10, r1_value));
+                makePolarR2PhiPlot(hist3d, nu_str, r1_bin, r1_desc);
+            }
+        }
+    }
 
 
     // ---------------------------------
@@ -1181,6 +1389,8 @@ int main (int argc, char* argv[]) {
     // Verifying successful run
     // =====================================
     // ---------------------------------
+    ROOTFile->Close();
+
     if (verbose >= 0) {
         std::cout << "\nComplete!\n";
         auto stop = high_resolution_clock::now();
